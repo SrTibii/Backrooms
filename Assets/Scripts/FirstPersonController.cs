@@ -7,197 +7,197 @@ public class FirstPersonController : MonoBehaviour
     // 1. MOVIMIENTO Y CONFIGURACIÓN BÁSICA
     // ============================================
     [Header("Movimiento")]
-    public float walkSpeed = 3f;          // Velocidad al andar
-    public float sprintSpeed = 6f;        // Velocidad al correr
-    public float acceleration = 8f;       // Qué tan rápido aceleras
-    public float deceleration = 10f;      // Qué tan rápido frenas
-    public float maxVelocity = 5f;        // Velocidad máxima (tope)
+    public float walkSpeed = 3f;
+    public float sprintSpeed = 6f;
+    public float acceleration = 8f;
+    public float deceleration = 10f;
+    public float maxVelocity = 5f;
 
     // ============================================
     // 2. STAMINA (RESISTENCIA)
     // ============================================
     [Header("Stamina")]
-    public float maxStamina = 100f;               // Stamina máxima
-    public float staminaDrainRate = 20f;          // Gasto por segundo al correr
-    public float staminaRegenRate = 10f;          // Recuperación por segundo
-    public float staminaRegenDelay = 2f;          // Espera antes de recuperar
-    public float staminaRequiredToSprint = 100f;  // Stamina mínima para correr
+    public float maxStamina = 100f;
+    public float staminaDrainRate = 20f;
+    public float staminaRegenRate = 10f;
+    public float staminaRegenDelay = 2f;
+    public float staminaRequiredToSprint = 100f;
 
     // ============================================
     // 3. CONTROL DE CÁMARA (RATÓN)
     // ============================================
     [Header("Mouse Look")]
-    public float mouseSensitivity = 2f;   // Sensibilidad del ratón
-    public float minYAngle = -80f;        // Límite inferior de mirada
-    public float maxYAngle = 80f;         // Límite superior de mirada
+    public float mouseSensitivity = 2f;
+    public float minYAngle = -80f;
+    public float maxYAngle = 80f;
 
     // ============================================
     // 4. HEAD BOB (BALANCEO DE CÁMARA)
     // ============================================
     [Header("Head Bob")]
-    public bool enableHeadBob = true;             // Activar/desactivar balanceo
-    public float bobSpeed = 1.4f;                 // Velocidad del balanceo
-    public float bobAmount = 0.05f;               // Amplitud del balanceo
-    public float bobSmoothness = 0.5f;            // Suavidad de la transición
+    public bool enableHeadBob = true;
+    public float bobSpeed = 1.4f;
+    public float bobAmount = 0.05f;
+    public float bobSmoothness = 0.5f;
 
     [Header("Head Bob - Sprint")]
-    public float sprintBobSpeedMultiplier = 1.8f;   // Velocidad al correr (más rápido)
-    public float sprintBobAmountMultiplier = 2.0f;  // Amplitud al correr (más movimiento)
+    public float sprintBobSpeedMultiplier = 1.8f;
+    public float sprintBobAmountMultiplier = 2.0f;
 
     [Header("Head Bob Horizontal - Sprint")]
-    public bool enableHorizontalBob = true;          // Balanceo lateral al correr
-    public float horizontalBobAmount = 0.03f;        // Amplitud del movimiento lateral
-    public float horizontalBobSpeedMultiplier = 1.5f; // Velocidad del movimiento lateral
+    public bool enableHorizontalBob = true;
+    public float horizontalBobAmount = 0.03f;
+    public float horizontalBobSpeedMultiplier = 1.5f;
 
     // ============================================
     // 5. INCLINACIÓN DE CÁMARA (TILT)
     // ============================================
     [Header("Cámara Inclinación")]
-    public bool enableTilt = true;          // Activar inclinación lateral
-    public float tiltAmount = 2f;           // Intensidad de la inclinación
-    public float tiltSmoothness = 4f;       // Suavidad de la inclinación
+    public bool enableTilt = true;
+    public float tiltAmount = 2f;
+    public float tiltSmoothness = 4f;
 
     [Header("Cámara Inclinación - Sprint")]
-    public float sprintTiltMultiplier = 1.8f; // Inclinación más pronunciada al correr
+    public float sprintTiltMultiplier = 1.8f;
 
     // ============================================
     // 6. INERCIA (MOVIMIENTO SUAVE)
     // ============================================
     [Header("Efecto de Inercia")]
-    public bool enableInertia = true; // Activar/desactivar inercia
+    public bool enableInertia = true;
 
     // ============================================
     // 7. CAMBIO DE FOV (AL CORRER)
     // ============================================
     [Header("FOV Change")]
-    public bool enableFOVChange = true;   // Activar cambio de FOV al correr
-    public float normalFOV = 60f;         // FOV normal
-    public float sprintFOV = 70f;         // FOV al correr (sensación de velocidad)
-    public float fovSmoothness = 5f;      // Suavidad del cambio de FOV
+    public bool enableFOVChange = true;
+    public float normalFOV = 60f;
+    public float sprintFOV = 70f;
+    public float fovSmoothness = 5f;
 
     // ============================================
     // 8. INPUT ACTIONS (INPUT SYSTEM)
     // ============================================
     [Header("Input Actions")]
-    public InputActionReference moveAction;   // Movimiento WASD
-    public InputActionReference lookAction;   // Mirada con ratón
-    public InputActionReference sprintAction; // Sprint (Shift)
-    public InputActionReference zoomAction;   // Zoom (tecla elegida)
-    public InputActionReference crouchAction; // Agacharse (Ctrl)
+    public InputActionReference moveAction;
+    public InputActionReference lookAction;
+    public InputActionReference sprintAction;
+    public InputActionReference zoomAction;
+    public InputActionReference crouchAction;
 
     // ============================================
     // 9. ZOOM VHS
     // ============================================
     [Header("Zoom VHS")]
-    public float zoomFOV = 30f;                     // FOV al hacer zoom
-    public float zoomTransitionSpeed = 5f;          // Velocidad de transición
-    public bool enableZoomVignette = true;          // Activar viñeta al zoom
-    public float zoomVignetteIntensity = 0.8f;      // Intensidad de la viñeta
+    public float zoomFOV = 30f;
+    public float zoomTransitionSpeed = 5f;
+    public bool enableZoomVignette = true;
+    public float zoomVignetteIntensity = 0.8f;
 
     [Header("Zoom Audio")]
-    public AudioClip zoomInSound;   // Sonido al activar zoom
-    public AudioClip zoomOutSound;  // Sonido al desactivar zoom
+    public AudioClip zoomInSound;
+    public AudioClip zoomOutSound;
     public float zoomSoundVolume = 0.5f;
 
     [Header("Focus Effect")]
-    public bool enableFocusEffect = true;        // Activar/desactivar efecto de enfoque
-    public float focusTransitionSpeed = 3f;      // Velocidad de transición del enfoque
-    public float focusBlurAmount = 15f;          // Intensidad del desenfoque (en píxeles)
+    public bool enableFocusEffect = true;
+    public float focusTransitionSpeed = 3f;
+    public float focusBlurAmount = 15f;
 
     // ============================================
     // 10. AUDIO DE PASOS
     // ============================================
     [Header("Footstep Audio")]
-    public AudioClip[] footstepSounds;              // Sonidos de pasos normales
-    public float footstepVolume = 0.4f;             // Volumen de pasos
-    public float footstepPitchMin = 0.85f;          // Tono mínimo
-    public float footstepPitchMax = 1.15f;          // Tono máximo
-    public float footstepInterval = 0.5f;           // Intervalo entre pasos
-    public bool enableFootsteps = true;             // Activar pasos
+    public AudioClip[] footstepSounds;
+    public float footstepVolume = 0.4f;
+    public float footstepPitchMin = 0.85f;
+    public float footstepPitchMax = 1.15f;
+    public float footstepInterval = 0.5f;
+    public bool enableFootsteps = true;
 
     [Header("Sprint Footstep Audio")]
-    public AudioClip[] sprintFootstepSounds;        // Sonidos de pasos al correr
-    public float sprintFootstepInterval = 0.35f;    // Intervalo más rápido al correr
+    public AudioClip[] sprintFootstepSounds;
+    public float sprintFootstepInterval = 0.35f;
 
     // ============================================
     // 11. AUDIO DE RESPIRACIÓN
     // ============================================
     [Header("Breathing Audio")]
-    public AudioClip breathingClip;                 // Loop de respiración
-    public float breathingVolumeWalk = 0.15f;       // Volumen al andar
-    public float breathingVolumeSprint = 0.5f;      // Volumen al correr
-    public float breathingPitchWalk = 0.9f;         // Pitch al andar (lento)
-    public float breathingPitchSprint = 1.4f;       // Pitch al correr (rápido)
-    public float breathingTransitionSpeed = 2f;     // Velocidad de transición
+    public AudioClip breathingClip;
+    public float breathingVolumeWalk = 0.15f;
+    public float breathingVolumeSprint = 0.5f;
+    public float breathingPitchWalk = 0.9f;
+    public float breathingPitchSprint = 1.4f;
+    public float breathingTransitionSpeed = 2f;
 
     // ============================================
     // 11.5. STAMINA AUDIO
     // ============================================
     [Header("Stamina Audio")]
-    public AudioClip staminaDepletedSound;      // Sonido cuando te quedas sin stamina
-    public AudioClip staminaRecoveredSound;     // Sonido cuando recuperas toda la stamina
-    public float staminaSoundVolume = 0.5f;     // Volumen de estos sonidos
+    public AudioClip staminaDepletedSound;      // Bucle de respiración agitada cuando estás agotado
+    public AudioClip staminaRecoveredSound;     // (Opcional) Ya no se usa, pero se mantiene
+    public float staminaSoundVolume = 0.5f;
 
     // ============================================
     // 12. CROUCH - AGACHARSE
     // ============================================
     [Header("Crouch Settings")]
-    public bool enableCrouch = true;                    // Activar/desactivar agacharse
-    public float crouchHeight = 1f;                     // Altura al agacharse
-    public float standingHeight = 1.8f;                 // Altura normal
-    public float crouchSpeed = 2f;                      // Velocidad al agacharse
-    public float crouchTransitionSpeed = 8f;            // Velocidad de transición entre estados
-    public float crouchCameraOffset = 0.6f;             // Cuánto baja la cámara al agacharse
+    public bool enableCrouch = true;
+    public float crouchHeight = 1f;
+    public float standingHeight = 1.8f;
+    public float crouchSpeed = 2f;
+    public float crouchTransitionSpeed = 8f;
+    public float crouchCameraOffset = 0.6f;
 
     [Header("Crouch - Ceiling Detection")]
-    public bool enableCeilingDetection = true;           // Activar/desactivar detección de techo
-    public float ceilingCheckRadius = 0.2f;              // Radio del esfera de detección
-    public float ceilingCheckDistance = 0.3f;            // Distancia extra para detectar techo
-    public LayerMask ceilingLayerMask = -1;              // Layers a detectar (-1 = todos)
+    public bool enableCeilingDetection = true;
+    public float ceilingCheckRadius = 0.2f;
+    public float ceilingCheckDistance = 0.3f;
+    public LayerMask ceilingLayerMask = -1;
 
     [Header("Crouch Audio")]
-    public AudioClip crouchSound;                       // Sonido al agacharse
-    public AudioClip standSound;                        // Sonido al levantarse
-    public float crouchSoundVolume = 0.3f;              // Volumen de los sonidos de agacharse
+    public AudioClip crouchSound;
+    public AudioClip standSound;
+    public float crouchSoundVolume = 0.3f;
 
     // ============================================
     // 12.5. CAMERA SWAY - BALANCEO DE CÁMARA
     // ============================================
     [Header("Camera Sway (Balanceo de cámara)")]
-    public bool enableSway = true;                      // Activar/desactivar balanceo
-    public float swayAmount = 2.5f;                     // Intensidad del balanceo
-    public float swaySpeed = 4f;                        // Velocidad del balanceo
-    public float swaySmoothness = 6f;                   // Suavidad del movimiento
-    public float swayMaxAngle = 8f;                     // Ángulo máximo de inclinación
-    public float swayReturnSpeed = 4f;                  // Velocidad de retorno a la posición neutra
+    public bool enableSway = true;
+    public float swayAmount = 2.5f;
+    public float swaySpeed = 4f;
+    public float swaySmoothness = 6f;
+    public float swayMaxAngle = 8f;
+    public float swayReturnSpeed = 4f;
 
     [Header("Sway - Sprint")]
-    public float swaySpeedMultiplier = 1.8f;            // Velocidad al correr
-    public float swayAmountMultiplier = 2.0f;           // Intensidad al correr
+    public float swaySpeedMultiplier = 1.8f;
+    public float swayAmountMultiplier = 2.0f;
 
     [Header("Sway - Crouch")]
-    public float swayAmountCrouchMultiplier = 0.5f;     // Intensidad al agacharse
-    public float swaySpeedCrouchMultiplier = 0.7f;      // Velocidad al agacharse
+    public float swayAmountCrouchMultiplier = 0.5f;
+    public float swaySpeedCrouchMultiplier = 0.7f;
 
     // ============================================
     // 13. VARIABLES PRIVADAS (COMPONENTES)
     // ============================================
-    private CharacterController controller;          // Controlador de movimiento
-    private Transform cameraTransform;               // Transform de la cámara
-    private Vector3 cameraInitialPosition;           // Posición inicial de la cámara
-    private Vector3 cameraHorizontalOffset;          // Offset para head bob horizontal
+    private CharacterController controller;
+    private Transform cameraTransform;
+    private Vector3 cameraInitialPosition;
+    private Vector3 cameraHorizontalOffset;
 
-    private Vector3 currentVelocity;                 // Velocidad actual
-    public bool isMoving;                            // ¿Está moviéndose?
-    private bool isSprinting;                        // ¿Está corriendo?
-    private bool isSprintPressed;                    // ¿Tecla de sprint pulsada?
+    private Vector3 currentVelocity;
+    public bool isMoving;
+    private bool isSprinting;
+    private bool isSprintPressed;
 
-    private float xRotation;                         // Rotación vertical de la cámara
-    private float yRotation;                         // Rotación horizontal del jugador
+    private float xRotation;
+    private float yRotation;
 
-    private float bobTimer;                          // Timer para head bob
-    private float horizontalBobTimer;                // Timer para head bob horizontal
-    private float currentTilt;                       // Inclinación actual
+    private float bobTimer;
+    private float horizontalBobTimer;
+    private float currentTilt;
 
     // Input System
     private Vector2 moveInput;
@@ -209,7 +209,7 @@ public class FirstPersonController : MonoBehaviour
     private AudioSource breathingAudioSource;
     private AudioSource zoomAudioSource;
     private AudioSource crouchAudioSource;
-    private AudioSource staminaAudioSource;          // AudioSource para sonidos de stamina
+    private AudioSource staminaAudioSource;
     private float currentBreathingVolume;
     private float currentBreathingPitch;
 
@@ -217,7 +217,10 @@ public class FirstPersonController : MonoBehaviour
     private float currentStamina;
     private float staminaRegenTimer;
     private bool isExhausted;
-    private bool hasPlayedDepletedSound = false;     // Evita que el sonido se repita
+    private bool hasPlayedDepletedSound = false;
+
+    // ?? Bucle de respiración agitada
+    private bool isPlayingStaminaBreath = false;
 
     // FOV
     private Camera playerCamera;
@@ -452,10 +455,11 @@ public class FirstPersonController : MonoBehaviour
 
         // --- AudioSource para sonidos de stamina ---
         staminaAudioSource = gameObject.AddComponent<AudioSource>();
-        staminaAudioSource.loop = false;
+        staminaAudioSource.loop = true; // ?? Loop activado para el bucle de respiración agitada
         staminaAudioSource.playOnAwake = false;
         staminaAudioSource.spatialBlend = 0f;
         staminaAudioSource.volume = staminaSoundVolume;
+        staminaAudioSource.clip = staminaDepletedSound;
 
         // --- Stamina ---
         currentStamina = maxStamina;
@@ -513,11 +517,11 @@ public class FirstPersonController : MonoBehaviour
                 isSprinting = false;
                 staminaRegenTimer = 0f;
 
-                // Reproducir sonido de STAMINA AGOTADA
-                if (staminaDepletedSound != null && !hasPlayedDepletedSound)
+                // ?? Reproducir bucle de respiración agitada
+                if (staminaDepletedSound != null && !isPlayingStaminaBreath)
                 {
-                    staminaAudioSource.PlayOneShot(staminaDepletedSound);
-                    hasPlayedDepletedSound = true;
+                    staminaAudioSource.Play();
+                    isPlayingStaminaBreath = true;
                 }
 
                 Debug.Log("?? ¡Agotado! Esperando para recuperar...");
@@ -547,10 +551,11 @@ public class FirstPersonController : MonoBehaviour
                         staminaRegenTimer = 0f;
                         hasPlayedDepletedSound = false;
 
-                        // Reproducir sonido de STAMINA RECUPERADA
-                        if (staminaRecoveredSound != null)
+                        // ?? DETENER bucle de respiración agitada
+                        if (isPlayingStaminaBreath)
                         {
-                            staminaAudioSource.PlayOneShot(staminaRecoveredSound);
+                            staminaAudioSource.Stop();
+                            isPlayingStaminaBreath = false;
                         }
 
                         Debug.Log("? ¡Recuperado! Puedes correr de nuevo.");
@@ -570,13 +575,9 @@ public class FirstPersonController : MonoBehaviour
                         currentStamina += staminaRegenRate * Time.deltaTime;
                         currentStamina = Mathf.Min(currentStamina, maxStamina);
 
-                        // Si hemos recuperado toda la stamina (y no estábamos agotados)
                         if (currentStamina >= maxStamina && previousStamina < maxStamina)
                         {
-                            if (staminaRecoveredSound != null)
-                            {
-                                staminaAudioSource.PlayOneShot(staminaRecoveredSound);
-                            }
+                            // Si se recupera completamente sin haber estado agotado
                         }
                     }
                 }
@@ -693,7 +694,6 @@ public class FirstPersonController : MonoBehaviour
                 targetPosition += cameraHorizontalOffset;
             }
 
-            // Combinar con SWAY
             if (enableSway && isMoving)
             {
                 targetPosition += swayCurrentPosition;
@@ -803,14 +803,12 @@ public class FirstPersonController : MonoBehaviour
     }
 
     // ============================================
-    // 24. SONIDO DE RESPIRACIÓN
+    // 24. SONIDO DE RESPIRACIÓN (MODIFICADO)
     // ============================================
-
     void HandleBreathing()
     {
         if (breathingClip == null) return;
 
-        // Determinar estado
         bool isRunning = isSprinting && isMoving && currentStamina > 0 && !isExhausted && !isCrouching;
         bool isWalking = isMoving && !isRunning;
 
@@ -819,40 +817,32 @@ public class FirstPersonController : MonoBehaviour
 
         if (isRunning)
         {
-            // Corriendo: respiración agitada
             targetVolume = breathingVolumeSprint;
             targetPitch = breathingPitchSprint;
         }
         else if (isExhausted)
         {
-            // ?? NUEVO: Agotado - respiración entrecortada y más fuerte
-            targetVolume = Mathf.Lerp(breathingVolumeWalk, breathingVolumeSprint, 0.8f);
-            targetPitch = Mathf.Lerp(breathingPitchWalk, breathingPitchSprint, 0.7f);
-
-            // Añadir un pequeño "jadeo" o variación
-            float jadeo = Mathf.Sin(Time.time * 1.5f) * 0.1f + 0.9f;
-            targetPitch *= jadeo;
+            // ?? Cuando está agotado, silenciamos la respiración normal
+            // para que solo se escuche el bucle de respiración agitada
+            targetVolume = 0f;
+            targetPitch = 1f;
         }
         else if (isCrouching && isMoving)
         {
-            // Agachado: respiración contenida
             targetVolume = breathingVolumeWalk * 0.8f;
             targetPitch = breathingPitchWalk * 0.9f;
         }
         else if (isWalking)
         {
-            // Andando: respiración normal
             targetVolume = breathingVolumeWalk;
             targetPitch = breathingPitchWalk;
         }
         else
         {
-            // Quieto: respiración muy suave
             targetVolume = breathingVolumeWalk * 0.5f;
             targetPitch = breathingPitchWalk * 0.9f;
         }
 
-        // Transición suave
         currentBreathingVolume = Mathf.Lerp(currentBreathingVolume, targetVolume, Time.deltaTime * breathingTransitionSpeed);
         currentBreathingPitch = Mathf.Lerp(currentBreathingPitch, targetPitch, Time.deltaTime * breathingTransitionSpeed);
 
