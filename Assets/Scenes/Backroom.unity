@@ -2204,7 +2204,7 @@ MonoBehaviour:
   maxVelocity: 12
   maxStamina: 100
   staminaDrainRate: 10
-  staminaRegenRate: 10
+  staminaRegenRate: 20
   staminaRegenDelay: 2
   staminaRequiredToSprint: 100
   mouseSensitivity: 0.5
@@ -2259,6 +2259,9 @@ MonoBehaviour:
   breathingPitchWalk: 0.85
   breathingPitchSprint: 1.2
   breathingTransitionSpeed: 2.5
+  staminaDepletedSound: {fileID: 8300000, guid: c3d6e4cca8fc4bd4191734a6c1fc0d45, type: 3}
+  staminaRecoveredSound: {fileID: 8300000, guid: c4dfb5b74cedeb64485f14a509c299db, type: 3}
+  staminaSoundVolume: 2
   enableCrouch: 1
   crouchHeight: 0.6
   standingHeight: 2
@@ -2361,8 +2364,8 @@ MonoBehaviour:
   vhsCamera: {fileID: 749084650}
   playerController: {fileID: 535094473}
   enableTrackingGlitch: 1
-  glitchIntervalMin: 100
-  glitchIntervalMax: 100
+  glitchIntervalMin: 50
+  glitchIntervalMax: 50
   glitchDurationMin: 0.03
   glitchDurationMax: 0.08
   glitchIntensityMin: 0.05
