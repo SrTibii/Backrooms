@@ -141,17 +141,35 @@ public class FirstPersonController : MonoBehaviour
     public float crouchTransitionSpeed = 8f;
     public float crouchCameraOffset = 0.6f;
 
-    // ?? NUEVO: Detección de techo para el crouch
     [Header("Crouch - Ceiling Detection")]
-    public bool enableCeilingDetection = true;           // Activar/desactivar detección de techo
-    public float ceilingCheckRadius = 0.2f;              // Radio del esfera de detección
-    public float ceilingCheckDistance = 0.3f;            // Distancia extra para detectar techo
-    public LayerMask ceilingLayerMask = -1;              // Layers a detectar (-1 = todos)
+    public bool enableCeilingDetection = true;
+    public float ceilingCheckRadius = 0.2f;
+    public float ceilingCheckDistance = 0.3f;
+    public LayerMask ceilingLayerMask = -1;
 
     [Header("Crouch Audio")]
     public AudioClip crouchSound;
     public AudioClip standSound;
     public float crouchSoundVolume = 0.3f;
+
+    // ============================================
+    // 12.5. CAMERA SWAY - BALANCEO DE CÁMARA (NUEVO)
+    // ============================================
+    [Header("Camera Sway (Balanceo de cámara)")]
+    public bool enableSway = true;
+    public float swayAmount = 2.5f;
+    public float swaySpeed = 4f;
+    public float swaySmoothness = 6f;
+    public float swayMaxAngle = 8f;
+    public float swayReturnSpeed = 4f;
+
+    [Header("Sway - Sprint")]
+    public float swaySpeedMultiplier = 1.8f;
+    public float swayAmountMultiplier = 2.0f;
+
+    [Header("Sway - Crouch")]
+    public float swayAmountCrouchMultiplier = 0.5f;
+    public float swaySpeedCrouchMultiplier = 0.7f;
 
     // ============================================
     // 13. VARIABLES PRIVADAS
@@ -162,7 +180,7 @@ public class FirstPersonController : MonoBehaviour
     private Vector3 cameraHorizontalOffset;
 
     private Vector3 currentVelocity;
-    private bool isMoving;
+    public bool isMoving;
     private bool isSprinting;
     private bool isSprintPressed;
 
@@ -205,8 +223,17 @@ public class FirstPersonController : MonoBehaviour
     private float currentHeight;
     private Vector3 crouchCameraTarget;
 
-    // ?? Ceiling detection
+    // Ceiling detection
     private bool isBlockedByCeiling = false;
+
+    // ============================================
+    // 13.5. CAMERA SWAY VARIABLES (NUEVO)
+    // ============================================
+    private float swayCurrentAngle = 0f;
+    private float swayTargetAngle = 0f;
+    private float swayTimer = 0f;
+    private Vector3 swayTargetPosition = Vector3.zero;
+    private Vector3 swayCurrentPosition = Vector3.zero;
 
     // ============================================
     // 14. ONENABLE / ONDISABLE
@@ -427,6 +454,7 @@ public class FirstPersonController : MonoBehaviour
         HandleCrouch();
         HandleMovement();
         HandleMouseLook();
+        HandleSway(); // ?? NUEVO: Balanceo de cámara
 
         if (enableHeadBob)
             HandleHeadBob();
@@ -615,6 +643,13 @@ public class FirstPersonController : MonoBehaviour
             {
                 cameraHorizontalOffset = Vector3.Lerp(cameraHorizontalOffset, Vector3.zero, Time.deltaTime * 5f);
                 targetPosition += cameraHorizontalOffset;
+            }
+
+            // ====== COMBINAR CON SWAY ======
+            // Añadir el offset del sway a la posición objetivo
+            if (enableSway && isMoving)
+            {
+                targetPosition += swayCurrentPosition;
             }
 
             cameraTransform.localPosition = Vector3.Lerp(cameraTransform.localPosition, targetPosition, Time.deltaTime * bobSmoothness * 10f);
@@ -846,25 +881,87 @@ public class FirstPersonController : MonoBehaviour
     }
 
     // ============================================
+    // 27.5. CAMERA SWAY - BALANCEO DE CÁMARA (NUEVO)
+    // ============================================
+    void HandleSway()
+    {
+        if (!enableSway) return;
+
+        // Determinar si estamos en movimiento
+        bool isMovingFast = isSprinting && isMoving && currentStamina > 0 && !isExhausted && !isCrouching;
+        bool isMovingSlow = isMoving && !isMovingFast;
+
+        // Calcular multiplicadores según estado
+        float currentSpeedMultiplier = 1f;
+        float currentAmountMultiplier = 1f;
+
+        if (isMovingFast)
+        {
+            // Corriendo: más rápido e intenso
+            currentSpeedMultiplier = swaySpeedMultiplier;
+            currentAmountMultiplier = swayAmountMultiplier;
+        }
+        else if (isCrouching && isMoving)
+        {
+            // Agachado: más suave y lento
+            currentSpeedMultiplier = swaySpeedCrouchMultiplier;
+            currentAmountMultiplier = swayAmountCrouchMultiplier;
+        }
+        else if (!isMoving)
+        {
+            // Quieto: sin balanceo, volver a la posición neutra
+            swayCurrentAngle = Mathf.Lerp(swayCurrentAngle, 0f, Time.deltaTime * swayReturnSpeed);
+            swayCurrentPosition = Vector3.Lerp(swayCurrentPosition, Vector3.zero, Time.deltaTime * swayReturnSpeed);
+            return;
+        }
+
+        // Si estamos en movimiento, calcular el balanceo
+        if (isMoving)
+        {
+            // Avanzar el timer
+            swayTimer += Time.deltaTime * swaySpeed * currentSpeedMultiplier;
+
+            // Calcular el ángulo de balanceo (sinusoidal)
+            float swayAngle = Mathf.Sin(swayTimer) * swayAmount * currentAmountMultiplier;
+
+            // Limitar el ángulo máximo
+            swayAngle = Mathf.Clamp(swayAngle, -swayMaxAngle, swayMaxAngle);
+
+            // Calcular el desplazamiento lateral (sway en posición X)
+            float swayX = Mathf.Sin(swayTimer * 0.7f + 1.2f) * (swayAmount * 0.3f) * currentAmountMultiplier;
+
+            // Calcular el desplazamiento vertical (pequeño bounce)
+            float swayY = Mathf.Sin(swayTimer * 1.1f + 0.5f) * (swayAmount * 0.1f) * currentAmountMultiplier;
+
+            // Guardar valores objetivo
+            swayTargetAngle = swayAngle;
+            swayTargetPosition = new Vector3(swayX, swayY, 0f);
+        }
+
+        // Suavizar la transición
+        swayCurrentAngle = Mathf.Lerp(swayCurrentAngle, swayTargetAngle, Time.deltaTime * swaySmoothness);
+        swayCurrentPosition = Vector3.Lerp(swayCurrentPosition, swayTargetPosition, Time.deltaTime * swaySmoothness);
+
+        // Aplicar rotación a la cámara (balanceo lateral Z)
+        Vector3 currentRotation = cameraTransform.localEulerAngles;
+        currentRotation.z = swayCurrentAngle;
+        cameraTransform.localEulerAngles = currentRotation;
+
+        // NOTA: El desplazamiento de posición se aplica en HandleHeadBob()
+    }
+
+    // ============================================
     // 28. CROUCH - AGACHARSE CON DETECCIÓN DE TECHO
     // ============================================
-
-    // ?? Verifica si hay un obstáculo encima del jugador que impida levantarse
 
     bool CheckCeilingBlock()
     {
         if (!enableCeilingDetection) return false;
 
-        // Posición desde donde lanzamos el raycast (encima del jugador)
         Vector3 checkPosition = transform.position + Vector3.up * standingHeight;
-
-        // Radio de detección
         float radius = ceilingCheckRadius;
-
-        // Distancia a comprobar (hasta la altura de pie)
         float checkDistance = standingHeight - crouchHeight + ceilingCheckDistance;
 
-        // ?? Lanzar un SphereCast hacia arriba para detectar obstáculos
         RaycastHit hit;
         if (Physics.SphereCast(
             checkPosition - Vector3.up * 0.1f,
@@ -875,18 +972,15 @@ public class FirstPersonController : MonoBehaviour
             ceilingLayerMask
         ))
         {
-            // Si hay algo, estamos bloqueados
             return true;
         }
 
-        // Debug: Dibujar el raycast en la escena
         Debug.DrawRay(
             transform.position + Vector3.up * (crouchHeight + 0.1f),
             Vector3.up * (standingHeight - crouchHeight + ceilingCheckDistance),
             Color.red
         );
 
-        // También comprobar con un Raycast simple para mayor precisión
         if (Physics.Raycast(
             transform.position + Vector3.up * (crouchHeight + 0.1f),
             Vector3.up,
@@ -905,72 +999,44 @@ public class FirstPersonController : MonoBehaviour
     {
         if (!enableCrouch) return;
 
-        // Si estamos agachados y pulsamos sprint, intentamos levantarnos
         if (isCrouching && isSprintPressed && isMoving)
         {
             ToggleCrouch();
             return;
         }
 
-        // ?? Verificar si hay techo antes de intentar levantarnos
-        if (!isCrouching && isCrouchPressed)
-        {
-            // Si estamos intentando agacharnos y hay techo, no hacemos nada
-            // (esto evita que te "clipes" al agacharte bajo un techo)
-        }
-
-        // Altura objetivo
         float targetHeight = isCrouching ? crouchHeight : standingHeight;
 
-        // Transición suave de altura
         currentHeight = Mathf.Lerp(currentHeight, targetHeight, Time.deltaTime * crouchTransitionSpeed);
         controller.height = currentHeight;
 
-        // Ajustar posición de la cámara
         Vector3 targetCameraPos = isCrouching ? crouchCameraTarget : cameraInitialPosition;
         cameraTransform.localPosition = Vector3.Lerp(cameraTransform.localPosition, targetCameraPos, Time.deltaTime * crouchTransitionSpeed);
 
-        // Ajustar centro del CharacterController
         Vector3 controllerCenter = controller.center;
         controllerCenter.y = currentHeight / 2f;
         controller.center = controllerCenter;
     }
-
-    // ?? Alterna entre agachado y de pie (con detección de techo)
 
     public void ToggleCrouch()
     {
         if (!enableCrouch) return;
         if (isZoomed) return;
 
-        // ?? Si estamos de pie y queremos agacharnos, comprobar si hay techo
-        if (!isCrouching && isCrouchPressed)
-        {
-            // Verificar si hay espacio suficiente para levantarse
-            // (cuando estamos de pie, no necesitamos comprobar techo para agacharnos)
-        }
-
-        // ?? Si estamos agachados y queremos levantarnos, VERIFICAR TECHO
         if (isCrouching)
         {
-            // Comprobar si hay un obstáculo encima
             isBlockedByCeiling = CheckCeilingBlock();
 
             if (isBlockedByCeiling)
             {
-                // ?? ¡Hay un techo! No podemos levantarnos
                 Debug.Log("?? ¡Bloqueado por techo! No puedes levantarte.");
-
-                // Reproducir sonido de "golpe" o feedback visual (opcional)
-                return; // Salimos sin cambiar de estado
+                return;
             }
         }
 
-        // ?? Alternar estado de agachado
         isCrouching = !isCrouching;
         isBlockedByCeiling = false;
 
-        // ?? Reproducir sonido de agacharse/levantarse
         if (isCrouching)
         {
             if (crouchSound != null)
@@ -1038,11 +1104,23 @@ public class FirstPersonController : MonoBehaviour
         return Mathf.InverseLerp(crouchHeight, standingHeight, controller.height);
     }
 
-    // ?? Método para saber si el jugador está bloqueado por un techo
     public bool IsBlockedByCeiling()
     {
         return isBlockedByCeiling;
     }
 
+    public bool IsMoving()
+    {
+        return isMoving;
+    }
 
+    public bool IsMovingFast()
+    {
+        return isSprinting && isMoving && currentStamina > 0 && !isExhausted && !isCrouching;
+    }
+
+    public bool IsMovingSlow()
+    {
+        return isMoving && !IsMovingFast();
+    }
 }

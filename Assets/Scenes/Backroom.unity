@@ -2177,6 +2177,7 @@ GameObject:
   - component: {fileID: 535094474}
   - component: {fileID: 535094473}
   - component: {fileID: 535094476}
+  - component: {fileID: 535094477}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -2273,6 +2274,17 @@ MonoBehaviour:
   crouchSound: {fileID: 8300000, guid: a8132134e614f9f4887250f0e1e32a4b, type: 3}
   standSound: {fileID: 8300000, guid: f59938ad9c9d72647a35030db13f969d, type: 3}
   crouchSoundVolume: 0.7
+  enableSway: 1
+  swayAmount: 1
+  swaySpeed: 2
+  swaySmoothness: 6
+  swayMaxAngle: 2
+  swayReturnSpeed: 3
+  swaySpeedMultiplier: 1.2
+  swayAmountMultiplier: 1.5
+  swayAmountCrouchMultiplier: 0.3
+  swaySpeedCrouchMultiplier: 0.5
+  isMoving: 0
 --- !u!143 &535094474
 CharacterController:
   m_ObjectHideFlags: 0
@@ -2334,6 +2346,31 @@ MonoBehaviour:
   sizeTransitionSpeed: 15
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   highlightColor: {r: 0, g: 1, b: 0, a: 1}
+--- !u!114 &535094477
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 535094472}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 933a985000d1cf5439d0ec90a963dfc9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VHSGlitchManager
+  vhsCamera: {fileID: 749084650}
+  playerController: {fileID: 535094473}
+  enableTrackingGlitch: 1
+  glitchIntervalMin: 100
+  glitchIntervalMax: 100
+  glitchDurationMin: 0.03
+  glitchDurationMax: 0.08
+  glitchIntensityMin: 0.05
+  glitchIntensityMax: 0.1
+  positionGlitchAmount: 0.005
+  rotationGlitchAmount: 0.2
+  glitchSound: {fileID: 8300000, guid: ca6513a7427d4564ea8e13844a533c73, type: 3}
+  glitchSoundVolume: 0.2
 --- !u!1 &539887698
 GameObject:
   m_ObjectHideFlags: 0
@@ -3289,6 +3326,7 @@ GameObject:
   - component: {fileID: 749084650}
   - component: {fileID: 749084649}
   - component: {fileID: 749084652}
+  - component: {fileID: 749084653}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -3414,6 +3452,31 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!114 &749084653
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 749084648}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5d28747e3204a545b47af8e1979b5ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VHSCameraEffects
+  playerController: {fileID: 535094473}
+  enableMicroSaccades: 1
+  saccadeAmplitude: 0.005
+  saccadeSpeed: 5
+  saccadeSmoothness: 10
+  enableGateWeave: 1
+  weaveAmplitude: 0.008
+  weaveSpeed: 0.4
+  weaveSmoothness: 5
+  idleMultiplier: 0.15
+  walkMultiplier: 0.3
+  sprintMultiplier: 0.6
+  crouchMultiplier: 0.2
 --- !u!1 &761624711
 GameObject:
   m_ObjectHideFlags: 0
