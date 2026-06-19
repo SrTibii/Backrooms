@@ -1154,4 +1154,30 @@ public class FirstPersonController : MonoBehaviour
     {
         return isMoving && !IsMovingFast();
     }
+
+    public void ResetSprintState()
+    {
+        isSprinting = false;
+        isSprintPressed = false;
+    }
+
+    public void ResetMovementState()
+    {
+        // Resetear el input de movimiento
+        moveInput = Vector2.zero;
+
+        // Resetear la velocidad actual
+        currentVelocity = Vector3.zero;
+
+        // Resetear el estado de movimiento
+        isMoving = false;
+
+        // Si el CharacterController está activo, detenerlo
+        if (controller != null && controller.enabled)
+        {
+            controller.Move(Vector3.zero);
+        }
+
+        Debug.Log("?? Movimiento reseteado");
+    }
 }
