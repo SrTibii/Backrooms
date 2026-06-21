@@ -20,6 +20,7 @@ public class EnemyIA : MonoBehaviour
     public float detectionRadius = 15f;
     public float visionRange = 25f;
     public float visionAngle = 120f;
+    public float proximityDetectionRange = 10f;
     public LayerMask obstacleMask = -1;
 
     [Header("Persecución")]
@@ -96,7 +97,7 @@ public class EnemyIA : MonoBehaviour
     // ?? NUEVO: Para detectar si el jugador está quieto
     private Vector3 lastPlayerPosition;
     private float playerIdleTimer = 0f;
-    private float playerIdleThreshold = 0.5f; // Si está quieto 0.5s, forzar actualización
+    private float playerIdleThreshold = 0.5f;
 
     void Start()
     {
@@ -221,7 +222,7 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? DETECTAR JUGADOR
+    // ?? DETECTAR JUGADOR (CORREGIDO)
     // ============================================
     void DetectPlayer()
     {
@@ -242,6 +243,16 @@ public class EnemyIA : MonoBehaviour
         isPlayerInRange = distanceToPlayer <= detectionRadius;
         isPlayerVisible = false;
 
+        // ?? NUEVO: Si el jugador está MUY CERCA (< 10f), DETECTARLO SIEMPRE
+        if (distanceToPlayer < proximityDetectionRange)
+        {
+            isPlayerVisible = true;
+            lastKnownPlayerPosition = player.position;
+            lastDirection = (player.position - transform.position).normalized;
+            return;
+        }
+
+        // ?? Detección normal por línea de visión
         if (distanceToPlayer <= visionRange)
         {
             Vector3 directionToPlayer = (player.position - transform.position).normalized;
@@ -289,13 +300,6 @@ public class EnemyIA : MonoBehaviour
                     }
                 }
             }
-        }
-
-        if (!isPlayerVisible && distanceToPlayer < 3f)
-        {
-            isPlayerVisible = true;
-            lastKnownPlayerPosition = player.position;
-            lastDirection = (player.position - transform.position).normalized;
         }
     }
 
@@ -566,12 +570,6 @@ public class EnemyIA : MonoBehaviour
                 Quaternion targetRotation = Quaternion.LookRotation(directionToPlayer);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 15f);
             }
-        }
-
-        // ?? Si el jugador está quieto y visible, resetear el timer para futuras actualizaciones
-        if (isPlayerIdle && isPlayerVisible)
-        {
-            // Ya se actualizó arriba, solo resetear
         }
     }
 
