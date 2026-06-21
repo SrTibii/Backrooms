@@ -83,10 +83,15 @@ public class EnemyIA : MonoBehaviour
     private bool isWaitingAfterHide = false;
     private float hideWaitTimer = 0f;
 
-    // ?? NUEVO: Variables para control de ruta
+    // Variables para control de ruta
     private float stuckTimer = 0f;
     private float stuckThreshold = 2f;
     private Vector3 lastPosition;
+
+    // ?? NUEVO: Variables para movimiento directo
+    private float directMovementTimer = 0f;
+    private float directMovementUpdateRate = 0.2f; // Actualizar destino cada 0.2s
+    private Vector3 lastDestination;
 
     void Start()
     {
@@ -116,6 +121,7 @@ public class EnemyIA : MonoBehaviour
             agent.updateRotation = true;
             agent.enabled = true;
             lastPosition = transform.position;
+            lastDestination = transform.position;
         }
 
         // ============================================
@@ -360,7 +366,7 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? UPDATE RUNNING (CORREGIDO)
+    // ?? UPDATE RUNNING (CORREGIDO - MOVIMIENTO DIRECTO)
     // ============================================
     void UpdateRunning()
     {
@@ -399,31 +405,8 @@ public class EnemyIA : MonoBehaviour
                 agent.speed = runSpeed;
                 agent.isStopped = false;
 
-                // ?? Verificar si el destino es alcanzable
-                if (CanReachDestination(player.position))
-                {
-                    agent.SetDestination(player.position);
-                }
-                else
-                {
-                    // ?? Si no puede alcanzar al jugador, ir a la posición más cercana posible
-                    Vector3 closestPoint = FindClosestNavMeshPosition(player.position);
-                    if (closestPoint != Vector3.zero)
-                    {
-                        agent.SetDestination(closestPoint);
-                        if (showDebugLogs) Debug.Log($"?? Destino alternativo (más cercano): {closestPoint}");
-                    }
-                    else
-                    {
-                        // ?? Si ni siquiera puede acercarse, moverse en la dirección general
-                        Vector3 fallbackDestination = transform.position + lastDirection * 3f;
-                        NavMeshHit hit;
-                        if (NavMesh.SamplePosition(fallbackDestination, out hit, 5f, agent.areaMask))
-                        {
-                            agent.SetDestination(hit.position);
-                        }
-                    }
-                }
+                // ?? NUEVO: Movimiento directo sin recálculos innecesarios
+                UpdateDirectMovement();
             }
 
             return;
@@ -469,13 +452,107 @@ public class EnemyIA : MonoBehaviour
             ChangeState(EnemyState.Walking);
         }
 
-        // ?? NUEVO: Detectar si el agente está atascado
         CheckIfStuck();
     }
 
     // ============================================
-    // ?? NUEVOS MÉTODOS PARA CONTROL DE RUTA
+    // ?? NUEVO: MOVIMIENTO DIRECTO Y OPTIMIZADO
     // ============================================
+
+    void UpdateDirectMovement()
+    {
+        // ?? Reducir la frecuencia de actualización del destino
+        directMovementTimer += Time.deltaTime;
+
+        if (directMovementTimer >= directMovementUpdateRate)
+        {
+            directMovementTimer = 0f;
+
+            Vector3 targetPosition = player.position;
+
+            // ?? Si el jugador está visible y no hay obstáculos, ir directo
+            if (isPlayerVisible)
+            {
+                // Verificar si hay línea de visión directa
+                if (HasLineOfSightToPlayer())
+                {
+                    // ?? MOVIMIENTO DIRECTO: Calcular ruta directa
+                    if (CanReachDestination(targetPosition))
+                    {
+                        agent.SetDestination(targetPosition);
+                        lastDestination = targetPosition;
+                        if (showDebugLogs && Time.frameCount % 30 == 0)
+                            Debug.Log($"?? Movimiento directo a: {targetPosition}");
+                    }
+                    else
+                    {
+                        // Si no es alcanzable, ir a la posición más cercana
+                        Vector3 closestPoint = FindClosestNavMeshPosition(targetPosition);
+                        if (closestPoint != Vector3.zero)
+                        {
+                            agent.SetDestination(closestPoint);
+                            lastDestination = closestPoint;
+                        }
+                    }
+                }
+                else
+                {
+                    // Si no hay línea de visión, usar el comportamiento normal
+                    if (CanReachDestination(targetPosition))
+                    {
+                        agent.SetDestination(targetPosition);
+                        lastDestination = targetPosition;
+                    }
+                    else
+                    {
+                        Vector3 closestPoint = FindClosestNavMeshPosition(targetPosition);
+                        if (closestPoint != Vector3.zero)
+                        {
+                            agent.SetDestination(closestPoint);
+                            lastDestination = closestPoint;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Si no es visible pero está en rango, ir a la última posición conocida
+                if (CanReachDestination(lastKnownPlayerPosition))
+                {
+                    agent.SetDestination(lastKnownPlayerPosition);
+                    lastDestination = lastKnownPlayerPosition;
+                }
+            }
+        }
+
+        // ?? Si el agente está muy cerca del destino, actualizar inmediatamente
+        if (agent.remainingDistance < 0.5f && isPlayerVisible)
+        {
+            directMovementTimer = directMovementUpdateRate; // Forzar actualización
+        }
+    }
+
+    /// <summary>
+    /// Verifica si hay línea de visión directa al jugador (sin obstáculos)
+    /// </summary>
+    bool HasLineOfSightToPlayer()
+    {
+        if (player == null) return false;
+
+        Vector3 origin = transform.position + Vector3.up * 0.5f;
+        Vector3 direction = (player.position - origin).normalized;
+        float distance = Vector3.Distance(origin, player.position);
+
+        RaycastHit hit;
+        if (Physics.Raycast(origin, direction, out hit, distance, obstacleMask))
+        {
+            if (hit.collider.CompareTag("Player"))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /// <summary>
     /// Verifica si el destino es alcanzable por el NavMeshAgent
@@ -484,20 +561,12 @@ public class EnemyIA : MonoBehaviour
     {
         if (agent == null || !agent.isOnNavMesh) return false;
 
-        // ?? Probar si el destino está en el NavMesh
         NavMeshPath path = new NavMeshPath();
         if (agent.CalculatePath(destination, path))
         {
-            // Si el path tiene una ruta válida
             if (path.status == NavMeshPathStatus.PathComplete)
             {
                 return true;
-            }
-            else if (path.status == NavMeshPathStatus.PathPartial)
-            {
-                // ?? Si la ruta es parcial, intentar acercarse lo más posible
-                if (showDebugLogs) Debug.Log($"?? Ruta parcial hacia {destination}");
-                return false;
             }
         }
         return false;
@@ -509,33 +578,22 @@ public class EnemyIA : MonoBehaviour
     Vector3 FindClosestNavMeshPosition(Vector3 position)
     {
         NavMeshHit hit;
-        float maxDistance = 5f;
-
-        if (NavMesh.SamplePosition(position, out hit, maxDistance, agent.areaMask))
+        if (NavMesh.SamplePosition(position, out hit, 10f, agent.areaMask))
         {
             return hit.position;
         }
-
-        // Si no encuentra cerca, intentar con mayor distancia
-        if (NavMesh.SamplePosition(position, out hit, 15f, agent.areaMask))
-        {
-            return hit.position;
-        }
-
         return Vector3.zero;
     }
 
     /// <summary>
-    /// Detecta si el agente está atascado (no se mueve)
+    /// Detecta si el agente está atascado
     /// </summary>
     void CheckIfStuck()
     {
         if (agent == null) return;
 
-        // Si el agente tiene un destino pero no se mueve
         if (agent.hasPath && agent.remainingDistance > agent.stoppingDistance)
         {
-            // Verificar si se ha movido en los últimos segundos
             if (Vector3.Distance(transform.position, lastPosition) < 0.1f)
             {
                 stuckTimer += Time.deltaTime;
@@ -544,7 +602,6 @@ public class EnemyIA : MonoBehaviour
                 {
                     if (showDebugLogs) Debug.Log($"?? Agente atascado! Buscando nueva ruta...");
 
-                    // ?? Intentar encontrar una nueva ruta
                     Vector3 randomDirection = Random.insideUnitSphere * 5f;
                     randomDirection += transform.position;
                     NavMeshHit hit;
@@ -559,14 +616,12 @@ public class EnemyIA : MonoBehaviour
             }
             else
             {
-                // Si se movió, resetear el timer
                 stuckTimer = 0f;
                 lastPosition = transform.position;
             }
         }
         else
         {
-            // Si no tiene path o llegó al destino, resetear
             stuckTimer = 0f;
             lastPosition = transform.position;
         }
@@ -648,18 +703,19 @@ public class EnemyIA : MonoBehaviour
                     agent.isStopped = false;
                     if (player != null && agent.isOnNavMesh)
                     {
-                        // ?? Verificar si el destino es alcanzable antes de asignar
+                        // Verificar si el destino es alcanzable
                         if (CanReachDestination(player.position))
                         {
                             agent.SetDestination(player.position);
+                            lastDestination = player.position;
                         }
                         else
                         {
-                            // Si no es alcanzable, ir a la posición más cercana posible
                             Vector3 closestPoint = FindClosestNavMeshPosition(player.position);
                             if (closestPoint != Vector3.zero)
                             {
                                 agent.SetDestination(closestPoint);
+                                lastDestination = closestPoint;
                             }
                         }
                     }
@@ -717,7 +773,7 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? SISTEMA DE SONIDOS (sin cambios)
+    // ?? SISTEMA DE SONIDOS
     // ============================================
 
     void PlayRandomAmbientSound()
