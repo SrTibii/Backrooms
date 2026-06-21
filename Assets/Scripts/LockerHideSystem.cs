@@ -10,6 +10,7 @@ public class LockerHideSystem : MonoBehaviour
     public Camera lockerCamera;
     public FirstPersonController playerController;
     public CharacterController characterController;
+    public Collider playerCollider;
     public Image crosshairImage;
 
     [Header("Configuración")]
@@ -46,6 +47,7 @@ public class LockerHideSystem : MonoBehaviour
     private bool wasLockerCameraActive;
     private bool wasPlayerControllerEnabled;
     private bool wasCharacterControllerEnabled;
+    private bool wasPlayerColliderEnabled;
     private bool wasCrosshairActive;
 
     // Variables para la transparencia de la puerta
@@ -54,10 +56,14 @@ public class LockerHideSystem : MonoBehaviour
     private float originalDoorOpacity = 1f;
     private bool isDoorTransparent = false;
 
-    // ============================================
     // Referencia a los enemigos
-    // ============================================
     private EnemyIA[] enemies;
+
+    // ?? NUEVO: Método público para que los enemigos sepan si el jugador está escondido
+    public bool IsPlayerHiding()
+    {
+        return isHiding;
+    }
 
     private void OnEnable()
     {
@@ -114,6 +120,15 @@ public class LockerHideSystem : MonoBehaviour
             if (characterController == null)
             {
                 Debug.LogWarning("LockerHideSystem: No se encontró CharacterController en el player");
+            }
+        }
+
+        if (playerCollider == null && playerController != null)
+        {
+            playerCollider = playerController.GetComponent<Collider>();
+            if (playerCollider == null)
+            {
+                Debug.LogWarning("LockerHideSystem: No se encontró Collider en el player");
             }
         }
 
@@ -218,6 +233,13 @@ public class LockerHideSystem : MonoBehaviour
             Debug.Log("??? CharacterController DESACTIVADO");
         }
 
+        if (playerCollider != null)
+        {
+            wasPlayerColliderEnabled = playerCollider.enabled;
+            playerCollider.enabled = false;
+            Debug.Log("??? Collider del player DESACTIVADO");
+        }
+
         // Guardar y desactivar el controlador del player
         if (playerController != null)
         {
@@ -251,7 +273,7 @@ public class LockerHideSystem : MonoBehaviour
         // Reproducir sonido de entrada
         PlayEnterSound();
 
-        // NOTIFICAR A TODOS LOS ENEMIGOS QUE EL JUGADOR SE HA ESCONDIDO
+        // ?? NOTIFICAR A TODOS LOS ENEMIGOS
         NotifyEnemiesPlayerHid();
 
         Debug.Log("?? Entrando a la taquilla");
@@ -280,6 +302,12 @@ public class LockerHideSystem : MonoBehaviour
             Debug.Log("?? Crosshair REACTIVADO");
         }
 
+        if (playerCollider != null)
+        {
+            playerCollider.enabled = wasPlayerColliderEnabled;
+            Debug.Log("??? Collider del player REACTIVADO");
+        }
+
         // REACTIVAR el CharacterController
         if (characterController != null)
         {
@@ -306,14 +334,10 @@ public class LockerHideSystem : MonoBehaviour
         Debug.Log("?? Saliendo de la taquilla");
     }
 
-    /// <summary>
-    /// Notifica a todos los enemigos que el jugador se ha escondido
-    /// </summary>
     void NotifyEnemiesPlayerHid()
     {
         if (enemies == null || enemies.Length == 0)
         {
-            // Buscar enemigos si no se encontraron antes
             enemies = FindObjectsOfType<EnemyIA>();
             if (enemies == null || enemies.Length == 0)
             {
@@ -332,9 +356,6 @@ public class LockerHideSystem : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Resetea completamente el estado del player para evitar movimiento residual
-    /// </summary>
     void ResetPlayerState()
     {
         if (playerController == null) return;
@@ -345,10 +366,6 @@ public class LockerHideSystem : MonoBehaviour
 
         Debug.Log("?? Estado del player reseteado correctamente");
     }
-
-    // ============================================
-    // MÉTODOS PARA REPRODUCIR SONIDOS
-    // ============================================
 
     void PlayEnterSound()
     {
@@ -375,10 +392,6 @@ public class LockerHideSystem : MonoBehaviour
         audioSource.PlayOneShot(exitSound);
         Debug.Log($"?? Sonido de salida reproducido (volumen: {exitSoundVolume})");
     }
-
-    // ============================================
-    // TRANSPARENCIA INSTANTÁNEA DE LA PUERTA
-    // ============================================
 
     void MakeDoorTransparentInstant()
     {

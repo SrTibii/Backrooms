@@ -278,7 +278,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a33ecbffb6b8e7a4096d2adb449c93eb, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1042.67
+      value: 1049.39
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a33ecbffb6b8e7a4096d2adb449c93eb, type: 3}
       propertyPath: m_LocalPosition.y
@@ -286,7 +286,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a33ecbffb6b8e7a4096d2adb449c93eb, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1149.56
+      value: 1159.42
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a33ecbffb6b8e7a4096d2adb449c93eb, type: 3}
       propertyPath: m_LocalRotation.w
@@ -330,13 +330,13 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a33ecbffb6b8e7a4096d2adb449c93eb, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 71488859}
+      addedObject: {fileID: 71488862}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a33ecbffb6b8e7a4096d2adb449c93eb, type: 3}
       insertIndex: -1
       addedObject: {fileID: 71488860}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a33ecbffb6b8e7a4096d2adb449c93eb, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 71488862}
+      addedObject: {fileID: 71488859}
   m_SourcePrefab: {fileID: 100100000, guid: a33ecbffb6b8e7a4096d2adb449c93eb, type: 3}
 --- !u!1 &71488857 stripped
 GameObject:
@@ -363,7 +363,8 @@ MonoBehaviour:
   player: {fileID: 535094475}
   agent: {fileID: 71488860}
   animator: {fileID: 71488858}
-  characterController: {fileID: 0}
+  characterController: {fileID: 71488862}
+  lockerSystem: {fileID: 131108282}
   waypoints:
   - {fileID: 2085851751}
   - {fileID: 2079011949}
@@ -379,6 +380,7 @@ MonoBehaviour:
   runSpeed: 7
   walkSpeed: 3
   lostPlayerTime: 5
+  hideWaitTime: 3
   showDebugLogs: 1
 --- !u!195 &71488860
 NavMeshAgent:
@@ -691,6 +693,7 @@ MonoBehaviour:
   lockerCamera: {fileID: 1963706019}
   playerController: {fileID: 535094473}
   characterController: {fileID: 535094474}
+  playerCollider: {fileID: 535094474}
   crosshairImage: {fileID: 257155419}
   doorTag: Door
   interactionDistance: 3

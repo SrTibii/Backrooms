@@ -10,6 +10,7 @@ public class EnemyIA : MonoBehaviour
     public NavMeshAgent agent;
     public Animator animator;
     public CharacterController characterController;
+    public LockerHideSystem lockerSystem;
 
     [Header("Puntos de Patrulla")]
     public List<Transform> waypoints = new List<Transform>();
@@ -27,6 +28,9 @@ public class EnemyIA : MonoBehaviour
     public float walkSpeed = 2f;
     public float lostPlayerTime = 3f;
 
+    [Header("Escondite")]
+    public float hideWaitTime = 3f;
+
     [Header("Debug")]
     public bool showDebugLogs = true;
 
@@ -39,10 +43,14 @@ public class EnemyIA : MonoBehaviour
 
     private bool isPlayerVisible = false;
     private bool isPlayerInRange = false;
+    private bool isPlayerHiding = false;
     private float playerLostTimer = 0f;
 
     private Vector3 lastKnownPlayerPosition;
-    private bool isPlayerHiding = false; // ?? NUEVO: Saber si el jugador está escondido
+    private Vector3 lastKnownHidingPosition;
+
+    private bool isWaitingAfterHide = false;
+    private float hideWaitTimer = 0f;
 
     void Start()
     {
@@ -59,6 +67,15 @@ public class EnemyIA : MonoBehaviour
 
         if (characterController == null)
             characterController = GetComponent<CharacterController>();
+
+        if (lockerSystem == null)
+        {
+            lockerSystem = FindObjectOfType<LockerHideSystem>();
+            if (lockerSystem == null)
+            {
+                Debug.LogWarning("LockerHideSystem: No se encontró LockerHideSystem en la escena");
+            }
+        }
 
         if (agent != null)
         {
@@ -108,16 +125,12 @@ public class EnemyIA : MonoBehaviour
 
     void DetectPlayer()
     {
-        // ?? Comprobar si el jugador está escondido
         isPlayerHiding = false;
-        LockerHideSystem lockerSystem = player.GetComponent<LockerHideSystem>();
-        if (lockerSystem == null)
-            lockerSystem = player.GetComponentInChildren<LockerHideSystem>();
-
         if (lockerSystem != null)
+        {
             isPlayerHiding = lockerSystem.IsHiding();
+        }
 
-        // ?? Si el jugador está escondido, NO se puede detectar
         if (isPlayerHiding)
         {
             isPlayerVisible = false;
@@ -166,7 +179,30 @@ public class EnemyIA : MonoBehaviour
 
     void UpdateIdle()
     {
-        // ?? Si el jugador está visible y NO está escondido, correr
+        if (isWaitingAfterHide)
+        {
+            hideWaitTimer -= Time.deltaTime;
+            if (hideWaitTimer <= 0)
+            {
+                isWaitingAfterHide = false;
+                if (isPlayerHiding)
+                {
+                    SelectNewWaypoint();
+                    ChangeState(EnemyState.Walking);
+                }
+                else if (isPlayerVisible && !isPlayerHiding)
+                {
+                    ChangeState(EnemyState.Running);
+                }
+                else
+                {
+                    SelectNewWaypoint();
+                    ChangeState(EnemyState.Walking);
+                }
+            }
+            return;
+        }
+
         if (isPlayerVisible && !isPlayerHiding)
         {
             ChangeState(EnemyState.Running);
@@ -190,7 +226,8 @@ public class EnemyIA : MonoBehaviour
 
     void UpdateWalking()
     {
-        // ?? Si el jugador está visible y NO está escondido, correr
+        if (isWaitingAfterHide) return;
+
         if (isPlayerVisible && !isPlayerHiding)
         {
             ChangeState(EnemyState.Running);
@@ -228,15 +265,27 @@ public class EnemyIA : MonoBehaviour
 
     void UpdateRunning()
     {
-        // ?? Si el jugador está escondido, perderlo inmediatamente
         if (isPlayerHiding)
         {
-            if (showDebugLogs) Debug.Log($"?? Jugador escondido en taquilla, volviendo a patrullar");
-            playerLostTimer = lostPlayerTime; // Forzar pérdida inmediata
+            if (showDebugLogs) Debug.Log($"?? Jugador escondido en taquilla, esperando {hideWaitTime}s - {gameObject.name}");
+
+            lastKnownHidingPosition = player.position;
+            isWaitingAfterHide = true;
+            hideWaitTimer = hideWaitTime;
+            playerLostTimer = 0f;
             isPlayerVisible = false;
             isPlayerInRange = false;
-            SelectNewWaypoint();
-            ChangeState(EnemyState.Walking);
+
+            ChangeState(EnemyState.Idle);
+
+            Vector3 directionToHide = (lastKnownHidingPosition - transform.position).normalized;
+            directionToHide.y = 0;
+            if (directionToHide.magnitude > 0.1f)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(directionToHide);
+                transform.rotation = targetRotation;
+            }
+
             return;
         }
 
@@ -272,7 +321,6 @@ public class EnemyIA : MonoBehaviour
             return;
         }
 
-        // Si no ve al jugador
         playerLostTimer += Time.deltaTime;
 
         if (playerLostTimer >= lostPlayerTime)
@@ -283,7 +331,6 @@ public class EnemyIA : MonoBehaviour
         }
         else
         {
-            // Ir a la última posición conocida
             Vector3 direction = (lastKnownPlayerPosition - transform.position).normalized;
             direction.y = 0;
 
@@ -303,21 +350,34 @@ public class EnemyIA : MonoBehaviour
         }
     }
 
-    // ============================================
-    // ?? OnPlayerHid - Mejorado
-    // ============================================
     public void OnPlayerHid()
     {
-        if (showDebugLogs) Debug.Log($"?? El jugador se ha escondido en una taquilla");
+        if (showDebugLogs) Debug.Log($"?? El jugador se ha escondido en una taquilla - {gameObject.name}");
 
-        // Si está corriendo, volver a patrullar inmediatamente
-        if (currentState == EnemyState.Running)
+        isPlayerVisible = false;
+        isPlayerInRange = false;
+        isPlayerHiding = true;
+        playerLostTimer = 0f;
+
+        if (player != null)
         {
-            isPlayerVisible = false;
-            isPlayerInRange = false;
-            playerLostTimer = 0f;
-            SelectNewWaypoint();
-            ChangeState(EnemyState.Walking);
+            lastKnownHidingPosition = player.position;
+        }
+
+        isWaitingAfterHide = true;
+        hideWaitTimer = hideWaitTime;
+
+        ChangeState(EnemyState.Idle);
+
+        if (lastKnownHidingPosition != Vector3.zero)
+        {
+            Vector3 directionToHide = (lastKnownHidingPosition - transform.position).normalized;
+            directionToHide.y = 0;
+            if (directionToHide.magnitude > 0.1f)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(directionToHide);
+                transform.rotation = targetRotation;
+            }
         }
     }
 
@@ -331,8 +391,11 @@ public class EnemyIA : MonoBehaviour
         switch (currentState)
         {
             case EnemyState.Idle:
-                idleTimer = Random.Range(idleTimeMin, idleTimeMax);
-                if (showDebugLogs) Debug.Log($"?? IDLE por {idleTimer:F1}s");
+                if (!isWaitingAfterHide)
+                {
+                    idleTimer = Random.Range(idleTimeMin, idleTimeMax);
+                }
+                if (showDebugLogs) Debug.Log($"?? IDLE por {(isWaitingAfterHide ? hideWaitTimer : idleTimer):F1}s");
                 break;
 
             case EnemyState.Walking:
@@ -364,21 +427,49 @@ public class EnemyIA : MonoBehaviour
             Debug.Log($"?? Nuevo waypoint: {currentWaypoint.name}");
     }
 
+    // ============================================
+    // ?? UPDATE ANIMATIONS - CORREGIDO
+    // ============================================
     void UpdateAnimations()
     {
         if (animator == null) return;
 
+        // Obtener la velocidad real del CharacterController
         float speed = 0f;
+
+        if (characterController != null)
+        {
+            speed = characterController.velocity.magnitude;
+        }
+        else if (agent != null)
+        {
+            speed = agent.velocity.magnitude;
+        }
+
+        // Calcular la velocidad normalizada según el estado
+        float normalizedSpeed = 0f;
+
         if (currentState == EnemyState.Running)
         {
-            speed = runSpeed;
+            normalizedSpeed = Mathf.Clamp01(speed / runSpeed);
         }
         else if (currentState == EnemyState.Walking)
         {
-            speed = walkSpeed;
+            normalizedSpeed = Mathf.Clamp01(speed / walkSpeed);
         }
 
-        animator.SetFloat("Speed", speed);
+        // Si está en Idle, velocidad 0 (a menos que esté en la espera post-escondite)
+        if (currentState == EnemyState.Idle)
+        {
+            normalizedSpeed = 0f;
+        }
+
+        // ?? SOLO forzar si está en Running y realmente se está moviendo (evita el bug)
+        // Si está en Running y tiene velocidad > 0, la animación se activará sola
+        // Si está en Running y no se mueve (bloqueado), la animación de idle se activará naturalmente
+
+        // Aplicar al Animator
+        animator.SetFloat("Speed", normalizedSpeed);
         animator.SetBool("IsRunning", currentState == EnemyState.Running);
         animator.SetInteger("State", (int)currentState);
     }
