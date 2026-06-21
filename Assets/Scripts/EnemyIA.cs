@@ -59,7 +59,7 @@ public class EnemyIA : MonoBehaviour
     private bool isChasePlaying = false;
     private Coroutine currentChaseFadeCoroutine;
     private bool isAmbientPlaying = false;
-    private bool isAmbientStopped = false;  
+    private bool isAmbientStopped = false;
 
     [Header("Debug")]
     public bool showDebugLogs = true;
@@ -82,6 +82,11 @@ public class EnemyIA : MonoBehaviour
 
     private bool isWaitingAfterHide = false;
     private float hideWaitTimer = 0f;
+
+    // ?? NUEVO: Variables para control de ruta
+    private float stuckTimer = 0f;
+    private float stuckThreshold = 2f;
+    private Vector3 lastPosition;
 
     void Start()
     {
@@ -110,6 +115,7 @@ public class EnemyIA : MonoBehaviour
             agent.updatePosition = true;
             agent.updateRotation = true;
             agent.enabled = true;
+            lastPosition = transform.position;
         }
 
         // ============================================
@@ -270,14 +276,7 @@ public class EnemyIA : MonoBehaviour
             }
         }
 
-        if (!isPlayerVisible && isPlayerInRange && distanceToPlayer < 3f)
-        {
-            isPlayerVisible = true;
-            lastKnownPlayerPosition = player.position;
-            lastDirection = (player.position - transform.position).normalized;
-        }
-
-        if (isPlayerInRange)
+        if (!isPlayerVisible && distanceToPlayer < 3f)
         {
             isPlayerVisible = true;
             lastKnownPlayerPosition = player.position;
@@ -293,8 +292,6 @@ public class EnemyIA : MonoBehaviour
             if (hideWaitTimer <= 0)
             {
                 isWaitingAfterHide = false;
-
-                // ?? NUEVO: Reactivar sonidos ambientales al salir de la espera
                 ReactivateAmbientSound();
 
                 if (isPlayerHiding)
@@ -362,6 +359,9 @@ public class EnemyIA : MonoBehaviour
         }
     }
 
+    // ============================================
+    // ?? UPDATE RUNNING (CORREGIDO)
+    // ============================================
     void UpdateRunning()
     {
         if (isPlayerHiding)
@@ -398,7 +398,32 @@ public class EnemyIA : MonoBehaviour
             {
                 agent.speed = runSpeed;
                 agent.isStopped = false;
-                agent.SetDestination(player.position);
+
+                // ?? Verificar si el destino es alcanzable
+                if (CanReachDestination(player.position))
+                {
+                    agent.SetDestination(player.position);
+                }
+                else
+                {
+                    // ?? Si no puede alcanzar al jugador, ir a la posición más cercana posible
+                    Vector3 closestPoint = FindClosestNavMeshPosition(player.position);
+                    if (closestPoint != Vector3.zero)
+                    {
+                        agent.SetDestination(closestPoint);
+                        if (showDebugLogs) Debug.Log($"?? Destino alternativo (más cercano): {closestPoint}");
+                    }
+                    else
+                    {
+                        // ?? Si ni siquiera puede acercarse, moverse en la dirección general
+                        Vector3 fallbackDestination = transform.position + lastDirection * 3f;
+                        NavMeshHit hit;
+                        if (NavMesh.SamplePosition(fallbackDestination, out hit, 5f, agent.areaMask))
+                        {
+                            agent.SetDestination(hit.position);
+                        }
+                    }
+                }
             }
 
             return;
@@ -439,11 +464,111 @@ public class EnemyIA : MonoBehaviour
         {
             if (showDebugLogs) Debug.Log($"?? Perdí al jugador después de {lostPlayerTime}s");
 
-            // ?? NUEVO: Reactivar sonidos ambientales al perder al jugador
             ReactivateAmbientSound();
-
             SelectNewWaypoint();
             ChangeState(EnemyState.Walking);
+        }
+
+        // ?? NUEVO: Detectar si el agente está atascado
+        CheckIfStuck();
+    }
+
+    // ============================================
+    // ?? NUEVOS MÉTODOS PARA CONTROL DE RUTA
+    // ============================================
+
+    /// <summary>
+    /// Verifica si el destino es alcanzable por el NavMeshAgent
+    /// </summary>
+    bool CanReachDestination(Vector3 destination)
+    {
+        if (agent == null || !agent.isOnNavMesh) return false;
+
+        // ?? Probar si el destino está en el NavMesh
+        NavMeshPath path = new NavMeshPath();
+        if (agent.CalculatePath(destination, path))
+        {
+            // Si el path tiene una ruta válida
+            if (path.status == NavMeshPathStatus.PathComplete)
+            {
+                return true;
+            }
+            else if (path.status == NavMeshPathStatus.PathPartial)
+            {
+                // ?? Si la ruta es parcial, intentar acercarse lo más posible
+                if (showDebugLogs) Debug.Log($"?? Ruta parcial hacia {destination}");
+                return false;
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Encuentra la posición más cercana en el NavMesh a un punto dado
+    /// </summary>
+    Vector3 FindClosestNavMeshPosition(Vector3 position)
+    {
+        NavMeshHit hit;
+        float maxDistance = 5f;
+
+        if (NavMesh.SamplePosition(position, out hit, maxDistance, agent.areaMask))
+        {
+            return hit.position;
+        }
+
+        // Si no encuentra cerca, intentar con mayor distancia
+        if (NavMesh.SamplePosition(position, out hit, 15f, agent.areaMask))
+        {
+            return hit.position;
+        }
+
+        return Vector3.zero;
+    }
+
+    /// <summary>
+    /// Detecta si el agente está atascado (no se mueve)
+    /// </summary>
+    void CheckIfStuck()
+    {
+        if (agent == null) return;
+
+        // Si el agente tiene un destino pero no se mueve
+        if (agent.hasPath && agent.remainingDistance > agent.stoppingDistance)
+        {
+            // Verificar si se ha movido en los últimos segundos
+            if (Vector3.Distance(transform.position, lastPosition) < 0.1f)
+            {
+                stuckTimer += Time.deltaTime;
+
+                if (stuckTimer >= stuckThreshold)
+                {
+                    if (showDebugLogs) Debug.Log($"?? Agente atascado! Buscando nueva ruta...");
+
+                    // ?? Intentar encontrar una nueva ruta
+                    Vector3 randomDirection = Random.insideUnitSphere * 5f;
+                    randomDirection += transform.position;
+                    NavMeshHit hit;
+                    if (NavMesh.SamplePosition(randomDirection, out hit, 5f, agent.areaMask))
+                    {
+                        agent.SetDestination(hit.position);
+                        if (showDebugLogs) Debug.Log($"?? Nueva ruta de escape: {hit.position}");
+                    }
+
+                    stuckTimer = 0f;
+                }
+            }
+            else
+            {
+                // Si se movió, resetear el timer
+                stuckTimer = 0f;
+                lastPosition = transform.position;
+            }
+        }
+        else
+        {
+            // Si no tiene path o llegó al destino, resetear
+            stuckTimer = 0f;
+            lastPosition = transform.position;
         }
     }
 
@@ -523,7 +648,20 @@ public class EnemyIA : MonoBehaviour
                     agent.isStopped = false;
                     if (player != null && agent.isOnNavMesh)
                     {
-                        agent.SetDestination(player.position);
+                        // ?? Verificar si el destino es alcanzable antes de asignar
+                        if (CanReachDestination(player.position))
+                        {
+                            agent.SetDestination(player.position);
+                        }
+                        else
+                        {
+                            // Si no es alcanzable, ir a la posición más cercana posible
+                            Vector3 closestPoint = FindClosestNavMeshPosition(player.position);
+                            if (closestPoint != Vector3.zero)
+                            {
+                                agent.SetDestination(closestPoint);
+                            }
+                        }
                     }
                 }
                 if (showDebugLogs) Debug.Log($"?? RUNNING al jugador");
@@ -579,10 +717,9 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? SISTEMA DE SONIDOS
+    // ?? SISTEMA DE SONIDOS (sin cambios)
     // ============================================
 
-    // ---------- SONIDO AMBIENTE ----------
     void PlayRandomAmbientSound()
     {
         if (ambientSounds == null || ambientSounds.Length == 0)
@@ -591,7 +728,6 @@ public class EnemyIA : MonoBehaviour
             return;
         }
 
-        // Seleccionar clip aleatorio
         AudioClip newClip = ambientSounds[Random.Range(0, ambientSounds.Length)];
         int attempts = 0;
         while (newClip == currentAmbientClip && ambientSounds.Length > 1 && attempts < 20)
@@ -602,15 +738,13 @@ public class EnemyIA : MonoBehaviour
 
         currentAmbientClip = newClip;
 
-        // ?? Reproducir el sonido completo
         ambientAudioSource.clip = currentAmbientClip;
         ambientAudioSource.loop = false;
         ambientAudioSource.volume = ambientVolume;
         ambientAudioSource.Play();
         isAmbientPlaying = true;
-        isAmbientStopped = false;  // ?? Ya no está detenido
+        isAmbientStopped = false;
 
-        // ?? Calcular el timer: duración del clip + pausa aleatoria
         float clipDuration = currentAmbientClip.length;
         float pauseBetweenSounds = Random.Range(minPauseBetweenAmbient, maxPauseBetweenAmbient);
         ambientTimer = clipDuration + pauseBetweenSounds;
@@ -619,22 +753,19 @@ public class EnemyIA : MonoBehaviour
             Debug.Log($"?? Ambiente: {currentAmbientClip.name} | Duración: {clipDuration:F1}s | Pausa: {pauseBetweenSounds:F1}s | Total: {ambientTimer:F1}s");
     }
 
-    // ?? NUEVO: Reactivar sonidos ambientales
     void ReactivateAmbientSound()
     {
         if (showDebugLogs) Debug.Log($"?? Reactivando sonidos ambientales...");
 
-        // Si el ambiente estaba detenido o no está sonando, reactivarlo
         if (isAmbientStopped || !ambientAudioSource.isPlaying)
         {
             isAmbientStopped = false;
             isAmbientPlaying = false;
-            ambientTimer = 0f;  // Forzar reproducción inmediata
+            ambientTimer = 0f;
             PlayRandomAmbientSound();
         }
     }
 
-    // ---------- SONIDO DE PERSECUCIÓN ----------
     void StartChaseSound()
     {
         if (chaseSounds == null || chaseSounds.Length == 0)
@@ -643,16 +774,13 @@ public class EnemyIA : MonoBehaviour
             return;
         }
 
-        // Si ya está sonando a volumen alto, no hacer nada
         if (isChasePlaying && chaseAudioSource.isPlaying && chaseAudioSource.volume > 0.5f)
         {
             return;
         }
 
-        // ?? Detener el sonido ambiente inmediatamente
         StopAmbientSoundImmediate();
 
-        // Seleccionar clip aleatorio
         AudioClip newClip = chaseSounds[Random.Range(0, chaseSounds.Length)];
         int attempts = 0;
         while (newClip == currentChaseClip && chaseSounds.Length > 1 && attempts < 20)
@@ -663,7 +791,6 @@ public class EnemyIA : MonoBehaviour
 
         currentChaseClip = newClip;
 
-        // Configurar para bucle
         chaseAudioSource.clip = currentChaseClip;
         chaseAudioSource.loop = true;
 
@@ -673,7 +800,6 @@ public class EnemyIA : MonoBehaviour
             isChasePlaying = true;
         }
 
-        // Fundido de entrada
         if (currentChaseFadeCoroutine != null)
             StopCoroutine(currentChaseFadeCoroutine);
         currentChaseFadeCoroutine = StartCoroutine(FadeChaseVolume(chaseVolume, chaseFadeTime));
@@ -689,7 +815,6 @@ public class EnemyIA : MonoBehaviour
         currentChaseFadeCoroutine = StartCoroutine(FadeChaseVolume(0f, chaseFadeTime));
     }
 
-    // ?? NUEVO: Detener ambiente inmediatamente (sin fundido)
     void StopAmbientSoundImmediate()
     {
         if (ambientAudioSource.isPlaying)
@@ -697,11 +822,10 @@ public class EnemyIA : MonoBehaviour
             ambientAudioSource.Stop();
         }
         isAmbientPlaying = false;
-        isAmbientStopped = true;  // ?? Marcamos que fue detenido
+        isAmbientStopped = true;
         if (showDebugLogs) Debug.Log($"?? Ambiente detenido inmediatamente");
     }
 
-    // ---------- CORRUTINAS DE FUNDIDO ----------
     IEnumerator FadeChaseVolume(float targetVolume, float duration)
     {
         float startVolume = chaseAudioSource.volume;
@@ -725,7 +849,6 @@ public class EnemyIA : MonoBehaviour
             }
             isChasePlaying = false;
 
-            // ?? NUEVO: Al detener el chase, reactivar ambiente (si no está oculto)
             if (!isWaitingAfterHide && !isPlayerHiding)
             {
                 ReactivateAmbientSound();
@@ -746,18 +869,13 @@ public class EnemyIA : MonoBehaviour
     // ============================================
     void UpdateAudio()
     {
-        // ==========================================
-        // 1. SONIDO AMBIENTE (solo si no está corriendo)
-        // ==========================================
         if (currentState != EnemyState.Running)
         {
-            // Si el clip actual ha terminado de sonar
             if (!ambientAudioSource.isPlaying && isAmbientPlaying)
             {
                 isAmbientPlaying = false;
             }
 
-            // Reducir timer solo cuando no está sonando
             if (!isAmbientPlaying && !isAmbientStopped)
             {
                 ambientTimer -= Time.deltaTime;
@@ -768,7 +886,6 @@ public class EnemyIA : MonoBehaviour
                 }
             }
 
-            // ?? Si el ambiente fue detenido y no estamos en chase, reactivarlo
             if (isAmbientStopped && currentState != EnemyState.Running)
             {
                 ReactivateAmbientSound();
@@ -776,7 +893,6 @@ public class EnemyIA : MonoBehaviour
         }
         else
         {
-            // ?? Si está corriendo, asegurar que el ambiente está detenido
             if (ambientAudioSource.isPlaying)
             {
                 ambientAudioSource.Stop();
@@ -785,9 +901,6 @@ public class EnemyIA : MonoBehaviour
             }
         }
 
-        // ==========================================
-        // 2. SONIDO DE PERSECUCIÓN
-        // ==========================================
         if (currentState == EnemyState.Running)
         {
             if (!isChasePlaying || !chaseAudioSource.isPlaying)
