@@ -30,6 +30,37 @@ public class EnemyIA : MonoBehaviour
     [Header("Escondite")]
     public float hideWaitTime = 3f;
 
+    [Header("Sonidos del Enemigo")]
+    public AudioClip[] ambientSounds;
+    public AudioClip[] chaseSounds;
+
+    [Header("Volumen")]
+    [Range(0f, 1f)] public float ambientVolume = 0.8f;
+    [Range(0f, 1f)] public float chaseVolume = 0.9f;
+
+    [Header("Intervalo Ambiente")]
+    public float minPauseBetweenAmbient = 2f;
+    public float maxPauseBetweenAmbient = 5f;
+
+    [Header("Audio Avanzado")]
+    public float audioMinDistance = 1f;
+    public float audioMaxDistance = 40f;
+    public AudioRolloffMode rolloffMode = AudioRolloffMode.Logarithmic;
+    public float chaseFadeTime = 0.5f;
+
+    // AudioSources
+    private AudioSource ambientAudioSource;
+    private AudioSource chaseAudioSource;
+
+    // Control de sonidos
+    private float ambientTimer = 0f;
+    private AudioClip currentAmbientClip;
+    private AudioClip currentChaseClip;
+    private bool isChasePlaying = false;
+    private Coroutine currentChaseFadeCoroutine;
+    private bool isAmbientPlaying = false;
+    private bool isAmbientStopped = false;  
+
     [Header("Debug")]
     public bool showDebugLogs = true;
 
@@ -81,6 +112,43 @@ public class EnemyIA : MonoBehaviour
             agent.enabled = true;
         }
 
+        // ============================================
+        // ?? CONFIGURAR AUDIOSOURCES
+        // ============================================
+        ambientAudioSource = gameObject.AddComponent<AudioSource>();
+        ambientAudioSource.loop = false;
+        ambientAudioSource.playOnAwake = false;
+        ambientAudioSource.spatialBlend = 1f;
+        ambientAudioSource.rolloffMode = rolloffMode;
+        ambientAudioSource.minDistance = audioMinDistance;
+        ambientAudioSource.maxDistance = audioMaxDistance;
+        ambientAudioSource.volume = ambientVolume;
+        ambientAudioSource.priority = 128;
+
+        chaseAudioSource = gameObject.AddComponent<AudioSource>();
+        chaseAudioSource.loop = true;
+        chaseAudioSource.playOnAwake = false;
+        chaseAudioSource.spatialBlend = 1f;
+        chaseAudioSource.rolloffMode = rolloffMode;
+        chaseAudioSource.minDistance = audioMinDistance;
+        chaseAudioSource.maxDistance = audioMaxDistance;
+        chaseAudioSource.volume = 0f;
+        chaseAudioSource.priority = 100;
+
+        // ============================================
+        // ?? INICIALIZAR SONIDOS
+        // ============================================
+        PlayRandomAmbientSound();
+
+        if (chaseSounds != null && chaseSounds.Length > 0)
+        {
+            currentChaseClip = chaseSounds[Random.Range(0, chaseSounds.Length)];
+            chaseAudioSource.clip = currentChaseClip;
+            chaseAudioSource.volume = 0f;
+            chaseAudioSource.Play();
+            isChasePlaying = true;
+        }
+
         if (waypoints.Count > 0)
         {
             currentWaypointIndex = Random.Range(0, waypoints.Count);
@@ -127,11 +195,12 @@ public class EnemyIA : MonoBehaviour
         }
 
         UpdateAnimations();
+        UpdateAudio();
         DebugDraw();
     }
 
     // ============================================
-    // ?? DETECTAR JUGADOR CON MÚLTIPLES RAYCASTS
+    // ?? DETECTAR JUGADOR
     // ============================================
     void DetectPlayer()
     {
@@ -159,7 +228,6 @@ public class EnemyIA : MonoBehaviour
 
             if (angle <= visionAngle * 0.5f)
             {
-                // ?? MÚLTIPLES RAYCASTS A DIFERENTES ALTURAS
                 float[] heights = { 0.2f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f };
                 Vector3 rayOrigin = transform.position;
 
@@ -167,7 +235,6 @@ public class EnemyIA : MonoBehaviour
                 {
                     Vector3 origin = rayOrigin + Vector3.up * height;
                     Vector3 direction = (player.position - origin).normalized;
-
                     float maxDistance = Vector3.Distance(origin, player.position) + 0.5f;
 
                     RaycastHit hit;
@@ -183,7 +250,6 @@ public class EnemyIA : MonoBehaviour
                     }
                 }
 
-                // ?? FALLBACK: SphereCast para detección más amplia
                 if (!isPlayerVisible)
                 {
                     Vector3 center = transform.position + Vector3.up * 1.2f;
@@ -227,6 +293,10 @@ public class EnemyIA : MonoBehaviour
             if (hideWaitTimer <= 0)
             {
                 isWaitingAfterHide = false;
+
+                // ?? NUEVO: Reactivar sonidos ambientales al salir de la espera
+                ReactivateAmbientSound();
+
                 if (isPlayerHiding)
                 {
                     SelectNewWaypoint();
@@ -368,6 +438,10 @@ public class EnemyIA : MonoBehaviour
         else
         {
             if (showDebugLogs) Debug.Log($"?? Perdí al jugador después de {lostPlayerTime}s");
+
+            // ?? NUEVO: Reactivar sonidos ambientales al perder al jugador
+            ReactivateAmbientSound();
+
             SelectNewWaypoint();
             ChangeState(EnemyState.Walking);
         }
@@ -408,7 +482,6 @@ public class EnemyIA : MonoBehaviour
     {
         if (currentState == newState) return;
 
-        string oldState = currentState.ToString();
         currentState = newState;
 
         switch (currentState)
@@ -424,6 +497,8 @@ public class EnemyIA : MonoBehaviour
                     agent.ResetPath();
                 }
                 if (showDebugLogs) Debug.Log($"?? IDLE por {(isWaitingAfterHide ? hideWaitTimer : idleTimer):F1}s");
+
+                StopChaseSound();
                 break;
 
             case EnemyState.Walking:
@@ -437,6 +512,8 @@ public class EnemyIA : MonoBehaviour
                     }
                 }
                 if (showDebugLogs) Debug.Log($"?? WALKING a {currentWaypoint?.name}");
+
+                StopChaseSound();
                 break;
 
             case EnemyState.Running:
@@ -450,6 +527,8 @@ public class EnemyIA : MonoBehaviour
                     }
                 }
                 if (showDebugLogs) Debug.Log($"?? RUNNING al jugador");
+
+                StartChaseSound();
                 break;
         }
     }
@@ -497,6 +576,225 @@ public class EnemyIA : MonoBehaviour
         animator.SetFloat("Speed", normalizedSpeed);
         animator.SetBool("IsRunning", currentState == EnemyState.Running);
         animator.SetInteger("State", (int)currentState);
+    }
+
+    // ============================================
+    // ?? SISTEMA DE SONIDOS
+    // ============================================
+
+    // ---------- SONIDO AMBIENTE ----------
+    void PlayRandomAmbientSound()
+    {
+        if (ambientSounds == null || ambientSounds.Length == 0)
+        {
+            if (showDebugLogs) Debug.LogWarning("?? No hay sonidos ambientales asignados");
+            return;
+        }
+
+        // Seleccionar clip aleatorio
+        AudioClip newClip = ambientSounds[Random.Range(0, ambientSounds.Length)];
+        int attempts = 0;
+        while (newClip == currentAmbientClip && ambientSounds.Length > 1 && attempts < 20)
+        {
+            newClip = ambientSounds[Random.Range(0, ambientSounds.Length)];
+            attempts++;
+        }
+
+        currentAmbientClip = newClip;
+
+        // ?? Reproducir el sonido completo
+        ambientAudioSource.clip = currentAmbientClip;
+        ambientAudioSource.loop = false;
+        ambientAudioSource.volume = ambientVolume;
+        ambientAudioSource.Play();
+        isAmbientPlaying = true;
+        isAmbientStopped = false;  // ?? Ya no está detenido
+
+        // ?? Calcular el timer: duración del clip + pausa aleatoria
+        float clipDuration = currentAmbientClip.length;
+        float pauseBetweenSounds = Random.Range(minPauseBetweenAmbient, maxPauseBetweenAmbient);
+        ambientTimer = clipDuration + pauseBetweenSounds;
+
+        if (showDebugLogs)
+            Debug.Log($"?? Ambiente: {currentAmbientClip.name} | Duración: {clipDuration:F1}s | Pausa: {pauseBetweenSounds:F1}s | Total: {ambientTimer:F1}s");
+    }
+
+    // ?? NUEVO: Reactivar sonidos ambientales
+    void ReactivateAmbientSound()
+    {
+        if (showDebugLogs) Debug.Log($"?? Reactivando sonidos ambientales...");
+
+        // Si el ambiente estaba detenido o no está sonando, reactivarlo
+        if (isAmbientStopped || !ambientAudioSource.isPlaying)
+        {
+            isAmbientStopped = false;
+            isAmbientPlaying = false;
+            ambientTimer = 0f;  // Forzar reproducción inmediata
+            PlayRandomAmbientSound();
+        }
+    }
+
+    // ---------- SONIDO DE PERSECUCIÓN ----------
+    void StartChaseSound()
+    {
+        if (chaseSounds == null || chaseSounds.Length == 0)
+        {
+            if (showDebugLogs) Debug.LogWarning("?? No hay sonidos de persecución asignados");
+            return;
+        }
+
+        // Si ya está sonando a volumen alto, no hacer nada
+        if (isChasePlaying && chaseAudioSource.isPlaying && chaseAudioSource.volume > 0.5f)
+        {
+            return;
+        }
+
+        // ?? Detener el sonido ambiente inmediatamente
+        StopAmbientSoundImmediate();
+
+        // Seleccionar clip aleatorio
+        AudioClip newClip = chaseSounds[Random.Range(0, chaseSounds.Length)];
+        int attempts = 0;
+        while (newClip == currentChaseClip && chaseSounds.Length > 1 && attempts < 20)
+        {
+            newClip = chaseSounds[Random.Range(0, chaseSounds.Length)];
+            attempts++;
+        }
+
+        currentChaseClip = newClip;
+
+        // Configurar para bucle
+        chaseAudioSource.clip = currentChaseClip;
+        chaseAudioSource.loop = true;
+
+        if (!chaseAudioSource.isPlaying)
+        {
+            chaseAudioSource.Play();
+            isChasePlaying = true;
+        }
+
+        // Fundido de entrada
+        if (currentChaseFadeCoroutine != null)
+            StopCoroutine(currentChaseFadeCoroutine);
+        currentChaseFadeCoroutine = StartCoroutine(FadeChaseVolume(chaseVolume, chaseFadeTime));
+
+        if (showDebugLogs)
+            Debug.Log($"?? Iniciando persecución: {currentChaseClip.name} (en bucle)");
+    }
+
+    void StopChaseSound()
+    {
+        if (currentChaseFadeCoroutine != null)
+            StopCoroutine(currentChaseFadeCoroutine);
+        currentChaseFadeCoroutine = StartCoroutine(FadeChaseVolume(0f, chaseFadeTime));
+    }
+
+    // ?? NUEVO: Detener ambiente inmediatamente (sin fundido)
+    void StopAmbientSoundImmediate()
+    {
+        if (ambientAudioSource.isPlaying)
+        {
+            ambientAudioSource.Stop();
+        }
+        isAmbientPlaying = false;
+        isAmbientStopped = true;  // ?? Marcamos que fue detenido
+        if (showDebugLogs) Debug.Log($"?? Ambiente detenido inmediatamente");
+    }
+
+    // ---------- CORRUTINAS DE FUNDIDO ----------
+    IEnumerator FadeChaseVolume(float targetVolume, float duration)
+    {
+        float startVolume = chaseAudioSource.volume;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / duration;
+            chaseAudioSource.volume = Mathf.Lerp(startVolume, targetVolume, t);
+            yield return null;
+        }
+
+        chaseAudioSource.volume = targetVolume;
+
+        if (targetVolume == 0f)
+        {
+            if (chaseAudioSource.isPlaying)
+            {
+                chaseAudioSource.Pause();
+            }
+            isChasePlaying = false;
+
+            // ?? NUEVO: Al detener el chase, reactivar ambiente (si no está oculto)
+            if (!isWaitingAfterHide && !isPlayerHiding)
+            {
+                ReactivateAmbientSound();
+            }
+        }
+        else
+        {
+            if (!chaseAudioSource.isPlaying)
+            {
+                chaseAudioSource.Play();
+                isChasePlaying = true;
+            }
+        }
+    }
+
+    // ============================================
+    // ?? ACTUALIZAR AUDIO
+    // ============================================
+    void UpdateAudio()
+    {
+        // ==========================================
+        // 1. SONIDO AMBIENTE (solo si no está corriendo)
+        // ==========================================
+        if (currentState != EnemyState.Running)
+        {
+            // Si el clip actual ha terminado de sonar
+            if (!ambientAudioSource.isPlaying && isAmbientPlaying)
+            {
+                isAmbientPlaying = false;
+            }
+
+            // Reducir timer solo cuando no está sonando
+            if (!isAmbientPlaying && !isAmbientStopped)
+            {
+                ambientTimer -= Time.deltaTime;
+
+                if (ambientTimer <= 0f)
+                {
+                    PlayRandomAmbientSound();
+                }
+            }
+
+            // ?? Si el ambiente fue detenido y no estamos en chase, reactivarlo
+            if (isAmbientStopped && currentState != EnemyState.Running)
+            {
+                ReactivateAmbientSound();
+            }
+        }
+        else
+        {
+            // ?? Si está corriendo, asegurar que el ambiente está detenido
+            if (ambientAudioSource.isPlaying)
+            {
+                ambientAudioSource.Stop();
+                isAmbientPlaying = false;
+                isAmbientStopped = true;
+            }
+        }
+
+        // ==========================================
+        // 2. SONIDO DE PERSECUCIÓN
+        // ==========================================
+        if (currentState == EnemyState.Running)
+        {
+            if (!isChasePlaying || !chaseAudioSource.isPlaying)
+            {
+                StartChaseSound();
+            }
+        }
     }
 
     void DebugDraw()
