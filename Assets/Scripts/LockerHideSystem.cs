@@ -23,15 +23,14 @@ public class LockerHideSystem : MonoBehaviour
     public float doorTransparency = 0.15f;
 
     // ============================================
-    // ?? NUEVO: AUDIO DE ENTRADA Y SALIDA
+    // AUDIO DE ENTRADA Y SALIDA
     // ============================================
     [Header("Sonidos de entrada/salida")]
-    public AudioClip enterSound;        // Sonido al entrar en la taquilla
-    public AudioClip exitSound;         // Sonido al salir de la taquilla
-    [Range(0f, 1f)] public float enterSoundVolume = 0.7f;  // Volumen al entrar
-    [Range(0f, 1f)] public float exitSoundVolume = 0.7f;   // Volumen al salir
+    public AudioClip enterSound;
+    public AudioClip exitSound;
+    [Range(0f, 1f)] public float enterSoundVolume = 0.7f;
+    [Range(0f, 1f)] public float exitSoundVolume = 0.7f;
 
-    // AudioSource para reproducir los sonidos
     private AudioSource audioSource;
 
     [Header("Debug")]
@@ -54,6 +53,11 @@ public class LockerHideSystem : MonoBehaviour
     private Material doorMaterial;
     private float originalDoorOpacity = 1f;
     private bool isDoorTransparent = false;
+
+    // ============================================
+    // Referencia a los enemigos
+    // ============================================
+    private EnemyIA[] enemies;
 
     private void OnEnable()
     {
@@ -113,11 +117,13 @@ public class LockerHideSystem : MonoBehaviour
             }
         }
 
-        // ?? Crear AudioSource para los sonidos
+        // Buscar todos los enemigos en la escena
+        enemies = FindObjectsOfType<EnemyIA>();
+
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.loop = false;
         audioSource.playOnAwake = false;
-        audioSource.spatialBlend = 0f; // Sonido 2D (sin efecto espacial)
+        audioSource.spatialBlend = 0f;
 
         if (crosshairImage == null && interactionSystem != null)
         {
@@ -242,8 +248,11 @@ public class LockerHideSystem : MonoBehaviour
 
         MakeDoorTransparentInstant();
 
-        // ?? Reproducir sonido de entrada
+        // Reproducir sonido de entrada
         PlayEnterSound();
+
+        // NOTIFICAR A TODOS LOS ENEMIGOS QUE EL JUGADOR SE HA ESCONDIDO
+        NotifyEnemiesPlayerHid();
 
         Debug.Log("?? Entrando a la taquilla");
     }
@@ -288,13 +297,39 @@ public class LockerHideSystem : MonoBehaviour
 
         RestoreDoorInstant();
 
-        // ?? Reproducir sonido de salida
+        // Reproducir sonido de salida
         PlayExitSound();
 
         isHiding = false;
         currentDoorObject = null;
 
         Debug.Log("?? Saliendo de la taquilla");
+    }
+
+    /// <summary>
+    /// Notifica a todos los enemigos que el jugador se ha escondido
+    /// </summary>
+    void NotifyEnemiesPlayerHid()
+    {
+        if (enemies == null || enemies.Length == 0)
+        {
+            // Buscar enemigos si no se encontraron antes
+            enemies = FindObjectsOfType<EnemyIA>();
+            if (enemies == null || enemies.Length == 0)
+            {
+                if (showDebugLogs) Debug.Log("?? No hay enemigos en la escena para notificar");
+                return;
+            }
+        }
+
+        foreach (var enemy in enemies)
+        {
+            if (enemy != null)
+            {
+                enemy.OnPlayerHid();
+                if (showDebugLogs) Debug.Log($"?? Notificado a enemigo: {enemy.name}");
+            }
+        }
     }
 
     /// <summary>
@@ -312,12 +347,9 @@ public class LockerHideSystem : MonoBehaviour
     }
 
     // ============================================
-    // ?? MÉTODOS PARA REPRODUCIR SONIDOS
+    // MÉTODOS PARA REPRODUCIR SONIDOS
     // ============================================
 
-    /// <summary>
-    /// Reproduce el sonido de entrada
-    /// </summary>
     void PlayEnterSound()
     {
         if (enterSound == null)
@@ -331,9 +363,6 @@ public class LockerHideSystem : MonoBehaviour
         Debug.Log($"?? Sonido de entrada reproducido (volumen: {enterSoundVolume})");
     }
 
-    /// <summary>
-    /// Reproduce el sonido de salida
-    /// </summary>
     void PlayExitSound()
     {
         if (exitSound == null)
