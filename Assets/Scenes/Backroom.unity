@@ -371,7 +371,7 @@ MonoBehaviour:
   idleTimeMax: 5
   detectionRadius: 15
   visionRange: 50
-  visionAngle: 360
+  visionAngle: 250
   obstacleMask:
     serializedVersion: 2
     m_Bits: 4294967295

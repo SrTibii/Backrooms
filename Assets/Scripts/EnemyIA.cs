@@ -47,7 +47,7 @@ public class EnemyIA : MonoBehaviour
 
     private Vector3 lastKnownPlayerPosition;
     private Vector3 lastKnownHidingPosition;
-    private Vector3 lastDirection; // ?? Última dirección hacia el jugador
+    private Vector3 lastDirection;
 
     private bool isWaitingAfterHide = false;
     private float hideWaitTimer = 0f;
@@ -130,6 +130,9 @@ public class EnemyIA : MonoBehaviour
         DebugDraw();
     }
 
+    // ============================================
+    // ?? DETECTAR JUGADOR CON MÚLTIPLES RAYCASTS
+    // ============================================
     void DetectPlayer()
     {
         isPlayerHiding = false;
@@ -156,17 +159,46 @@ public class EnemyIA : MonoBehaviour
 
             if (angle <= visionAngle * 0.5f)
             {
-                RaycastHit hit;
-                Vector3 rayOrigin = transform.position + Vector3.up * 0.5f;
-                Vector3 rayDirection = (player.position - rayOrigin).normalized;
+                // ?? MÚLTIPLES RAYCASTS A DIFERENTES ALTURAS
+                float[] heights = { 0.2f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f };
+                Vector3 rayOrigin = transform.position;
 
-                if (Physics.Raycast(rayOrigin, rayDirection, out hit, visionRange, obstacleMask))
+                foreach (float height in heights)
                 {
-                    if (hit.collider.CompareTag("Player"))
+                    Vector3 origin = rayOrigin + Vector3.up * height;
+                    Vector3 direction = (player.position - origin).normalized;
+
+                    float maxDistance = Vector3.Distance(origin, player.position) + 0.5f;
+
+                    RaycastHit hit;
+                    if (Physics.Raycast(origin, direction, out hit, maxDistance, obstacleMask))
                     {
-                        isPlayerVisible = true;
-                        lastKnownPlayerPosition = player.position;
-                        lastDirection = (player.position - transform.position).normalized;
+                        if (hit.collider.CompareTag("Player"))
+                        {
+                            isPlayerVisible = true;
+                            lastKnownPlayerPosition = player.position;
+                            lastDirection = (player.position - transform.position).normalized;
+                            break;
+                        }
+                    }
+                }
+
+                // ?? FALLBACK: SphereCast para detección más amplia
+                if (!isPlayerVisible)
+                {
+                    Vector3 center = transform.position + Vector3.up * 1.2f;
+                    Vector3 direction = (player.position - center).normalized;
+                    float distance = Vector3.Distance(center, player.position);
+
+                    RaycastHit hit;
+                    if (Physics.SphereCast(center, 0.8f, direction, out hit, distance, obstacleMask))
+                    {
+                        if (hit.collider.CompareTag("Player"))
+                        {
+                            isPlayerVisible = true;
+                            lastKnownPlayerPosition = player.position;
+                            lastDirection = (player.position - transform.position).normalized;
+                        }
                     }
                 }
             }
@@ -260,9 +292,6 @@ public class EnemyIA : MonoBehaviour
         }
     }
 
-    // ============================================
-    // ?? UpdateRunning - PERSECUCIÓN CONTINUA
-    // ============================================
     void UpdateRunning()
     {
         if (isPlayerHiding)
@@ -289,7 +318,6 @@ public class EnemyIA : MonoBehaviour
             return;
         }
 
-        // ?? PERSECUCIÓN ACTIVA
         if (isPlayerVisible || isPlayerInRange)
         {
             playerLostTimer = 0f;
@@ -306,10 +334,8 @@ public class EnemyIA : MonoBehaviour
             return;
         }
 
-        // ?? NO VE AL JUGADOR - INCREMENTAR TIMER
         playerLostTimer += Time.deltaTime;
 
-        // ?? MIENTRAS NO HAYA PASADO EL TIEMPO, SEGUIR MOVIÉNDOSE
         if (playerLostTimer < lostPlayerTime)
         {
             if (showDebugLogs && Time.frameCount % 30 == 0)
@@ -322,13 +348,10 @@ public class EnemyIA : MonoBehaviour
                 agent.speed = runSpeed;
                 agent.isStopped = false;
 
-                // ?? SI EL AGENTE LLEGÓ AL DESTINO O NO TIENE DESTINO
                 if (!agent.hasPath || agent.remainingDistance < 0.5f)
                 {
-                    // ?? CREAR UN NUEVO DESTINO EN LA DIRECCIÓN DEL JUGADOR
                     Vector3 newDestination = transform.position + lastDirection * 5f;
 
-                    // ?? BUSCAR UN PUNTO VÁLIDO EN EL NAVMESH
                     NavMeshHit hit;
                     if (NavMesh.SamplePosition(newDestination, out hit, 10f, agent.areaMask))
                     {
@@ -337,7 +360,6 @@ public class EnemyIA : MonoBehaviour
                     }
                     else
                     {
-                        // Fallback: usar la última posición conocida
                         agent.SetDestination(lastKnownPlayerPosition);
                     }
                 }
@@ -345,7 +367,6 @@ public class EnemyIA : MonoBehaviour
         }
         else
         {
-            // ?? PERDIÓ AL JUGADOR
             if (showDebugLogs) Debug.Log($"?? Perdí al jugador después de {lostPlayerTime}s");
             SelectNewWaypoint();
             ChangeState(EnemyState.Walking);
@@ -502,7 +523,6 @@ public class EnemyIA : MonoBehaviour
             Debug.DrawLine(transform.position, currentWaypoint.position, Color.cyan);
         }
 
-        // ?? Dibujar la dirección de persecución
         if (currentState == EnemyState.Running && !isPlayerVisible && playerLostTimer < lostPlayerTime)
         {
             Debug.DrawRay(transform.position + Vector3.up * 0.5f, lastDirection * 5f, Color.magenta);
