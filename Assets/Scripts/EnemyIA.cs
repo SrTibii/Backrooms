@@ -9,7 +9,6 @@ public class EnemyIA : MonoBehaviour
     public Transform player;
     public NavMeshAgent agent;
     public Animator animator;
-    public CharacterController characterController;
     public LockerHideSystem lockerSystem;
 
     [Header("Puntos de Patrulla")]
@@ -19,14 +18,14 @@ public class EnemyIA : MonoBehaviour
 
     [Header("Detección")]
     public float detectionRadius = 15f;
-    public float visionRange = 20f;
-    public float visionAngle = 60f;
+    public float visionRange = 25f;
+    public float visionAngle = 120f;
     public LayerMask obstacleMask = -1;
 
     [Header("Persecución")]
     public float runSpeed = 5f;
     public float walkSpeed = 2f;
-    public float lostPlayerTime = 3f;
+    public float lostPlayerTime = 5f;
 
     [Header("Escondite")]
     public float hideWaitTime = 3f;
@@ -48,6 +47,7 @@ public class EnemyIA : MonoBehaviour
 
     private Vector3 lastKnownPlayerPosition;
     private Vector3 lastKnownHidingPosition;
+    private Vector3 lastDirection; // ?? Última dirección hacia el jugador
 
     private bool isWaitingAfterHide = false;
     private float hideWaitTimer = 0f;
@@ -65,16 +65,9 @@ public class EnemyIA : MonoBehaviour
         if (animator == null)
             animator = GetComponent<Animator>();
 
-        if (characterController == null)
-            characterController = GetComponent<CharacterController>();
-
         if (lockerSystem == null)
         {
             lockerSystem = FindObjectOfType<LockerHideSystem>();
-            if (lockerSystem == null)
-            {
-                Debug.LogWarning("LockerHideSystem: No se encontró LockerHideSystem en la escena");
-            }
         }
 
         if (agent != null)
@@ -83,6 +76,9 @@ public class EnemyIA : MonoBehaviour
             agent.autoBraking = false;
             agent.stoppingDistance = 0.5f;
             agent.isStopped = false;
+            agent.updatePosition = true;
+            agent.updateRotation = true;
+            agent.enabled = true;
         }
 
         if (waypoints.Count > 0)
@@ -90,7 +86,18 @@ public class EnemyIA : MonoBehaviour
             currentWaypointIndex = Random.Range(0, waypoints.Count);
             currentWaypoint = waypoints[currentWaypointIndex];
             currentState = EnemyState.Walking;
-            Debug.Log($"?? Primer waypoint: {currentWaypoint.name}");
+
+            if (agent != null && agent.isOnNavMesh)
+            {
+                agent.SetDestination(currentWaypoint.position);
+                Debug.Log($"?? Yendo a primer waypoint: {currentWaypoint.name}");
+            }
+            else
+            {
+                Debug.LogError($"? {gameObject.name} NO está en NavMesh");
+                currentState = EnemyState.Idle;
+                idleTimer = Random.Range(idleTimeMin, idleTimeMax);
+            }
         }
         else
         {
@@ -159,6 +166,7 @@ public class EnemyIA : MonoBehaviour
                     {
                         isPlayerVisible = true;
                         lastKnownPlayerPosition = player.position;
+                        lastDirection = (player.position - transform.position).normalized;
                     }
                 }
             }
@@ -168,12 +176,14 @@ public class EnemyIA : MonoBehaviour
         {
             isPlayerVisible = true;
             lastKnownPlayerPosition = player.position;
+            lastDirection = (player.position - transform.position).normalized;
         }
 
         if (isPlayerInRange)
         {
             isPlayerVisible = true;
             lastKnownPlayerPosition = player.position;
+            lastDirection = (player.position - transform.position).normalized;
         }
     }
 
@@ -240,34 +250,24 @@ public class EnemyIA : MonoBehaviour
             return;
         }
 
-        Vector3 direction = (currentWaypoint.position - transform.position).normalized;
-        direction.y = 0;
-
-        float distance = Vector3.Distance(transform.position, currentWaypoint.position);
-
-        if (distance > 0.5f)
+        if (agent != null && agent.isOnNavMesh)
         {
-            Vector3 moveVector = direction * walkSpeed * Time.deltaTime;
-            characterController.Move(moveVector);
-
-            if (direction.magnitude > 0.1f)
+            if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
             {
-                Quaternion targetRotation = Quaternion.LookRotation(direction);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 8f);
+                idleTimer = Random.Range(idleTimeMin, idleTimeMax);
+                ChangeState(EnemyState.Idle);
             }
-        }
-        else
-        {
-            idleTimer = Random.Range(idleTimeMin, idleTimeMax);
-            ChangeState(EnemyState.Idle);
         }
     }
 
+    // ============================================
+    // ?? UpdateRunning - PERSECUCIÓN CONTINUA
+    // ============================================
     void UpdateRunning()
     {
         if (isPlayerHiding)
         {
-            if (showDebugLogs) Debug.Log($"?? Jugador escondido en taquilla, esperando {hideWaitTime}s - {gameObject.name}");
+            if (showDebugLogs) Debug.Log($"?? Jugador escondido en taquilla, esperando {hideWaitTime}s");
 
             lastKnownHidingPosition = player.position;
             isWaitingAfterHide = true;
@@ -289,64 +289,66 @@ public class EnemyIA : MonoBehaviour
             return;
         }
 
+        // ?? PERSECUCIÓN ACTIVA
         if (isPlayerVisible || isPlayerInRange)
         {
             playerLostTimer = 0f;
             lastKnownPlayerPosition = player.position;
+            lastDirection = (player.position - transform.position).normalized;
 
-            if (player != null)
+            if (agent != null && agent.isOnNavMesh)
             {
-                Vector3 direction = (player.position - transform.position).normalized;
-                direction.y = 0;
-
-                float distance = Vector3.Distance(transform.position, player.position);
-
-                if (distance > 1f)
-                {
-                    Vector3 moveVector = direction * runSpeed * Time.deltaTime;
-                    characterController.Move(moveVector);
-
-                    if (direction.magnitude > 0.1f)
-                    {
-                        Quaternion targetRotation = Quaternion.LookRotation(direction);
-                        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 8f);
-                    }
-                }
-
-                if (showDebugLogs && Time.frameCount % 30 == 0)
-                {
-                    Debug.Log($"?? Persiguiendo (dist: {distance:F1}m)");
-                }
+                agent.speed = runSpeed;
+                agent.isStopped = false;
+                agent.SetDestination(player.position);
             }
+
             return;
         }
 
+        // ?? NO VE AL JUGADOR - INCREMENTAR TIMER
         playerLostTimer += Time.deltaTime;
 
-        if (playerLostTimer >= lostPlayerTime)
+        // ?? MIENTRAS NO HAYA PASADO EL TIEMPO, SEGUIR MOVIÉNDOSE
+        if (playerLostTimer < lostPlayerTime)
         {
-            if (showDebugLogs) Debug.Log($"?? Perdí al jugador");
-            SelectNewWaypoint();
-            ChangeState(EnemyState.Walking);
+            if (showDebugLogs && Time.frameCount % 30 == 0)
+            {
+                Debug.Log($"?? Buscando... {playerLostTimer:F1}s/{lostPlayerTime}s");
+            }
+
+            if (agent != null && agent.isOnNavMesh)
+            {
+                agent.speed = runSpeed;
+                agent.isStopped = false;
+
+                // ?? SI EL AGENTE LLEGÓ AL DESTINO O NO TIENE DESTINO
+                if (!agent.hasPath || agent.remainingDistance < 0.5f)
+                {
+                    // ?? CREAR UN NUEVO DESTINO EN LA DIRECCIÓN DEL JUGADOR
+                    Vector3 newDestination = transform.position + lastDirection * 5f;
+
+                    // ?? BUSCAR UN PUNTO VÁLIDO EN EL NAVMESH
+                    NavMeshHit hit;
+                    if (NavMesh.SamplePosition(newDestination, out hit, 10f, agent.areaMask))
+                    {
+                        agent.SetDestination(hit.position);
+                        if (showDebugLogs) Debug.Log($"?? Nuevo destino en dirección: {hit.position}");
+                    }
+                    else
+                    {
+                        // Fallback: usar la última posición conocida
+                        agent.SetDestination(lastKnownPlayerPosition);
+                    }
+                }
+            }
         }
         else
         {
-            Vector3 direction = (lastKnownPlayerPosition - transform.position).normalized;
-            direction.y = 0;
-
-            float distance = Vector3.Distance(transform.position, lastKnownPlayerPosition);
-
-            if (distance > 1f)
-            {
-                Vector3 moveVector = direction * runSpeed * Time.deltaTime;
-                characterController.Move(moveVector);
-
-                if (direction.magnitude > 0.1f)
-                {
-                    Quaternion targetRotation = Quaternion.LookRotation(direction);
-                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 8f);
-                }
-            }
+            // ?? PERDIÓ AL JUGADOR
+            if (showDebugLogs) Debug.Log($"?? Perdí al jugador después de {lostPlayerTime}s");
+            SelectNewWaypoint();
+            ChangeState(EnemyState.Walking);
         }
     }
 
@@ -395,14 +397,37 @@ public class EnemyIA : MonoBehaviour
                 {
                     idleTimer = Random.Range(idleTimeMin, idleTimeMax);
                 }
+                if (agent != null)
+                {
+                    agent.isStopped = true;
+                    agent.ResetPath();
+                }
                 if (showDebugLogs) Debug.Log($"?? IDLE por {(isWaitingAfterHide ? hideWaitTimer : idleTimer):F1}s");
                 break;
 
             case EnemyState.Walking:
+                if (agent != null)
+                {
+                    agent.speed = walkSpeed;
+                    agent.isStopped = false;
+                    if (currentWaypoint != null && agent.isOnNavMesh)
+                    {
+                        agent.SetDestination(currentWaypoint.position);
+                    }
+                }
                 if (showDebugLogs) Debug.Log($"?? WALKING a {currentWaypoint?.name}");
                 break;
 
             case EnemyState.Running:
+                if (agent != null)
+                {
+                    agent.speed = runSpeed;
+                    agent.isStopped = false;
+                    if (player != null && agent.isOnNavMesh)
+                    {
+                        agent.SetDestination(player.position);
+                    }
+                }
                 if (showDebugLogs) Debug.Log($"?? RUNNING al jugador");
                 break;
         }
@@ -427,26 +452,11 @@ public class EnemyIA : MonoBehaviour
             Debug.Log($"?? Nuevo waypoint: {currentWaypoint.name}");
     }
 
-    // ============================================
-    // ?? UPDATE ANIMATIONS - CORREGIDO
-    // ============================================
     void UpdateAnimations()
     {
         if (animator == null) return;
 
-        // Obtener la velocidad real del CharacterController
-        float speed = 0f;
-
-        if (characterController != null)
-        {
-            speed = characterController.velocity.magnitude;
-        }
-        else if (agent != null)
-        {
-            speed = agent.velocity.magnitude;
-        }
-
-        // Calcular la velocidad normalizada según el estado
+        float speed = agent != null ? agent.velocity.magnitude : 0f;
         float normalizedSpeed = 0f;
 
         if (currentState == EnemyState.Running)
@@ -458,17 +468,11 @@ public class EnemyIA : MonoBehaviour
             normalizedSpeed = Mathf.Clamp01(speed / walkSpeed);
         }
 
-        // Si está en Idle, velocidad 0 (a menos que esté en la espera post-escondite)
         if (currentState == EnemyState.Idle)
         {
             normalizedSpeed = 0f;
         }
 
-        // ?? SOLO forzar si está en Running y realmente se está moviendo (evita el bug)
-        // Si está en Running y tiene velocidad > 0, la animación se activará sola
-        // Si está en Running y no se mueve (bloqueado), la animación de idle se activará naturalmente
-
-        // Aplicar al Animator
         animator.SetFloat("Speed", normalizedSpeed);
         animator.SetBool("IsRunning", currentState == EnemyState.Running);
         animator.SetInteger("State", (int)currentState);
@@ -496,6 +500,12 @@ public class EnemyIA : MonoBehaviour
         if (currentWaypoint != null)
         {
             Debug.DrawLine(transform.position, currentWaypoint.position, Color.cyan);
+        }
+
+        // ?? Dibujar la dirección de persecución
+        if (currentState == EnemyState.Running && !isPlayerVisible && playerLostTimer < lostPlayerTime)
+        {
+            Debug.DrawRay(transform.position + Vector3.up * 0.5f, lastDirection * 5f, Color.magenta);
         }
     }
 
@@ -535,5 +545,15 @@ public class EnemyIA : MonoBehaviour
             Gizmos.color = Color.magenta;
             Gizmos.DrawWireSphere(currentWaypoint.position, 0.5f);
         }
+
+        Gizmos.color = Color.green;
+        Vector3 forward = transform.forward;
+        Vector3 left = Quaternion.Euler(0, -visionAngle * 0.5f, 0) * forward;
+        Vector3 right = Quaternion.Euler(0, visionAngle * 0.5f, 0) * forward;
+
+        Gizmos.DrawLine(transform.position + Vector3.up * 0.5f,
+                        transform.position + Vector3.up * 0.5f + left * visionRange);
+        Gizmos.DrawLine(transform.position + Vector3.up * 0.5f,
+                        transform.position + Vector3.up * 0.5f + right * visionRange);
     }
 }
