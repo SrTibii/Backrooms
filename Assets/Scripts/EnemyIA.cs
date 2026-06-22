@@ -222,7 +222,7 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? DETECTAR JUGADOR (CORREGIDO)
+    // ?? DETECTAR JUGADOR (CON MÚLTIPLES RAYCASTS)
     // ============================================
     void DetectPlayer()
     {
@@ -243,7 +243,7 @@ public class EnemyIA : MonoBehaviour
         isPlayerInRange = distanceToPlayer <= detectionRadius;
         isPlayerVisible = false;
 
-        // ?? NUEVO: Si el jugador está MUY CERCA (< 10f), DETECTARLO SIEMPRE
+        // ?? Si el jugador está MUY CERCA, DETECTARLO SIEMPRE
         if (distanceToPlayer < proximityDetectionRange)
         {
             isPlayerVisible = true;
@@ -252,7 +252,7 @@ public class EnemyIA : MonoBehaviour
             return;
         }
 
-        // ?? Detección normal por línea de visión
+        // ?? Detección normal por línea de visión con MÚLTIPLES RAYCASTS
         if (distanceToPlayer <= visionRange)
         {
             Vector3 directionToPlayer = (player.position - transform.position).normalized;
@@ -260,6 +260,7 @@ public class EnemyIA : MonoBehaviour
 
             if (angle <= visionAngle * 0.5f)
             {
+                // ?? MÚLTIPLES ALTURAS para los raycasts
                 float[] heights = { 0.2f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f };
                 Vector3 rayOrigin = transform.position;
 
@@ -282,6 +283,7 @@ public class EnemyIA : MonoBehaviour
                     }
                 }
 
+                // ?? Si fallaron los raycasts, probar con SphereCast
                 if (!isPlayerVisible)
                 {
                     Vector3 center = transform.position + Vector3.up * 1.2f;
@@ -580,18 +582,39 @@ public class EnemyIA : MonoBehaviour
     {
         if (player == null) return false;
 
-        Vector3 origin = transform.position + Vector3.up * 0.5f;
-        Vector3 direction = (player.position - origin).normalized;
-        float distance = Vector3.Distance(origin, player.position);
+        // ?? MÚLTIPLES RAYCASTS desde diferentes alturas
+        float[] heights = { 0.2f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f };
 
-        RaycastHit hit;
-        if (Physics.Raycast(origin, direction, out hit, distance, obstacleMask))
+        foreach (float height in heights)
         {
-            if (hit.collider.CompareTag("Player"))
+            Vector3 origin = transform.position + Vector3.up * height;
+            Vector3 direction = (player.position - origin).normalized;
+            float distance = Vector3.Distance(origin, player.position);
+
+            RaycastHit hit;
+            if (Physics.Raycast(origin, direction, out hit, distance, obstacleMask))
+            {
+                if (hit.collider.CompareTag("Player"))
+                {
+                    return true;
+                }
+            }
+        }
+
+        // ?? Si fallan los raycasts, probar con SphereCast
+        Vector3 center = transform.position + Vector3.up * 1.2f;
+        Vector3 dir = (player.position - center).normalized;
+        float dist = Vector3.Distance(center, player.position);
+
+        RaycastHit sphereHit;
+        if (Physics.SphereCast(center, 0.8f, dir, out sphereHit, dist, obstacleMask))
+        {
+            if (sphereHit.collider.CompareTag("Player"))
             {
                 return true;
             }
         }
+
         return false;
     }
 
