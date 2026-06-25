@@ -89,12 +89,12 @@ public class EnemyIA : MonoBehaviour
     private float stuckThreshold = 2f;
     private Vector3 lastPosition;
 
-    // ?? Variables para movimiento directo (PERSECUCIÓN OPTIMIZADA)
+    // Variables para movimiento directo (PERSECUCIÓN OPTIMIZADA)
     private float directMovementTimer = 0f;
     private float directMovementUpdateRate = 0.5f;
     private Vector3 lastDestination;
 
-    // ?? NUEVO: Para detectar si el jugador está quieto
+    // Para detectar si el jugador está quieto
     private Vector3 lastPlayerPosition;
     private float playerIdleTimer = 0f;
     private float playerIdleThreshold = 0.5f;
@@ -132,7 +132,7 @@ public class EnemyIA : MonoBehaviour
         }
 
         // ============================================
-        // ?? CONFIGURAR AUDIOSOURCES
+        // CONFIGURAR AUDIOSOURCES
         // ============================================
         ambientAudioSource = gameObject.AddComponent<AudioSource>();
         ambientAudioSource.loop = false;
@@ -155,7 +155,7 @@ public class EnemyIA : MonoBehaviour
         chaseAudioSource.priority = 100;
 
         // ============================================
-        // ?? INICIALIZAR SONIDOS
+        // INICIALIZAR SONIDOS
         // ============================================
         PlayRandomAmbientSound();
 
@@ -200,7 +200,7 @@ public class EnemyIA : MonoBehaviour
 
         DetectPlayer();
 
-        // ?? Detectar si el jugador está quieto
+        // Detectar si el jugador está quieto
         CheckPlayerIdle();
 
         switch (currentState)
@@ -222,7 +222,7 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? DETECTAR JUGADOR (CON MÚLTIPLES RAYCASTS)
+    // DETECTAR JUGADOR (CON MÚLTIPLES RAYCASTS)
     // ============================================
     void DetectPlayer()
     {
@@ -243,7 +243,7 @@ public class EnemyIA : MonoBehaviour
         isPlayerInRange = distanceToPlayer <= detectionRadius;
         isPlayerVisible = false;
 
-        // ?? Si el jugador está MUY CERCA, DETECTARLO SIEMPRE
+        // Si el jugador está MUY CERCA, DETECTARLO SIEMPRE
         if (distanceToPlayer < proximityDetectionRange)
         {
             isPlayerVisible = true;
@@ -252,7 +252,7 @@ public class EnemyIA : MonoBehaviour
             return;
         }
 
-        // ?? Detección normal por línea de visión con MÚLTIPLES RAYCASTS
+        // Detección normal por línea de visión con MÚLTIPLES RAYCASTS
         if (distanceToPlayer <= visionRange)
         {
             Vector3 directionToPlayer = (player.position - transform.position).normalized;
@@ -260,7 +260,7 @@ public class EnemyIA : MonoBehaviour
 
             if (angle <= visionAngle * 0.5f)
             {
-                // ?? MÚLTIPLES ALTURAS para los raycasts
+                // MÚLTIPLES ALTURAS para los raycasts
                 float[] heights = { 0.2f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f };
                 Vector3 rayOrigin = transform.position;
 
@@ -283,7 +283,6 @@ public class EnemyIA : MonoBehaviour
                     }
                 }
 
-                // ?? Si fallaron los raycasts, probar con SphereCast
                 if (!isPlayerVisible)
                 {
                     Vector3 center = transform.position + Vector3.up * 1.2f;
@@ -306,7 +305,7 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? DETECTAR SI EL JUGADOR ESTÁ QUIETO
+    // DETECTAR SI EL JUGADOR ESTÁ QUIETO
     // ============================================
     void CheckPlayerIdle()
     {
@@ -375,7 +374,7 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? UPDATE WALKING (PATRULLA FUNCIONAL - NO TOCAR)
+    // UPDATE WALKING (PATRULLA FUNCIONAL - NO TOCAR)
     // ============================================
     void UpdateWalking()
     {
@@ -404,7 +403,7 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? UPDATE RUNNING (PERSECUCIÓN OPTIMIZADA)
+    // UPDATE RUNNING (PERSECUCIÓN OPTIMIZADA)
     // ============================================
     void UpdateRunning()
     {
@@ -418,6 +417,9 @@ public class EnemyIA : MonoBehaviour
             playerLostTimer = 0f;
             isPlayerVisible = false;
             isPlayerInRange = false;
+
+            // ?? FORZAR DETENCIÓN INMEDIATA DEL AGENTE
+            StopAgentImmediately();
 
             ChangeState(EnemyState.Idle);
 
@@ -443,7 +445,7 @@ public class EnemyIA : MonoBehaviour
                 agent.speed = runSpeed;
                 agent.isStopped = false;
 
-                // ?? Movimiento directo optimizado (sin rodeos)
+                // Movimiento directo optimizado (sin rodeos)
                 UpdateDirectMovement();
             }
 
@@ -494,29 +496,48 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? MOVIMIENTO DIRECTO OPTIMIZADO (SIN RODEOS)
+    // ?? NUEVO: FORZAR DETENCIÓN INMEDIATA DEL AGENTE
+    // ============================================
+    void StopAgentImmediately()
+    {
+        if (agent == null) return;
+
+        // ?? Detener el movimiento inmediatamente
+        agent.velocity = Vector3.zero;
+        agent.isStopped = true;
+        agent.ResetPath();
+
+        // ?? Forzar que el agente se detenga en seco
+        agent.updatePosition = true;
+        agent.updateRotation = true;
+
+        if (showDebugLogs) Debug.Log($"?? Agente detenido inmediatamente");
+    }
+
+    // ============================================
+    // MOVIMIENTO DIRECTO OPTIMIZADO (SIN RODEOS)
     // ============================================
     void UpdateDirectMovement()
     {
         Vector3 targetPosition = player.position;
 
-        // ?? Si el jugador está QUIETO, FORZAR actualización inmediata
+        // Si el jugador está QUIETO, FORZAR actualización inmediata
         bool isPlayerIdle = playerIdleTimer >= playerIdleThreshold;
 
-        // ?? Reducir la frecuencia de actualización del destino (CADA 0.5s)
+        // Reducir la frecuencia de actualización del destino (CADA 0.5s)
         directMovementTimer += Time.deltaTime;
 
-        // ?? Forzar actualización si el jugador está quieto O el timer se cumplió
+        // Forzar actualización si el jugador está quieto O el timer se cumplió
         bool shouldUpdate = directMovementTimer >= directMovementUpdateRate || isPlayerIdle;
 
         if (shouldUpdate)
         {
             directMovementTimer = 0f;
 
-            // ?? Si el jugador está visible Y hay línea de visión directa
+            // Si el jugador está visible Y hay línea de visión directa
             if (isPlayerVisible && HasLineOfSightToPlayer())
             {
-                // ?? MOVIMIENTO EN LÍNEA RECTA (sin NavMesh)
+                // MOVIMIENTO EN LÍNEA RECTA (sin NavMesh)
                 Vector3 directionToPlayer = (targetPosition - transform.position).normalized;
                 directionToPlayer.y = 0;
 
@@ -538,7 +559,7 @@ public class EnemyIA : MonoBehaviour
                 }
             }
 
-            // ?? Si NO hay línea de visión o falló lo anterior, usar NavMesh normal
+            // Si NO hay línea de visión o falló lo anterior, usar NavMesh normal
             NavMeshHit hit2;
             if (NavMesh.SamplePosition(targetPosition, out hit2, 10f, agent.areaMask))
             {
@@ -554,13 +575,13 @@ public class EnemyIA : MonoBehaviour
             }
         }
 
-        // ?? Si el agente está muy cerca del destino, actualizar inmediatamente
+        // Si el agente está muy cerca del destino, actualizar inmediatamente
         if (agent.remainingDistance < 0.5f && isPlayerVisible)
         {
             directMovementTimer = directMovementUpdateRate;
         }
 
-        // ?? Si el jugador está cerca (< 2m), rotar hacia él
+        // Si el jugador está cerca (< 2m), rotar hacia él
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
         if (distanceToPlayer < 2f && isPlayerVisible)
         {
@@ -575,14 +596,12 @@ public class EnemyIA : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Verifica si hay línea de visión directa al jugador (sin obstáculos)
-    /// </summary>
+    // Verifica si hay línea de visión directa al jugador (sin obstáculos)
     bool HasLineOfSightToPlayer()
     {
         if (player == null) return false;
 
-        // ?? MÚLTIPLES RAYCASTS desde diferentes alturas
+        // MÚLTIPLES RAYCASTS desde diferentes alturas
         float[] heights = { 0.2f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f };
 
         foreach (float height in heights)
@@ -601,7 +620,7 @@ public class EnemyIA : MonoBehaviour
             }
         }
 
-        // ?? Si fallan los raycasts, probar con SphereCast
+        // Si fallan los raycasts, probar con SphereCast
         Vector3 center = transform.position + Vector3.up * 1.2f;
         Vector3 dir = (player.position - center).normalized;
         float dist = Vector3.Distance(center, player.position);
@@ -618,9 +637,7 @@ public class EnemyIA : MonoBehaviour
         return false;
     }
 
-    /// <summary>
-    /// Verifica si el destino es alcanzable por el NavMeshAgent
-    /// </summary>
+    // Verifica si el destino es alcanzable por el NavMeshAgent
     bool CanReachDestination(Vector3 destination)
     {
         if (agent == null || !agent.isOnNavMesh) return false;
@@ -636,9 +653,7 @@ public class EnemyIA : MonoBehaviour
         return false;
     }
 
-    /// <summary>
-    /// Encuentra la posición más cercana en el NavMesh a un punto dado
-    /// </summary>
+    // Encuentra la posición más cercana en el NavMesh a un punto dado
     Vector3 FindClosestNavMeshPosition(Vector3 position)
     {
         NavMeshHit hit;
@@ -649,9 +664,7 @@ public class EnemyIA : MonoBehaviour
         return Vector3.zero;
     }
 
-    /// <summary>
-    /// Detecta si el agente está atascado
-    /// </summary>
+    // Detecta si el agente está atascado
     void CheckIfStuck()
     {
         if (agent == null) return;
@@ -707,6 +720,9 @@ public class EnemyIA : MonoBehaviour
 
         isWaitingAfterHide = true;
         hideWaitTimer = hideWaitTime;
+
+        // ?? FORZAR DETENCIÓN INMEDIATA DEL AGENTE
+        StopAgentImmediately();
 
         ChangeState(EnemyState.Idle);
 
@@ -837,7 +853,7 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? SISTEMA DE SONIDOS
+    // SISTEMA DE SONIDOS
     // ============================================
 
     void PlayRandomAmbientSound()
@@ -985,7 +1001,7 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? ACTUALIZAR AUDIO
+    // ACTUALIZAR AUDIO
     // ============================================
     void UpdateAudio()
     {
