@@ -1259,6 +1259,10 @@ MonoBehaviour:
   audioMaxDistance: 50
   rolloffMode: 0
   chaseFadeTime: 0.5
+  jumpscareDistance: 2.5
+  jumpscareSound: {fileID: 8300000, guid: 3a2dfb1f35bbe5745a2d136b0ac84b67, type: 3}
+  jumpscareVolume: 1
+  jumpscareDuration: 3
   showDebugLogs: 1
 --- !u!195 &71488860
 NavMeshAgent:
@@ -5619,7 +5623,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &277462265
 Transform:
   m_ObjectHideFlags: 0

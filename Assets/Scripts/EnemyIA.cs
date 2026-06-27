@@ -49,9 +49,19 @@ public class EnemyIA : MonoBehaviour
     public AudioRolloffMode rolloffMode = AudioRolloffMode.Logarithmic;
     public float chaseFadeTime = 0.5f;
 
+    // ============================================
+    // ?? JUMPSCARE
+    // ============================================
+    [Header("Jumpscare")]
+    public float jumpscareDistance = 2.5f;
+    public AudioClip jumpscareSound;
+    [Range(0f, 1f)] public float jumpscareVolume = 1f;
+    public float jumpscareDuration = 3f;
+
     // AudioSources
     private AudioSource ambientAudioSource;
     private AudioSource chaseAudioSource;
+    private AudioSource jumpscareAudioSource;
 
     // Control de sonidos
     private float ambientTimer = 0f;
@@ -65,7 +75,7 @@ public class EnemyIA : MonoBehaviour
     [Header("Debug")]
     public bool showDebugLogs = true;
 
-    private enum EnemyState { Idle, Walking, Running }
+    private enum EnemyState { Idle, Walking, Running, Jumpscare }
     private EnemyState currentState = EnemyState.Idle;
 
     private Transform currentWaypoint;
@@ -99,6 +109,20 @@ public class EnemyIA : MonoBehaviour
     private float playerIdleTimer = 0f;
     private float playerIdleThreshold = 0.5f;
 
+    // ?? Variables para Jumpscare
+    private bool isJumpscareActive = false;
+    private FirstPersonController playerController;
+    private CharacterController playerCharacterController;
+    private Collider playerCollider;
+    private LockerHideSystem lockerSystemRef;
+    private InteractionSystem interactionSystemRef;
+    private Canvas crosshairCanvas;
+    private bool wasPlayerControllerEnabled;
+    private bool wasCharacterControllerEnabled;
+    private bool wasPlayerColliderEnabled;
+    private bool wasCrosshairActive;
+    private bool wasLockerSystemEnabled;
+
     void Start()
     {
         Debug.Log($"?? Inicializando {gameObject.name}...");
@@ -131,6 +155,26 @@ public class EnemyIA : MonoBehaviour
             lastPlayerPosition = player != null ? player.position : transform.position;
         }
 
+        // ?? Obtener referencias para Jumpscare
+        if (player != null)
+        {
+            playerController = player.GetComponent<FirstPersonController>();
+            playerCharacterController = player.GetComponent<CharacterController>();
+            playerCollider = player.GetComponent<Collider>();
+        }
+
+        lockerSystemRef = FindObjectOfType<LockerHideSystem>();
+        interactionSystemRef = FindObjectOfType<InteractionSystem>();
+
+        if (interactionSystemRef != null)
+        {
+            var crosshairRect = interactionSystemRef?.GetComponentInChildren<RectTransform>();
+            if (crosshairRect != null)
+            {
+                crosshairCanvas = crosshairRect.GetComponentInParent<Canvas>();
+            }
+        }
+
         // ============================================
         // CONFIGURAR AUDIOSOURCES
         // ============================================
@@ -153,6 +197,14 @@ public class EnemyIA : MonoBehaviour
         chaseAudioSource.maxDistance = audioMaxDistance;
         chaseAudioSource.volume = 0f;
         chaseAudioSource.priority = 100;
+
+        // ?? AudioSource para Jumpscare
+        jumpscareAudioSource = gameObject.AddComponent<AudioSource>();
+        jumpscareAudioSource.loop = false;
+        jumpscareAudioSource.playOnAwake = false;
+        jumpscareAudioSource.spatialBlend = 0f;
+        jumpscareAudioSource.volume = jumpscareVolume;
+        jumpscareAudioSource.priority = 0;
 
         // ============================================
         // INICIALIZAR SONIDOS
@@ -198,10 +250,16 @@ public class EnemyIA : MonoBehaviour
     {
         if (player == null) return;
 
+        // ?? Si el jumpscare está activo, no hacer nada más
+        if (isJumpscareActive) return;
+
         DetectPlayer();
 
         // Detectar si el jugador está quieto
         CheckPlayerIdle();
+
+        // ?? Verificar si el enemigo está lo suficientemente cerca para jumpscare
+        CheckJumpscare();
 
         switch (currentState)
         {
@@ -214,11 +272,205 @@ public class EnemyIA : MonoBehaviour
             case EnemyState.Running:
                 UpdateRunning();
                 break;
+            case EnemyState.Jumpscare:
+                // No hacer nada, la corrutina maneja todo
+                break;
         }
 
         UpdateAnimations();
         UpdateAudio();
         DebugDraw();
+    }
+
+    // ============================================
+    // ?? CHECK JUMBSCARE
+    // ============================================
+    void CheckJumpscare()
+    {
+        if (isJumpscareActive) return;
+        if (player == null) return;
+        if (isPlayerHiding) return;
+
+        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+
+        // ?? Si está lo suficientemente cerca y el jugador no está escondido
+        if (distanceToPlayer <= jumpscareDistance && !isPlayerHiding)
+        {
+            // ?? Verificar que hay línea de visión
+            if (HasLineOfSightToPlayer())
+            {
+                StartJumpscare();
+            }
+        }
+    }
+
+    // ============================================
+    // ?? INICIAR JUMBSCARE
+    // ============================================
+    void StartJumpscare()
+    {
+        if (isJumpscareActive) return;
+        isJumpscareActive = true;
+
+        Debug.Log($"?? JUMBSCARE ACTIVADO! {gameObject.name} atrapó al jugador");
+
+        // ?? Cambiar estado
+        currentState = EnemyState.Jumpscare;
+
+        // ?? Detener el enemigo
+        StopAgentImmediately();
+
+        // ?? Detener todos los sonidos
+        StopAllCoroutines();
+        if (ambientAudioSource.isPlaying) ambientAudioSource.Stop();
+        if (chaseAudioSource.isPlaying) chaseAudioSource.Stop();
+        isChasePlaying = false;
+        isAmbientPlaying = false;
+
+        // ?? Reproducir sonido de jumpscare
+        if (jumpscareSound != null)
+        {
+            jumpscareAudioSource.volume = jumpscareVolume;
+            jumpscareAudioSource.PlayOneShot(jumpscareSound);
+            Debug.Log($"?? Sonido de jumpscare reproducido");
+        }
+
+        // ?? Desactivar controles del jugador
+        DisablePlayerControls();
+
+        // ?? Rotar la cámara del jugador hacia el enemigo
+        RotatePlayerToEnemy();
+
+        // ?? Iniciar corrutina para esperar y reiniciar
+        StartCoroutine(JumpscareSequence());
+    }
+
+    // ============================================
+    // ?? DESACTIVAR CONTROLES DEL JUGADOR
+    // ============================================
+    void DisablePlayerControls()
+    {
+        if (playerController != null)
+        {
+            wasPlayerControllerEnabled = playerController.enabled;
+            playerController.enabled = false;
+            Debug.Log("?? PlayerController DESACTIVADO");
+        }
+
+        if (playerCharacterController != null)
+        {
+            wasCharacterControllerEnabled = playerCharacterController.enabled;
+            playerCharacterController.enabled = false;
+            Debug.Log("?? CharacterController DESACTIVADO");
+        }
+
+        if (playerCollider != null)
+        {
+            wasPlayerColliderEnabled = playerCollider.enabled;
+            playerCollider.enabled = false;
+            Debug.Log("?? PlayerCollider DESACTIVADO");
+        }
+
+        if (lockerSystemRef != null)
+        {
+            wasLockerSystemEnabled = lockerSystemRef.enabled;
+            lockerSystemRef.enabled = false;
+            Debug.Log("?? LockerHideSystem DESACTIVADO");
+        }
+
+        // ?? Desactivar crosshair
+        if (crosshairCanvas != null)
+        {
+            wasCrosshairActive = crosshairCanvas.gameObject.activeSelf;
+            crosshairCanvas.gameObject.SetActive(false);
+            Debug.Log("?? Crosshair DESACTIVADO");
+        }
+
+        // ?? Desactivar el sistema de interacción
+        if (interactionSystemRef != null)
+        {
+            interactionSystemRef.enabled = false;
+            Debug.Log("?? InteractionSystem DESACTIVADO");
+        }
+    }
+
+    // ============================================
+    // ?? REACTIVAR CONTROLES DEL JUGADOR
+    // ============================================
+    void EnablePlayerControls()
+    {
+        if (playerController != null)
+        {
+            playerController.enabled = wasPlayerControllerEnabled;
+            Debug.Log("? PlayerController REACTIVADO");
+        }
+
+        if (playerCharacterController != null)
+        {
+            playerCharacterController.enabled = wasCharacterControllerEnabled;
+            Debug.Log("? CharacterController REACTIVADO");
+        }
+
+        if (playerCollider != null)
+        {
+            playerCollider.enabled = wasPlayerColliderEnabled;
+            Debug.Log("? PlayerCollider REACTIVADO");
+        }
+
+        if (lockerSystemRef != null)
+        {
+            lockerSystemRef.enabled = wasLockerSystemEnabled;
+            Debug.Log("? LockerHideSystem REACTIVADO");
+        }
+
+        if (crosshairCanvas != null)
+        {
+            crosshairCanvas.gameObject.SetActive(wasCrosshairActive);
+            Debug.Log("? Crosshair REACTIVADO");
+        }
+
+        if (interactionSystemRef != null)
+        {
+            interactionSystemRef.enabled = true;
+            Debug.Log("? InteractionSystem REACTIVADO");
+        }
+    }
+
+    // ============================================
+    // ?? ROTAR JUGADOR HACIA EL ENEMIGO
+    // ============================================
+    void RotatePlayerToEnemy()
+    {
+        if (player == null) return;
+
+        Vector3 directionToEnemy = (transform.position - player.position).normalized;
+        directionToEnemy.y = 0;
+
+        if (directionToEnemy.magnitude > 0.1f)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(directionToEnemy);
+            player.rotation = targetRotation;
+            Debug.Log($"?? Jugador rotado hacia el enemigo");
+        }
+    }
+
+    // ============================================
+    // ?? CORRUTINA DE JUMBSCARE
+    // ============================================
+    IEnumerator JumpscareSequence()
+    {
+        // Esperar la duración del jumpscare
+        yield return new WaitForSeconds(jumpscareDuration);
+
+        Debug.Log($"?? Reiniciando escena después de {jumpscareDuration} segundos...");
+
+        // Reactivar controles antes de reiniciar
+        EnablePlayerControls();
+
+        // ?? Reiniciar la escena
+        UnityEngine.SceneManagement.SceneManager.LoadScene(
+            UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex
+        );
     }
 
     // ============================================
@@ -418,7 +670,7 @@ public class EnemyIA : MonoBehaviour
             isPlayerVisible = false;
             isPlayerInRange = false;
 
-            // ?? FORZAR DETENCIÓN INMEDIATA DEL AGENTE
+            // FORZAR DETENCIÓN INMEDIATA DEL AGENTE
             StopAgentImmediately();
 
             ChangeState(EnemyState.Idle);
@@ -496,18 +748,15 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? NUEVO: FORZAR DETENCIÓN INMEDIATA DEL AGENTE
+    // FORZAR DETENCIÓN INMEDIATA DEL AGENTE
     // ============================================
     void StopAgentImmediately()
     {
         if (agent == null) return;
 
-        // ?? Detener el movimiento inmediatamente
         agent.velocity = Vector3.zero;
         agent.isStopped = true;
         agent.ResetPath();
-
-        // ?? Forzar que el agente se detenga en seco
         agent.updatePosition = true;
         agent.updateRotation = true;
 
@@ -521,23 +770,18 @@ public class EnemyIA : MonoBehaviour
     {
         Vector3 targetPosition = player.position;
 
-        // Si el jugador está QUIETO, FORZAR actualización inmediata
         bool isPlayerIdle = playerIdleTimer >= playerIdleThreshold;
 
-        // Reducir la frecuencia de actualización del destino (CADA 0.5s)
         directMovementTimer += Time.deltaTime;
 
-        // Forzar actualización si el jugador está quieto O el timer se cumplió
         bool shouldUpdate = directMovementTimer >= directMovementUpdateRate || isPlayerIdle;
 
         if (shouldUpdate)
         {
             directMovementTimer = 0f;
 
-            // Si el jugador está visible Y hay línea de visión directa
             if (isPlayerVisible && HasLineOfSightToPlayer())
             {
-                // MOVIMIENTO EN LÍNEA RECTA (sin NavMesh)
                 Vector3 directionToPlayer = (targetPosition - transform.position).normalized;
                 directionToPlayer.y = 0;
 
@@ -559,7 +803,6 @@ public class EnemyIA : MonoBehaviour
                 }
             }
 
-            // Si NO hay línea de visión o falló lo anterior, usar NavMesh normal
             NavMeshHit hit2;
             if (NavMesh.SamplePosition(targetPosition, out hit2, 10f, agent.areaMask))
             {
@@ -575,13 +818,11 @@ public class EnemyIA : MonoBehaviour
             }
         }
 
-        // Si el agente está muy cerca del destino, actualizar inmediatamente
         if (agent.remainingDistance < 0.5f && isPlayerVisible)
         {
             directMovementTimer = directMovementUpdateRate;
         }
 
-        // Si el jugador está cerca (< 2m), rotar hacia él
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
         if (distanceToPlayer < 2f && isPlayerVisible)
         {
@@ -596,12 +837,10 @@ public class EnemyIA : MonoBehaviour
         }
     }
 
-    // Verifica si hay línea de visión directa al jugador (sin obstáculos)
     bool HasLineOfSightToPlayer()
     {
         if (player == null) return false;
 
-        // MÚLTIPLES RAYCASTS desde diferentes alturas
         float[] heights = { 0.2f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f };
 
         foreach (float height in heights)
@@ -620,7 +859,6 @@ public class EnemyIA : MonoBehaviour
             }
         }
 
-        // Si fallan los raycasts, probar con SphereCast
         Vector3 center = transform.position + Vector3.up * 1.2f;
         Vector3 dir = (player.position - center).normalized;
         float dist = Vector3.Distance(center, player.position);
@@ -637,7 +875,6 @@ public class EnemyIA : MonoBehaviour
         return false;
     }
 
-    // Verifica si el destino es alcanzable por el NavMeshAgent
     bool CanReachDestination(Vector3 destination)
     {
         if (agent == null || !agent.isOnNavMesh) return false;
@@ -653,7 +890,6 @@ public class EnemyIA : MonoBehaviour
         return false;
     }
 
-    // Encuentra la posición más cercana en el NavMesh a un punto dado
     Vector3 FindClosestNavMeshPosition(Vector3 position)
     {
         NavMeshHit hit;
@@ -664,7 +900,6 @@ public class EnemyIA : MonoBehaviour
         return Vector3.zero;
     }
 
-    // Detecta si el agente está atascado
     void CheckIfStuck()
     {
         if (agent == null) return;
@@ -721,7 +956,6 @@ public class EnemyIA : MonoBehaviour
         isWaitingAfterHide = true;
         hideWaitTimer = hideWaitTime;
 
-        // ?? FORZAR DETENCIÓN INMEDIATA DEL AGENTE
         StopAgentImmediately();
 
         ChangeState(EnemyState.Idle);
@@ -783,7 +1017,6 @@ public class EnemyIA : MonoBehaviour
                     agent.isStopped = false;
                     if (player != null && agent.isOnNavMesh)
                     {
-                        // Verificar si el destino es alcanzable
                         if (CanReachDestination(player.position))
                         {
                             agent.SetDestination(player.position);
@@ -803,6 +1036,10 @@ public class EnemyIA : MonoBehaviour
                 if (showDebugLogs) Debug.Log($"?? RUNNING al jugador");
 
                 StartChaseSound();
+                break;
+
+            case EnemyState.Jumpscare:
+                // No hacer nada, la corrutina maneja todo
                 break;
         }
     }
@@ -842,7 +1079,7 @@ public class EnemyIA : MonoBehaviour
             normalizedSpeed = Mathf.Clamp01(speed / walkSpeed);
         }
 
-        if (currentState == EnemyState.Idle)
+        if (currentState == EnemyState.Idle || currentState == EnemyState.Jumpscare)
         {
             normalizedSpeed = 0f;
         }
@@ -1099,6 +1336,9 @@ public class EnemyIA : MonoBehaviour
 
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.position, visionRange);
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, jumpscareDistance);
 
         Gizmos.color = Color.cyan;
         foreach (var wp in waypoints)
