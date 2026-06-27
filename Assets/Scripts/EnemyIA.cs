@@ -57,6 +57,9 @@ public class EnemyIA : MonoBehaviour
     public AudioClip jumpscareSound;
     [Range(0f, 1f)] public float jumpscareVolume = 1f;
     public float jumpscareDuration = 3f;
+    public Camera jumpscareCamera;
+    public UnityEngine.Rendering.Volume globalVolume;
+    public UnityEngine.Rendering.Volume jumpscareVolumeOverride;
 
     // AudioSources
     private AudioSource ambientAudioSource;
@@ -99,7 +102,7 @@ public class EnemyIA : MonoBehaviour
     private float stuckThreshold = 2f;
     private Vector3 lastPosition;
 
-    // Variables para movimiento directo (PERSECUCIÓN OPTIMIZADA)
+    // Variables para movimiento directo
     private float directMovementTimer = 0f;
     private float directMovementUpdateRate = 0.5f;
     private Vector3 lastDestination;
@@ -109,7 +112,7 @@ public class EnemyIA : MonoBehaviour
     private float playerIdleTimer = 0f;
     private float playerIdleThreshold = 0.5f;
 
-    // ?? Variables para Jumpscare
+    // Variables para Jumpscare
     private bool isJumpscareActive = false;
     private FirstPersonController playerController;
     private CharacterController playerCharacterController;
@@ -117,11 +120,18 @@ public class EnemyIA : MonoBehaviour
     private LockerHideSystem lockerSystemRef;
     private InteractionSystem interactionSystemRef;
     private Canvas crosshairCanvas;
+    private UnityEngine.Rendering.Universal.ColorAdjustments globalColorAdjustments;
+    private float originalHueShift;
     private bool wasPlayerControllerEnabled;
     private bool wasCharacterControllerEnabled;
     private bool wasPlayerColliderEnabled;
     private bool wasCrosshairActive;
     private bool wasLockerSystemEnabled;
+
+    // Guardar estado de las cámaras
+    private bool wasPlayerCameraActive;
+    private bool wasJumpscareCameraActive;
+    private Camera playerCamera;
 
     void Start()
     {
@@ -155,7 +165,13 @@ public class EnemyIA : MonoBehaviour
             lastPlayerPosition = player != null ? player.position : transform.position;
         }
 
-        // ?? Obtener referencias para Jumpscare
+        // Obtener la cámara del player
+        if (playerCamera == null)
+        {
+            playerCamera = Camera.main;
+        }
+
+        // Obtener referencias para Jumpscare
         if (player != null)
         {
             playerController = player.GetComponent<FirstPersonController>();
@@ -173,6 +189,23 @@ public class EnemyIA : MonoBehaviour
             {
                 crosshairCanvas = crosshairRect.GetComponentInParent<Canvas>();
             }
+        }
+
+        // Solo LEER el globalVolume (no modificarlo)
+        if (globalVolume != null && globalVolume.profile != null)
+        {
+            if (globalVolume.profile.TryGet<UnityEngine.Rendering.Universal.ColorAdjustments>(out globalColorAdjustments))
+            {
+                originalHueShift = globalColorAdjustments.hueShift.value;
+                Debug.Log($"? ColorAdjustments global encontrado. HueShift original: {originalHueShift}");
+            }
+        }
+
+        // ?? Asegurarse de que el jumpscareVolumeOverride empieza DESACTIVADO
+        if (jumpscareVolumeOverride != null)
+        {
+            jumpscareVolumeOverride.enabled = false;
+            Debug.Log("?? Jumpscare Volume desactivado al inicio");
         }
 
         // ============================================
@@ -198,13 +231,27 @@ public class EnemyIA : MonoBehaviour
         chaseAudioSource.volume = 0f;
         chaseAudioSource.priority = 100;
 
-        // ?? AudioSource para Jumpscare
         jumpscareAudioSource = gameObject.AddComponent<AudioSource>();
         jumpscareAudioSource.loop = false;
         jumpscareAudioSource.playOnAwake = false;
         jumpscareAudioSource.spatialBlend = 0f;
         jumpscareAudioSource.volume = jumpscareVolume;
         jumpscareAudioSource.priority = 0;
+
+        // Verificar que la cámara de jumpscare esté asignada
+        if (jumpscareCamera == null)
+        {
+            Debug.LogWarning($"?? {gameObject.name}: No se ha asignado JumpscareCamera. Se usará cámara por defecto.");
+        }
+        else
+        {
+            jumpscareCamera.gameObject.SetActive(false);
+            AudioListener jumpscareListener = jumpscareCamera.GetComponent<AudioListener>();
+            if (jumpscareListener != null)
+            {
+                jumpscareListener.enabled = false;
+            }
+        }
 
         // ============================================
         // INICIALIZAR SONIDOS
@@ -250,15 +297,10 @@ public class EnemyIA : MonoBehaviour
     {
         if (player == null) return;
 
-        // ?? Si el jumpscare está activo, no hacer nada más
         if (isJumpscareActive) return;
 
         DetectPlayer();
-
-        // Detectar si el jugador está quieto
         CheckPlayerIdle();
-
-        // ?? Verificar si el enemigo está lo suficientemente cerca para jumpscare
         CheckJumpscare();
 
         switch (currentState)
@@ -273,7 +315,6 @@ public class EnemyIA : MonoBehaviour
                 UpdateRunning();
                 break;
             case EnemyState.Jumpscare:
-                // No hacer nada, la corrutina maneja todo
                 break;
         }
 
@@ -293,10 +334,8 @@ public class EnemyIA : MonoBehaviour
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
-        // ?? Si está lo suficientemente cerca y el jugador no está escondido
         if (distanceToPlayer <= jumpscareDistance && !isPlayerHiding)
         {
-            // ?? Verificar que hay línea de visión
             if (HasLineOfSightToPlayer())
             {
                 StartJumpscare();
@@ -314,20 +353,26 @@ public class EnemyIA : MonoBehaviour
 
         Debug.Log($"?? JUMBSCARE ACTIVADO! {gameObject.name} atrapó al jugador");
 
-        // ?? Cambiar estado
         currentState = EnemyState.Jumpscare;
 
-        // ?? Detener el enemigo
+        // ?? ACTIVAR LA ANIMACIÓN DE JUMPSCARE
+        if (animator != null)
+        {
+            animator.SetTrigger("Jumpscare");
+            Debug.Log("?? Animación de Jumpscare activada");
+        }
+
+        // Detener el enemigo
         StopAgentImmediately();
 
-        // ?? Detener todos los sonidos
+        // Detener todos los sonidos
         StopAllCoroutines();
         if (ambientAudioSource.isPlaying) ambientAudioSource.Stop();
         if (chaseAudioSource.isPlaying) chaseAudioSource.Stop();
         isChasePlaying = false;
         isAmbientPlaying = false;
 
-        // ?? Reproducir sonido de jumpscare
+        // Reproducir sonido de jumpscare
         if (jumpscareSound != null)
         {
             jumpscareAudioSource.volume = jumpscareVolume;
@@ -335,14 +380,188 @@ public class EnemyIA : MonoBehaviour
             Debug.Log($"?? Sonido de jumpscare reproducido");
         }
 
-        // ?? Desactivar controles del jugador
+        // ACTIVAR LA CÁMARA DE JUMPSCARE
+        ActivateJumpscareCamera();
+
+        // Desactivar controles del jugador
         DisablePlayerControls();
 
-        // ?? Rotar la cámara del jugador hacia el enemigo
-        RotatePlayerToEnemy();
-
-        // ?? Iniciar corrutina para esperar y reiniciar
+        // Iniciar corrutina para esperar y reiniciar
         StartCoroutine(JumpscareSequence());
+    }
+
+    // ============================================
+    // ?? ACTIVAR CÁMARA DE JUMPSCARE
+    // ============================================
+    void ActivateJumpscareCamera()
+    {
+        if (jumpscareCamera == null)
+        {
+            Debug.LogWarning("?? No se ha asignado JumpscareCamera. Usando posición de la cámara principal.");
+
+            if (playerCamera != null)
+            {
+                Vector3 targetPos = transform.position + Vector3.up * 1.5f + transform.forward * 1f;
+                playerCamera.transform.position = targetPos;
+
+                Vector3 directionToEnemy = (transform.position - playerCamera.transform.position).normalized;
+                if (directionToEnemy.magnitude > 0.1f)
+                {
+                    playerCamera.transform.rotation = Quaternion.LookRotation(directionToEnemy);
+                }
+            }
+            return;
+        }
+
+        // ?? COMPROBAR QUE jumpscareCamera NO HA SIDO DESTRUIDO
+        if (jumpscareCamera == null)
+        {
+            Debug.LogWarning("?? jumpscareCamera ha sido destruido");
+            return;
+        }
+
+        if (playerCamera != null)
+        {
+            wasPlayerCameraActive = playerCamera.gameObject.activeSelf;
+            playerCamera.gameObject.SetActive(false);
+            Debug.Log("?? Cámara del player DESACTIVADA");
+        }
+
+        wasJumpscareCameraActive = jumpscareCamera.gameObject.activeSelf;
+        jumpscareCamera.gameObject.SetActive(true);
+
+        // ?? ASIGNAR EL VOLUME A LA CÁMARA DE JUMPSCARE
+        if (jumpscareVolumeOverride != null && jumpscareCamera != null)
+        {
+            try
+            {
+                var existingVolume = jumpscareCamera.GetComponent<UnityEngine.Rendering.Volume>();
+                if (existingVolume != null)
+                {
+                    existingVolume.profile = jumpscareVolumeOverride.profile;
+                }
+                else
+                {
+                    var newVolume = jumpscareCamera.gameObject.AddComponent<UnityEngine.Rendering.Volume>();
+                    newVolume.profile = jumpscareVolumeOverride.profile;
+                }
+
+                var volumeComponent = jumpscareCamera.GetComponent<UnityEngine.Rendering.Volume>();
+                if (volumeComponent != null)
+                {
+                    volumeComponent.enabled = true;
+                }
+
+                // ?? ACTIVAR EL VOLUME DE JUMPSCARE
+                if (jumpscareVolumeOverride != null)
+                {
+                    jumpscareVolumeOverride.enabled = true;
+                    Debug.Log("?? Jumpscare Volume ACTIVADO");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"?? Error al asignar Volume: {e.Message}");
+            }
+        }
+
+        AudioListener jumpscareListener = jumpscareCamera.GetComponent<AudioListener>();
+        if (jumpscareListener == null)
+        {
+            jumpscareListener = jumpscareCamera.gameObject.AddComponent<AudioListener>();
+        }
+        if (jumpscareListener != null)
+        {
+            jumpscareListener.enabled = true;
+        }
+
+        if (playerCamera != null)
+        {
+            AudioListener playerListener = playerCamera.GetComponent<AudioListener>();
+            if (playerListener != null)
+            {
+                playerListener.enabled = false;
+            }
+        }
+
+        Debug.Log($"?? Cámara de Jumpscare ACTIVADA: {jumpscareCamera.name}");
+    }
+
+    // ============================================
+    // ?? DESACTIVAR CÁMARA DE JUMPSCARE
+    // ============================================
+    void DeactivateJumpscareCamera()
+    {
+        // ?? COMPROBAR QUE LAS REFERENCIAS SIGUEN VIVAS
+        if (jumpscareCamera == null)
+        {
+            if (playerCamera != null)
+            {
+                playerCamera.gameObject.SetActive(true);
+            }
+            return;
+        }
+
+        // ?? DESACTIVAR EL VOLUME DE JUMPSCARE (con comprobación de null)
+        if (jumpscareVolumeOverride != null)
+        {
+            try
+            {
+                jumpscareVolumeOverride.enabled = false;
+                Debug.Log("?? Jumpscare Volume DESACTIVADO");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"?? Error al desactivar Volume: {e.Message}");
+            }
+        }
+
+        // ?? LIMPIAR EL VOLUME DE LA CÁMARA DE JUMPSCARE
+        if (jumpscareCamera != null)
+        {
+            try
+            {
+                var volume = jumpscareCamera.GetComponent<UnityEngine.Rendering.Volume>();
+                if (volume != null)
+                {
+                    volume.enabled = false;
+                }
+                Debug.Log("?? Volume de jumpscare limpiado");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"?? Error al limpiar Volume: {e.Message}");
+            }
+        }
+
+        if (jumpscareCamera != null)
+        {
+            jumpscareCamera.gameObject.SetActive(false);
+        }
+
+        if (jumpscareCamera != null)
+        {
+            AudioListener jumpscareListener = jumpscareCamera.GetComponent<AudioListener>();
+            if (jumpscareListener != null)
+            {
+                jumpscareListener.enabled = false;
+            }
+        }
+
+        if (playerCamera != null)
+        {
+            playerCamera.gameObject.SetActive(true);
+
+            AudioListener playerListener = playerCamera.GetComponent<AudioListener>();
+            if (playerListener != null)
+            {
+                playerListener.enabled = true;
+            }
+
+            Debug.Log("? Cámara del player REACTIVADA");
+        }
+
+        Debug.Log($"?? Cámara de Jumpscare DESACTIVADA");
     }
 
     // ============================================
@@ -378,7 +597,6 @@ public class EnemyIA : MonoBehaviour
             Debug.Log("?? LockerHideSystem DESACTIVADO");
         }
 
-        // ?? Desactivar crosshair
         if (crosshairCanvas != null)
         {
             wasCrosshairActive = crosshairCanvas.gameObject.activeSelf;
@@ -386,7 +604,6 @@ public class EnemyIA : MonoBehaviour
             Debug.Log("?? Crosshair DESACTIVADO");
         }
 
-        // ?? Desactivar el sistema de interacción
         if (interactionSystemRef != null)
         {
             interactionSystemRef.enabled = false;
@@ -395,79 +612,18 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? REACTIVAR CONTROLES DEL JUGADOR
-    // ============================================
-    void EnablePlayerControls()
-    {
-        if (playerController != null)
-        {
-            playerController.enabled = wasPlayerControllerEnabled;
-            Debug.Log("? PlayerController REACTIVADO");
-        }
-
-        if (playerCharacterController != null)
-        {
-            playerCharacterController.enabled = wasCharacterControllerEnabled;
-            Debug.Log("? CharacterController REACTIVADO");
-        }
-
-        if (playerCollider != null)
-        {
-            playerCollider.enabled = wasPlayerColliderEnabled;
-            Debug.Log("? PlayerCollider REACTIVADO");
-        }
-
-        if (lockerSystemRef != null)
-        {
-            lockerSystemRef.enabled = wasLockerSystemEnabled;
-            Debug.Log("? LockerHideSystem REACTIVADO");
-        }
-
-        if (crosshairCanvas != null)
-        {
-            crosshairCanvas.gameObject.SetActive(wasCrosshairActive);
-            Debug.Log("? Crosshair REACTIVADO");
-        }
-
-        if (interactionSystemRef != null)
-        {
-            interactionSystemRef.enabled = true;
-            Debug.Log("? InteractionSystem REACTIVADO");
-        }
-    }
-
-    // ============================================
-    // ?? ROTAR JUGADOR HACIA EL ENEMIGO
-    // ============================================
-    void RotatePlayerToEnemy()
-    {
-        if (player == null) return;
-
-        Vector3 directionToEnemy = (transform.position - player.position).normalized;
-        directionToEnemy.y = 0;
-
-        if (directionToEnemy.magnitude > 0.1f)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(directionToEnemy);
-            player.rotation = targetRotation;
-            Debug.Log($"?? Jugador rotado hacia el enemigo");
-        }
-    }
-
-    // ============================================
     // ?? CORRUTINA DE JUMBSCARE
     // ============================================
     IEnumerator JumpscareSequence()
     {
-        // Esperar la duración del jumpscare
         yield return new WaitForSeconds(jumpscareDuration);
 
         Debug.Log($"?? Reiniciando escena después de {jumpscareDuration} segundos...");
 
-        // Reactivar controles antes de reiniciar
-        EnablePlayerControls();
+        // ?? NO llamar a DeactivateJumpscareCamera() aquí
+        // Los objetos se destruirán al reiniciar la escena
 
-        // ?? Reiniciar la escena
+        // Reiniciar la escena directamente
         UnityEngine.SceneManagement.SceneManager.LoadScene(
             UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex
         );
@@ -495,7 +651,6 @@ public class EnemyIA : MonoBehaviour
         isPlayerInRange = distanceToPlayer <= detectionRadius;
         isPlayerVisible = false;
 
-        // Si el jugador está MUY CERCA, DETECTARLO SIEMPRE
         if (distanceToPlayer < proximityDetectionRange)
         {
             isPlayerVisible = true;
@@ -504,7 +659,6 @@ public class EnemyIA : MonoBehaviour
             return;
         }
 
-        // Detección normal por línea de visión con MÚLTIPLES RAYCASTS
         if (distanceToPlayer <= visionRange)
         {
             Vector3 directionToPlayer = (player.position - transform.position).normalized;
@@ -512,7 +666,6 @@ public class EnemyIA : MonoBehaviour
 
             if (angle <= visionAngle * 0.5f)
             {
-                // MÚLTIPLES ALTURAS para los raycasts
                 float[] heights = { 0.2f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f };
                 Vector3 rayOrigin = transform.position;
 
@@ -626,7 +779,7 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // UPDATE WALKING (PATRULLA FUNCIONAL - NO TOCAR)
+    // UPDATE WALKING
     // ============================================
     void UpdateWalking()
     {
@@ -655,7 +808,7 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // UPDATE RUNNING (PERSECUCIÓN OPTIMIZADA)
+    // UPDATE RUNNING
     // ============================================
     void UpdateRunning()
     {
@@ -670,9 +823,7 @@ public class EnemyIA : MonoBehaviour
             isPlayerVisible = false;
             isPlayerInRange = false;
 
-            // FORZAR DETENCIÓN INMEDIATA DEL AGENTE
             StopAgentImmediately();
-
             ChangeState(EnemyState.Idle);
 
             Vector3 directionToHide = (lastKnownHidingPosition - transform.position).normalized;
@@ -696,8 +847,6 @@ public class EnemyIA : MonoBehaviour
             {
                 agent.speed = runSpeed;
                 agent.isStopped = false;
-
-                // Movimiento directo optimizado (sin rodeos)
                 UpdateDirectMovement();
             }
 
@@ -748,7 +897,7 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // FORZAR DETENCIÓN INMEDIATA DEL AGENTE
+    // FORZAR DETENCIÓN
     // ============================================
     void StopAgentImmediately()
     {
@@ -764,16 +913,14 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // MOVIMIENTO DIRECTO OPTIMIZADO (SIN RODEOS)
+    // MOVIMIENTO DIRECTO OPTIMIZADO
     // ============================================
     void UpdateDirectMovement()
     {
         Vector3 targetPosition = player.position;
-
         bool isPlayerIdle = playerIdleTimer >= playerIdleThreshold;
 
         directMovementTimer += Time.deltaTime;
-
         bool shouldUpdate = directMovementTimer >= directMovementUpdateRate || isPlayerIdle;
 
         if (shouldUpdate)
@@ -957,7 +1104,6 @@ public class EnemyIA : MonoBehaviour
         hideWaitTimer = hideWaitTime;
 
         StopAgentImmediately();
-
         ChangeState(EnemyState.Idle);
 
         if (lastKnownHidingPosition != Vector3.zero)
@@ -1039,7 +1185,6 @@ public class EnemyIA : MonoBehaviour
                 break;
 
             case EnemyState.Jumpscare:
-                // No hacer nada, la corrutina maneja todo
                 break;
         }
     }
@@ -1362,5 +1507,30 @@ public class EnemyIA : MonoBehaviour
                         transform.position + Vector3.up * 0.5f + left * visionRange);
         Gizmos.DrawLine(transform.position + Vector3.up * 0.5f,
                         transform.position + Vector3.up * 0.5f + right * visionRange);
+
+        if (jumpscareCamera != null)
+        {
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawWireSphere(jumpscareCamera.transform.position, 0.3f);
+            Gizmos.DrawLine(transform.position, jumpscareCamera.transform.position);
+
+            Gizmos.color = new Color(1f, 0f, 1f, 0.3f);
+            Gizmos.DrawFrustum(
+                jumpscareCamera.transform.position,
+                jumpscareCamera.fieldOfView,
+                2f,
+                0.1f,
+                jumpscareCamera.aspect
+            );
+        }
+    }
+
+    private void OnDestroy()
+    {
+        // ?? Limpiar referencias al destruir el objeto para evitar MissingReferenceException
+        jumpscareVolumeOverride = null;
+        globalVolume = null;
+        jumpscareCamera = null;
+        playerCamera = null;
     }
 }
