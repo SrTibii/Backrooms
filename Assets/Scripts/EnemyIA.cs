@@ -102,15 +102,15 @@ public class EnemyIA : MonoBehaviour
     private float stuckThreshold = 2f;
     private Vector3 lastPosition;
 
-    // Variables para movimiento directo
+    // ?? Variables de persecución
     private float directMovementTimer = 0f;
-    private float directMovementUpdateRate = 0.5f;
+    private float directMovementUpdateRate = 0.1f; // Ya no se usa el timer, pero mantenemos
     private Vector3 lastDestination;
 
     // Para detectar si el jugador está quieto
     private Vector3 lastPlayerPosition;
     private float playerIdleTimer = 0f;
-    private float playerIdleThreshold = 0.5f;
+    private float playerIdleThreshold = 0.3f; // ?? CAMBIADO de 0.5f a 0.3f
 
     // Variables para Jumpscare
     private bool isJumpscareActive = false;
@@ -154,7 +154,7 @@ public class EnemyIA : MonoBehaviour
         if (agent != null)
         {
             agent.speed = walkSpeed;
-            agent.autoBraking = false;
+            agent.autoBraking = true;      // ?? CAMBIADO de false a true
             agent.stoppingDistance = 0.5f;
             agent.isStopped = false;
             agent.updatePosition = true;
@@ -163,6 +163,8 @@ public class EnemyIA : MonoBehaviour
             lastPosition = transform.position;
             lastDestination = transform.position;
             lastPlayerPosition = player != null ? player.position : transform.position;
+            agent.acceleration = 20f;      // ?? NUEVO
+            agent.angularSpeed = 360f;
         }
 
         // Obtener la cámara del player
@@ -201,7 +203,7 @@ public class EnemyIA : MonoBehaviour
             }
         }
 
-        // ?? Asegurarse de que el jumpscareVolumeOverride empieza DESACTIVADO
+        // Asegurarse de que el jumpscareVolumeOverride empieza DESACTIVADO
         if (jumpscareVolumeOverride != null)
         {
             jumpscareVolumeOverride.enabled = false;
@@ -355,24 +357,20 @@ public class EnemyIA : MonoBehaviour
 
         currentState = EnemyState.Jumpscare;
 
-        // ?? ACTIVAR LA ANIMACIÓN DE JUMPSCARE
         if (animator != null)
         {
             animator.SetTrigger("Jumpscare");
             Debug.Log("?? Animación de Jumpscare activada");
         }
 
-        // Detener el enemigo
         StopAgentImmediately();
 
-        // Detener todos los sonidos
         StopAllCoroutines();
         if (ambientAudioSource.isPlaying) ambientAudioSource.Stop();
         if (chaseAudioSource.isPlaying) chaseAudioSource.Stop();
         isChasePlaying = false;
         isAmbientPlaying = false;
 
-        // Reproducir sonido de jumpscare
         if (jumpscareSound != null)
         {
             jumpscareAudioSource.volume = jumpscareVolume;
@@ -380,13 +378,8 @@ public class EnemyIA : MonoBehaviour
             Debug.Log($"?? Sonido de jumpscare reproducido");
         }
 
-        // ACTIVAR LA CÁMARA DE JUMPSCARE
         ActivateJumpscareCamera();
-
-        // Desactivar controles del jugador
         DisablePlayerControls();
-
-        // Iniciar corrutina para esperar y reiniciar
         StartCoroutine(JumpscareSequence());
     }
 
@@ -413,7 +406,6 @@ public class EnemyIA : MonoBehaviour
             return;
         }
 
-        // ?? COMPROBAR QUE jumpscareCamera NO HA SIDO DESTRUIDO
         if (jumpscareCamera == null)
         {
             Debug.LogWarning("?? jumpscareCamera ha sido destruido");
@@ -430,7 +422,6 @@ public class EnemyIA : MonoBehaviour
         wasJumpscareCameraActive = jumpscareCamera.gameObject.activeSelf;
         jumpscareCamera.gameObject.SetActive(true);
 
-        // ?? ASIGNAR EL VOLUME A LA CÁMARA DE JUMPSCARE
         if (jumpscareVolumeOverride != null && jumpscareCamera != null)
         {
             try
@@ -452,7 +443,6 @@ public class EnemyIA : MonoBehaviour
                     volumeComponent.enabled = true;
                 }
 
-                // ?? ACTIVAR EL VOLUME DE JUMPSCARE
                 if (jumpscareVolumeOverride != null)
                 {
                     jumpscareVolumeOverride.enabled = true;
@@ -492,7 +482,6 @@ public class EnemyIA : MonoBehaviour
     // ============================================
     void DeactivateJumpscareCamera()
     {
-        // ?? COMPROBAR QUE LAS REFERENCIAS SIGUEN VIVAS
         if (jumpscareCamera == null)
         {
             if (playerCamera != null)
@@ -502,7 +491,6 @@ public class EnemyIA : MonoBehaviour
             return;
         }
 
-        // ?? DESACTIVAR EL VOLUME DE JUMPSCARE (con comprobación de null)
         if (jumpscareVolumeOverride != null)
         {
             try
@@ -516,7 +504,6 @@ public class EnemyIA : MonoBehaviour
             }
         }
 
-        // ?? LIMPIAR EL VOLUME DE LA CÁMARA DE JUMPSCARE
         if (jumpscareCamera != null)
         {
             try
@@ -620,10 +607,6 @@ public class EnemyIA : MonoBehaviour
 
         Debug.Log($"?? Reiniciando escena después de {jumpscareDuration} segundos...");
 
-        // ?? NO llamar a DeactivateJumpscareCamera() aquí
-        // Los objetos se destruirán al reiniciar la escena
-
-        // Reiniciar la escena directamente
         UnityEngine.SceneManagement.SceneManager.LoadScene(
             UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex
         );
@@ -779,7 +762,7 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // UPDATE WALKING
+    // ?? UPDATE WALKING (INTACTO - NO TOCAR)
     // ============================================
     void UpdateWalking()
     {
@@ -808,7 +791,7 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // UPDATE RUNNING
+    // ?? UPDATE RUNNING (PERSECUCIÓN MEJORADA - SIN ROMPER PATRULLA)
     // ============================================
     void UpdateRunning()
     {
@@ -847,6 +830,8 @@ public class EnemyIA : MonoBehaviour
             {
                 agent.speed = runSpeed;
                 agent.isStopped = false;
+
+                // ?? MOVIMIENTO DIRECTO MEJORADO
                 UpdateDirectMovement();
             }
 
@@ -897,6 +882,113 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
+    // ?? MOVIMIENTO DIRECTO MEJORADO (CONTROL MANUAL - SIN RODEOS)
+    // ============================================
+    void UpdateDirectMovement()
+    {
+        if (agent == null || player == null) return;
+
+        // ?? Si el jugador está visible, perseguir
+        if (isPlayerVisible)
+        {
+            // ?? Calcular dirección hacia el jugador
+            Vector3 directionToPlayer = (player.position - transform.position).normalized;
+            directionToPlayer.y = 0;
+
+            float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+
+            // ?? Si está muy cerca (< 1.5m), ir DIRECTAMENTE sin NavMesh
+            if (distanceToPlayer < 1.5f)
+            {
+                // Movimiento directo
+                agent.velocity = directionToPlayer * runSpeed;
+                agent.ResetPath();
+
+                // Rotación suave
+                if (directionToPlayer.magnitude > 0.1f)
+                {
+                    Quaternion targetRotation = Quaternion.LookRotation(directionToPlayer);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 10f);
+                }
+                return;
+            }
+
+            // ?? Si está lejos, usar NavMesh pero con control de velocidad
+            NavMeshHit hit;
+            if (NavMesh.SamplePosition(player.position, out hit, 10f, agent.areaMask))
+            {
+                Vector3 target = hit.position;
+
+                // ?? Solo actualizar el destino si cambió significativamente
+                if (Vector3.Distance(target, lastDestination) > 0.5f)
+                {
+                    agent.SetDestination(target);
+                    lastDestination = target;
+
+                    if (showDebugLogs && Time.frameCount % 60 == 0)
+                        Debug.Log($"?? Actualizando ruta a: {target}");
+                }
+            }
+
+            // ?? CONTROL MANUAL DE VELOCIDAD para evitar que se pegue a las paredes
+            // Si el agente está cerca de una pared (velocidad baja pero destino lejos)
+            // ?? CONTROL MANUAL DE VELOCIDAD para evitar que se pegue a las paredes
+            if (agent.remainingDistance > 1f && agent.velocity.magnitude < 0.5f)
+            {
+                // ?? REDUCIDO de 0.8f a 0.5f para menos deslizamiento
+                agent.velocity = directionToPlayer * runSpeed * 0.5f;
+
+                if (showDebugLogs && Time.frameCount % 60 == 0)
+                    Debug.Log($"? Forzando movimiento en dirección al jugador");
+            }
+
+            // ?? Rotación suave hacia el jugador (no instantánea)
+            Vector3 desiredDirection = (player.position - transform.position).normalized;
+            desiredDirection.y = 0;
+            if (desiredDirection.magnitude > 0.1f)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(desiredDirection);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 8f);
+            }
+        }
+        else
+        {
+            // ?? Si no ve al jugador, ir a la última posición conocida
+            if (!agent.hasPath || agent.remainingDistance < 0.5f)
+            {
+                NavMeshHit hit;
+                if (NavMesh.SamplePosition(lastKnownPlayerPosition, out hit, 10f, agent.areaMask))
+                {
+                    agent.SetDestination(hit.position);
+                    lastDestination = hit.position;
+                }
+            }
+        }
+
+        // ?? Si el agente está atascado, forzar recálculo
+        if (agent.remainingDistance > 2f && agent.velocity.magnitude < 0.1f)
+        {
+            directMovementTimer += Time.deltaTime;
+            if (directMovementTimer > 1.5f)
+            {
+                directMovementTimer = 0f;
+
+                NavMeshHit hit;
+                if (NavMesh.SamplePosition(player.position, out hit, 10f, agent.areaMask))
+                {
+                    agent.SetDestination(hit.position);
+                    lastDestination = hit.position;
+                    if (showDebugLogs) Debug.Log($"?? Forzando recálculo de ruta");
+                }
+            }
+        }
+        else
+        {
+            directMovementTimer = 0f;
+        }
+    }
+
+    // ============================================
     // FORZAR DETENCIÓN
     // ============================================
     void StopAgentImmediately()
@@ -910,78 +1002,6 @@ public class EnemyIA : MonoBehaviour
         agent.updateRotation = true;
 
         if (showDebugLogs) Debug.Log($"?? Agente detenido inmediatamente");
-    }
-
-    // ============================================
-    // MOVIMIENTO DIRECTO OPTIMIZADO
-    // ============================================
-    void UpdateDirectMovement()
-    {
-        Vector3 targetPosition = player.position;
-        bool isPlayerIdle = playerIdleTimer >= playerIdleThreshold;
-
-        directMovementTimer += Time.deltaTime;
-        bool shouldUpdate = directMovementTimer >= directMovementUpdateRate || isPlayerIdle;
-
-        if (shouldUpdate)
-        {
-            directMovementTimer = 0f;
-
-            if (isPlayerVisible && HasLineOfSightToPlayer())
-            {
-                Vector3 directionToPlayer = (targetPosition - transform.position).normalized;
-                directionToPlayer.y = 0;
-
-                Vector3 destination = transform.position + directionToPlayer * 10f;
-
-                NavMeshHit hit;
-                if (NavMesh.SamplePosition(destination, out hit, 15f, agent.areaMask))
-                {
-                    Vector3 navMeshTarget = hit.position;
-
-                    if (Vector3.Distance(navMeshTarget, destination) < 3f)
-                    {
-                        agent.SetDestination(navMeshTarget);
-                        lastDestination = navMeshTarget;
-                        if (showDebugLogs && Time.frameCount % 30 == 0)
-                            Debug.Log($"?? Línea recta a: {navMeshTarget}");
-                        return;
-                    }
-                }
-            }
-
-            NavMeshHit hit2;
-            if (NavMesh.SamplePosition(targetPosition, out hit2, 10f, agent.areaMask))
-            {
-                Vector3 navMeshTarget = hit2.position;
-
-                if (Vector3.Distance(navMeshTarget, agent.destination) > 0.5f)
-                {
-                    agent.SetDestination(navMeshTarget);
-                    lastDestination = navMeshTarget;
-                    if (showDebugLogs && Time.frameCount % 60 == 0)
-                        Debug.Log($"?? NavMesh a: {navMeshTarget}");
-                }
-            }
-        }
-
-        if (agent.remainingDistance < 0.5f && isPlayerVisible)
-        {
-            directMovementTimer = directMovementUpdateRate;
-        }
-
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-        if (distanceToPlayer < 2f && isPlayerVisible)
-        {
-            Vector3 directionToPlayer = (player.position - transform.position).normalized;
-            directionToPlayer.y = 0;
-
-            if (directionToPlayer.magnitude > 0.1f)
-            {
-                Quaternion targetRotation = Quaternion.LookRotation(directionToPlayer);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 15f);
-            }
-        }
     }
 
     bool HasLineOfSightToPlayer()
@@ -1527,7 +1547,6 @@ public class EnemyIA : MonoBehaviour
 
     private void OnDestroy()
     {
-        // ?? Limpiar referencias al destruir el objeto para evitar MissingReferenceException
         jumpscareVolumeOverride = null;
         globalVolume = null;
         jumpscareCamera = null;
