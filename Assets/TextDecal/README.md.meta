@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: a33edb5f64dd3406c9f8979987cd9578
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302653
+  packageName: 'Text Decal: Dynamic, Surface-Aligned & Shaded'
+  packageVersion: 1.2.6
+  assetPath: Assets/space.chikalin.textdecal/README.md
+  uploadId: 932418

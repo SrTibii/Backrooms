@@ -1,0 +1,22 @@
+{
+  "name": "space.chikalin.textdecal",
+  "displayName": "Text Decal",
+  "version": "1.2.6",
+  "description": "Decal for TextMeshPro",
+  "documentationUrl": "https://textdecal.chikalin.space/",
+  "dependencies": {
+    "com.unity.ugui": "2.0.0"
+  },
+  "samples": [
+    {
+      "displayName": "URP Sample",
+      "description": "URP Sample",
+      "path": "Samples~/SampleURP"
+    }
+  ],
+  "author": {
+    "name": "Kirill Chikalin",
+    "email": "kirill@chikalin.space",
+    "url": "https://chikalin.space"
+  }
+}

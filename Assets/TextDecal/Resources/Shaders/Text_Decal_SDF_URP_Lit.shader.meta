@@ -1,0 +1,10 @@
+fileFormatVersion: 2
+guid: 6f9dc39644934f62a0a58b6547a988e5
+timeCreated: 1732887718
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302653
+  packageName: 'Text Decal: Dynamic, Surface-Aligned & Shaded'
+  packageVersion: 1.2.6
+  assetPath: Assets/space.chikalin.textdecal/Resources/Shaders/Text_Decal_SDF_URP_Lit.shader
+  uploadId: 932418

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 25fbd6bedb59c4aca8c94889acc3fded
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 625f186215c104763be7675aa2d941aa, type: 3}
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302653
+  packageName: 'Text Decal: Dynamic, Surface-Aligned & Shaded'
+  packageVersion: 1.2.6
+  assetPath: Packages/space.chikalin.textdecal/Samples~/SampleURP/Shaders/Height
+    Noise Shader Graph.shadergraph
+  uploadId: 932418

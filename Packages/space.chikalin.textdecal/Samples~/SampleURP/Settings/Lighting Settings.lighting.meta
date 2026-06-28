@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: c90aef62f536675478e516a9871fbb8f
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302653
+  packageName: 'Text Decal: Dynamic, Surface-Aligned & Shaded'
+  packageVersion: 1.2.6
+  assetPath: Packages/space.chikalin.textdecal/Samples~/SampleURP/Settings/Lighting
+    Settings.lighting
+  uploadId: 932418

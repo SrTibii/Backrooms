@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 1c7d5ccf5af491043b2ca4886a7be7d6
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302653
+  packageName: 'Text Decal: Dynamic, Surface-Aligned & Shaded'
+  packageVersion: 1.2.6
+  assetPath: Packages/space.chikalin.textdecal/Samples~/SampleURP/Scenes/SampleURP.unity
+  uploadId: 932418

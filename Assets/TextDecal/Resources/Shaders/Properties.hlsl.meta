@@ -1,0 +1,10 @@
+fileFormatVersion: 2
+guid: 49536a91d8d94eddb186152f0eca69a7
+timeCreated: 1731660883
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302653
+  packageName: 'Text Decal: Dynamic, Surface-Aligned & Shaded'
+  packageVersion: 1.2.6
+  assetPath: Assets/space.chikalin.textdecal/Resources/Shaders/Properties.hlsl
+  uploadId: 932418

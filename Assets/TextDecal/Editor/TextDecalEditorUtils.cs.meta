@@ -1,0 +1,10 @@
+fileFormatVersion: 2
+guid: 80edd491232c4337ad32587cdc594673
+timeCreated: 1740149026
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302653
+  packageName: 'Text Decal: Dynamic, Surface-Aligned & Shaded'
+  packageVersion: 1.2.6
+  assetPath: Assets/space.chikalin.textdecal/Editor/TextDecalEditorUtils.cs
+  uploadId: 932418

@@ -1,0 +1,10 @@
+fileFormatVersion: 2
+guid: 160d459d78d844298bb97b2aee40d48a
+timeCreated: 1738733259
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302653
+  packageName: 'Text Decal: Dynamic, Surface-Aligned & Shaded'
+  packageVersion: 1.2.6
+  assetPath: Packages/space.chikalin.textdecal/Samples~/SampleURP/Fonts/Inter-Regular.ttf
+  uploadId: 932418

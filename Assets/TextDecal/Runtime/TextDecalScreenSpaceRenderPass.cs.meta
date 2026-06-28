@@ -1,0 +1,10 @@
+fileFormatVersion: 2
+guid: 47d86fce4ca94ddbad96fb02040c4d94
+timeCreated: 1739284766
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302653
+  packageName: 'Text Decal: Dynamic, Surface-Aligned & Shaded'
+  packageVersion: 1.2.6
+  assetPath: Assets/space.chikalin.textdecal/Runtime/TextDecalScreenSpaceRenderPass.cs
+  uploadId: 932418

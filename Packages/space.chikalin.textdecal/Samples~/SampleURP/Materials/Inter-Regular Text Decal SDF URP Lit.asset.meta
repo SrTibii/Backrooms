@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 9d0cbc2922b4d48dc936c7fd617753c9
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302653
+  packageName: 'Text Decal: Dynamic, Surface-Aligned & Shaded'
+  packageVersion: 1.2.6
+  assetPath: Packages/space.chikalin.textdecal/Samples~/SampleURP/Materials/Inter-Regular
+    Text Decal SDF URP Lit.asset
+  uploadId: 932418
