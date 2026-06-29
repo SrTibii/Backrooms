@@ -29691,6 +29691,19 @@ MonoBehaviour:
   obstacleMask:
     serializedVersion: 2
     m_Bits: 4294967295
+  raycastHeights:
+  - 0.2
+  - 0.5
+  - 1
+  - 1.5
+  - 2
+  - 2.5
+  sphereCastRadius: 1.17
+  sphereCastHeight: 1.2
+  raycastForwardOffset: 4
+  showRaycastDebug: 1
+  raycastColor: {r: 0, g: 1, b: 0, a: 1}
+  hitColor: {r: 1, g: 0, b: 0, a: 1}
   runSpeed: 15
   walkSpeed: 6
   lostPlayerTime: 5
@@ -41287,7 +41300,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a33ecbffb6b8e7a4096d2adb449c93eb, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 66.64
+      value: 90.63
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a33ecbffb6b8e7a4096d2adb449c93eb, type: 3}
       propertyPath: m_LocalPosition.y
@@ -41295,7 +41308,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a33ecbffb6b8e7a4096d2adb449c93eb, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -18.38
+      value: -15.08
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a33ecbffb6b8e7a4096d2adb449c93eb, type: 3}
       propertyPath: m_LocalRotation.w
@@ -52845,7 +52858,7 @@ Transform:
   m_GameObject: {fileID: 5346311453154236445}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1163.31, y: 113.66, z: 1185.65}
+  m_LocalPosition: {x: 1121.91, y: 113.66, z: 1188.39}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

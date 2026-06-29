@@ -389,7 +389,7 @@ public class FirstPersonController : MonoBehaviour
         }
 
         // ?? FORZAR VALORES: Height = 2, Center Y = 1
-        standingHeight = 2.5f;
+        standingHeight = 2f;
         crouchHeight = 1f;
 
         controller.height = standingHeight;

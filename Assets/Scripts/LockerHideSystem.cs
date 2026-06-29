@@ -14,7 +14,7 @@ public class LockerHideSystem : MonoBehaviour
     public Image crosshairImage;
 
     [Header("Configuración de Taquilla")]
-    public GameObject doorObject; // ?? ASIGNAR LA PUERTA EN EL INSPECTOR
+    public GameObject doorObject; // ASIGNAR LA PUERTA EN EL INSPECTOR
     public float interactionDistance = 3f;
 
     [Header("Input Actions")]
@@ -95,7 +95,7 @@ public class LockerHideSystem : MonoBehaviour
 
     void Start()
     {
-        // ?? Verificar que la puerta esté asignada
+        // Verificar que la puerta esté asignada
         if (doorObject == null)
         {
             Debug.LogError($"? {gameObject.name}: No se ha asignado la puerta en el Inspector!");
@@ -188,10 +188,10 @@ public class LockerHideSystem : MonoBehaviour
         if (doorObject == null) return;
         if (interactionSystem == null) return;
 
-        // ?? Obtener el objeto que el jugador está mirando
+        // Obtener el objeto que el jugador está mirando
         GameObject target = interactionSystem.GetTargetObject();
 
-        // ?? Verificar si el objeto mirado es EXACTAMENTE la puerta asignada
+        // Verificar si el objeto mirado es EXACTAMENTE la puerta asignada
         if (target != null && target == doorObject)
         {
             isLookingAtDoor = true;
@@ -234,7 +234,7 @@ public class LockerHideSystem : MonoBehaviour
 
         isHiding = true;
 
-        // ?? Obtener el renderer de la puerta
+        // Obtener el renderer de la puerta
         if (doorObject != null)
         {
             doorRenderer = doorObject.GetComponent<Renderer>();
@@ -242,7 +242,7 @@ public class LockerHideSystem : MonoBehaviour
             {
                 doorMaterial = doorRenderer.material;
                 originalDoorOpacity = doorMaterial.color.a;
-                Debug.Log($"?? Material de puerta guardado. Opacidad original: {originalDoorOpacity}");
+                Debug.Log($"Material de puerta guardado. Opacidad original: {originalDoorOpacity}");
             }
             else
             {
@@ -265,14 +265,14 @@ public class LockerHideSystem : MonoBehaviour
         {
             wasCharacterControllerEnabled = characterController.enabled;
             characterController.enabled = false;
-            Debug.Log("?? CharacterController DESACTIVADO");
+            Debug.Log("CharacterController DESACTIVADO");
         }
 
         if (playerCollider != null)
         {
             wasPlayerColliderEnabled = playerCollider.enabled;
             playerCollider.enabled = false;
-            Debug.Log("?? Collider del player DESACTIVADO");
+            Debug.Log("Collider del player DESACTIVADO");
         }
 
         // Guardar y desactivar el controlador del player
@@ -280,7 +280,7 @@ public class LockerHideSystem : MonoBehaviour
         {
             wasPlayerControllerEnabled = playerController.enabled;
             playerController.enabled = false;
-            Debug.Log("?? Movimiento del player DESACTIVADO");
+            Debug.Log("Movimiento del player DESACTIVADO");
         }
 
         // DESACTIVAR el crosshair
@@ -288,7 +288,7 @@ public class LockerHideSystem : MonoBehaviour
         {
             wasCrosshairActive = crosshairImage.gameObject.activeSelf;
             crosshairImage.gameObject.SetActive(false);
-            Debug.Log("?? Crosshair DESACTIVADO");
+            Debug.Log("Crosshair DESACTIVADO");
         }
 
         // DESACTIVAR cámara del player
@@ -307,7 +307,7 @@ public class LockerHideSystem : MonoBehaviour
         if (lockerAudioListener != null)
         {
             lockerAudioListener.enabled = true;
-            Debug.Log("?? AudioListener de taquilla ACTIVADO");
+            Debug.Log("AudioListener de taquilla ACTIVADO");
         }
 
         // Desactivar el AudioListener de la cámara del player
@@ -315,7 +315,7 @@ public class LockerHideSystem : MonoBehaviour
         if (playerAudioListener != null)
         {
             playerAudioListener.enabled = false;
-            Debug.Log("?? AudioListener del player DESACTIVADO");
+            Debug.Log("AudioListener del player DESACTIVADO");
         }
 
         MakeDoorTransparentInstant();
@@ -323,8 +323,8 @@ public class LockerHideSystem : MonoBehaviour
         // Reproducir sonido de entrada
         PlayEnterSound();
 
-        // NOTIFICAR A TODOS LOS ENEMIGOS
-        NotifyEnemiesPlayerHid();
+        // NOTIFICAR A TODOS LOS ENEMIGOS - DESACTIVAR DETECCIÓN
+        NotifyEnemiesPlayerHid(true);
 
         Debug.Log($"? {gameObject.name}: Entrando a la taquilla");
     }
@@ -343,7 +343,7 @@ public class LockerHideSystem : MonoBehaviour
         if (lockerAudioListener != null)
         {
             lockerAudioListener.enabled = false;
-            Debug.Log("?? AudioListener de taquilla DESACTIVADO");
+            Debug.Log("AudioListener de taquilla DESACTIVADO");
         }
 
         // REACTIVAR cámara del player
@@ -357,30 +357,30 @@ public class LockerHideSystem : MonoBehaviour
         if (playerAudioListener != null)
         {
             playerAudioListener.enabled = true;
-            Debug.Log("?? AudioListener del player REACTIVADO");
+            Debug.Log("AudioListener del player REACTIVADO");
         }
 
-        // ?? RESTAURAR LA PUERTA
+        // RESTAURAR LA PUERTA
         RestoreDoorInstant();
 
         // REACTIVAR el crosshair
         if (crosshairImage != null)
         {
             crosshairImage.gameObject.SetActive(wasCrosshairActive);
-            Debug.Log("? Crosshair REACTIVADO");
+            Debug.Log("Crosshair REACTIVADO");
         }
 
         if (playerCollider != null)
         {
             playerCollider.enabled = wasPlayerColliderEnabled;
-            Debug.Log("? Collider del player REACTIVADO");
+            Debug.Log("Collider del player REACTIVADO");
         }
 
         // REACTIVAR el CharacterController
         if (characterController != null)
         {
             characterController.enabled = wasCharacterControllerEnabled;
-            Debug.Log("? CharacterController REACTIVADO");
+            Debug.Log("CharacterController REACTIVADO");
         }
 
         // REACTIVAR el controlador del player
@@ -388,7 +388,7 @@ public class LockerHideSystem : MonoBehaviour
         {
             ResetPlayerState();
             playerController.enabled = true;
-            Debug.Log("? Movimiento del player REACTIVADO - Estado reseteado");
+            Debug.Log("Movimiento del player REACTIVADO - Estado reseteado");
         }
 
         isHiding = false;
@@ -396,17 +396,23 @@ public class LockerHideSystem : MonoBehaviour
         // Reproducir sonido de salida
         PlayExitSound();
 
+        // NOTIFICAR A TODOS LOS ENEMIGOS - REACTIVAR DETECCIÓN
+        NotifyEnemiesPlayerHid(false);
+
         Debug.Log($"? {gameObject.name}: Saliendo de la taquilla");
     }
 
-    void NotifyEnemiesPlayerHid()
+    // ============================================
+    // NOTIFICAR A LOS ENEMIGOS
+    // ============================================
+    void NotifyEnemiesPlayerHid(bool isHidden)
     {
         if (enemies == null || enemies.Length == 0)
         {
             enemies = FindObjectsOfType<EnemyIA>();
             if (enemies == null || enemies.Length == 0)
             {
-                if (showDebugLogs) Debug.Log("? No hay enemigos en la escena para notificar");
+                if (showDebugLogs) Debug.Log("No hay enemigos en la escena para notificar");
                 return;
             }
         }
@@ -415,8 +421,16 @@ public class LockerHideSystem : MonoBehaviour
         {
             if (enemy != null)
             {
-                enemy.OnPlayerHid();
-                if (showDebugLogs) Debug.Log($"? Notificado a enemigo: {enemy.name}");
+                // Usar el nuevo método SetPlayerHidden
+                enemy.SetPlayerHidden(isHidden);
+
+                // Si está entrando, también llamar a OnPlayerHid para el comportamiento de IA
+                if (isHidden)
+                {
+                    enemy.OnPlayerHid();
+                }
+
+                if (showDebugLogs) Debug.Log($"? {(isHidden ? "Ocultando" : "Revelando")} al enemigo: {enemy.name}");
             }
         }
     }
@@ -429,14 +443,14 @@ public class LockerHideSystem : MonoBehaviour
         if (characterController != null && !characterController.enabled)
         {
             characterController.enabled = true;
-            Debug.Log("? CharacterController REACTIVADO durante reset");
+            Debug.Log("CharacterController REACTIVADO durante reset");
         }
 
         playerController.ResetSprintState();
         playerController.ResetMovementState();
         playerController.enabled = false;
 
-        Debug.Log("? Estado del player reseteado correctamente");
+        Debug.Log("Estado del player reseteado correctamente");
     }
 
     void PlayEnterSound()
@@ -449,7 +463,7 @@ public class LockerHideSystem : MonoBehaviour
 
         audioSource.volume = enterSoundVolume;
         audioSource.PlayOneShot(enterSound);
-        Debug.Log($"?? Sonido de entrada reproducido (volumen: {enterSoundVolume})");
+        Debug.Log($"Sonido de entrada reproducido (volumen: {enterSoundVolume})");
     }
 
     void PlayExitSound()
@@ -462,11 +476,11 @@ public class LockerHideSystem : MonoBehaviour
 
         audioSource.volume = exitSoundVolume;
         audioSource.PlayOneShot(exitSound);
-        Debug.Log($"?? Sonido de salida reproducido (volumen: {exitSoundVolume})");
+        Debug.Log($"Sonido de salida reproducido (volumen: {exitSoundVolume})");
     }
 
     // ============================================
-    // ?? TRANSPARENCIA DE PUERTA
+    // TRANSPARENCIA DE PUERTA
     // ============================================
 
     void MakeDoorTransparentInstant()
@@ -513,12 +527,12 @@ public class LockerHideSystem : MonoBehaviour
             return;
         }
 
-        // ?? RESTAURAR COLOR
+        // RESTAURAR COLOR
         Color color = doorMaterial.color;
         color.a = originalDoorOpacity;
         doorMaterial.color = color;
 
-        // ?? RESTAURAR RENDER MODE
+        // RESTAURAR RENDER MODE
         doorMaterial.SetFloat("_Mode", 0);
         doorMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
         doorMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
@@ -527,7 +541,7 @@ public class LockerHideSystem : MonoBehaviour
         doorMaterial.EnableKeyword("_ALPHATEST_ON");
         doorMaterial.renderQueue = originalRenderQueue;
 
-        // ?? FORZAR ACTUALIZACIÓN DEL MATERIAL
+        // FORZAR ACTUALIZACIÓN DEL MATERIAL
         doorRenderer.material = doorMaterial;
 
         doorMaterial = null;

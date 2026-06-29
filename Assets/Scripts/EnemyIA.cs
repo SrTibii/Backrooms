@@ -20,8 +20,24 @@ public class EnemyIA : MonoBehaviour
     public float detectionRadius = 15f;
     public float visionRange = 25f;
     public float visionAngle = 120f;
-    public float proximityDetectionRange = 10f;
+    public float proximityDetectionRange = 2.5f;
     public LayerMask obstacleMask = -1;
+
+    // ============================================
+    // ?? RAYCASTS CONFIGURABLES DESDE EL INSPECTOR
+    // ============================================
+    [Header("Raycast Heights (Múltiples alturas)")]
+    public float[] raycastHeights = { 0.2f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f };
+    public float sphereCastRadius = 0.8f;
+    public float sphereCastHeight = 1.2f;
+
+    [Header("Raycast Offset")]
+    public float raycastForwardOffset = 0.5f;
+
+    [Header("Debug Raycast")]
+    public bool showRaycastDebug = true;
+    public Color raycastColor = Color.green;
+    public Color hitColor = Color.red;
 
     [Header("Persecución")]
     public float runSpeed = 5f;
@@ -102,15 +118,15 @@ public class EnemyIA : MonoBehaviour
     private float stuckThreshold = 2f;
     private Vector3 lastPosition;
 
-    // ?? Variables de persecución
+    // Variables de persecución
     private float directMovementTimer = 0f;
-    private float directMovementUpdateRate = 0.1f; // Ya no se usa el timer, pero mantenemos
+    private float directMovementUpdateRate = 0.1f;
     private Vector3 lastDestination;
 
     // Para detectar si el jugador está quieto
     private Vector3 lastPlayerPosition;
     private float playerIdleTimer = 0f;
-    private float playerIdleThreshold = 0.3f; // ?? CAMBIADO de 0.5f a 0.3f
+    private float playerIdleThreshold = 0.3f;
 
     // Variables para Jumpscare
     private bool isJumpscareActive = false;
@@ -133,6 +149,12 @@ public class EnemyIA : MonoBehaviour
     private bool wasJumpscareCameraActive;
     private Camera playerCamera;
 
+    // ============================================
+    // ?? NUEVAS VARIABLES PARA CONTROL DE DETECCIÓN
+    // ============================================
+    private bool detectionDisabled = false;
+    private bool playerHidden = false;
+
     void Start()
     {
         Debug.Log($"?? Inicializando {gameObject.name}...");
@@ -154,7 +176,7 @@ public class EnemyIA : MonoBehaviour
         if (agent != null)
         {
             agent.speed = walkSpeed;
-            agent.autoBraking = true;      // ?? CAMBIADO de false a true
+            agent.autoBraking = true;
             agent.stoppingDistance = 0.5f;
             agent.isStopped = false;
             agent.updatePosition = true;
@@ -163,7 +185,7 @@ public class EnemyIA : MonoBehaviour
             lastPosition = transform.position;
             lastDestination = transform.position;
             lastPlayerPosition = player != null ? player.position : transform.position;
-            agent.acceleration = 20f;      // ?? NUEVO
+            agent.acceleration = 20f;
             agent.angularSpeed = 360f;
         }
 
@@ -299,6 +321,9 @@ public class EnemyIA : MonoBehaviour
     {
         if (player == null) return;
 
+        // ?? ACTUALIZAR ESTADO DE ESCONDIDO (solo si no estamos forzados)
+        UpdateHidingStatus();
+
         if (isJumpscareActive) return;
 
         DetectPlayer();
@@ -326,6 +351,38 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
+    // ?? NUEVO MÉTODO PARA CONTROLAR LA DETECCIÓN DESDE EL EXTERIOR
+    // ============================================
+    public void SetPlayerHidden(bool hidden)
+    {
+        playerHidden = hidden;
+        detectionDisabled = hidden;
+
+        if (showDebugLogs)
+            Debug.Log($"{(hidden ? "??" : "??")} Detección {(hidden ? "DESACTIVADA" : "ACTIVADA")} para {gameObject.name}");
+    }
+
+    // ============================================
+    // ?? ACTUALIZAR ESTADO DE ESCONDIDO
+    // ============================================
+    void UpdateHidingStatus()
+    {
+        // Si la detección está desactivada, no actualizar el estado
+        if (detectionDisabled) return;
+
+        if (lockerSystem != null)
+        {
+            bool wasHiding = isPlayerHiding;
+            isPlayerHiding = lockerSystem.IsHiding();
+
+            if (showDebugLogs && wasHiding != isPlayerHiding)
+            {
+                Debug.Log($"?? Estado de escondido cambiado: {wasHiding} -> {isPlayerHiding}");
+            }
+        }
+    }
+
+    // ============================================
     // ?? CHECK JUMBSCARE
     // ============================================
     void CheckJumpscare()
@@ -333,6 +390,7 @@ public class EnemyIA : MonoBehaviour
         if (isJumpscareActive) return;
         if (player == null) return;
         if (isPlayerHiding) return;
+        if (detectionDisabled) return;
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
@@ -613,20 +671,17 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // DETECTAR JUGADOR (CON MÚLTIPLES RAYCASTS)
+    // ?? DETECTAR JUGADOR (MODIFICADO)
     // ============================================
     void DetectPlayer()
     {
-        isPlayerHiding = false;
-        if (lockerSystem != null)
-        {
-            isPlayerHiding = lockerSystem.IsHiding();
-        }
-
-        if (isPlayerHiding)
+        // ?? NUEVA VERIFICACIÓN: Si la detección está desactivada, salir inmediatamente
+        if (detectionDisabled || playerHidden)
         {
             isPlayerVisible = false;
             isPlayerInRange = false;
+            if (showDebugLogs && Time.frameCount % 60 == 0)
+                Debug.Log($"?? Detección DESACTIVADA para {gameObject.name}");
             return;
         }
 
@@ -634,61 +689,119 @@ public class EnemyIA : MonoBehaviour
         isPlayerInRange = distanceToPlayer <= detectionRadius;
         isPlayerVisible = false;
 
+        // ?? SI EL JUGADOR ESTÁ CERCA, DETECTARLO SIEMPRE (PROXIMIDAD)
         if (distanceToPlayer < proximityDetectionRange)
         {
             isPlayerVisible = true;
             lastKnownPlayerPosition = player.position;
             lastDirection = (player.position - transform.position).normalized;
+            Debug.Log($"?? Detección por proximidad: {distanceToPlayer:F1}m");
             return;
         }
 
+        // ?? SI ESTÁ DENTRO DEL RANGO DE VISIÓN (RAYCAST)
         if (distanceToPlayer <= visionRange)
         {
             Vector3 directionToPlayer = (player.position - transform.position).normalized;
             float angle = Vector3.Angle(transform.forward, directionToPlayer);
 
+            Debug.Log($"?? Distancia: {distanceToPlayer:F1}m | Ángulo: {angle:F1}° | Máx: {visionAngle * 0.5f}°");
+
             if (angle <= visionAngle * 0.5f)
             {
-                float[] heights = { 0.2f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f };
-                Vector3 rayOrigin = transform.position;
+                int layerMask = -1;
+                layerMask &= ~(1 << gameObject.layer);
 
-                foreach (float height in heights)
+                Debug.Log($"?? LayerMask: {layerMask} | Offset: {raycastForwardOffset}");
+
+                bool hitDetected = false;
+
+                foreach (float height in raycastHeights)
                 {
-                    Vector3 origin = rayOrigin + Vector3.up * height;
+                    Vector3 origin = transform.position + Vector3.up * height + transform.forward * raycastForwardOffset;
                     Vector3 direction = (player.position - origin).normalized;
                     float maxDistance = Vector3.Distance(origin, player.position) + 0.5f;
 
                     RaycastHit hit;
-                    if (Physics.Raycast(origin, direction, out hit, maxDistance, obstacleMask))
+
+                    if (showRaycastDebug)
                     {
+                        Debug.DrawRay(origin, direction * maxDistance, raycastColor, 0.2f);
+                    }
+
+                    if (Physics.Raycast(origin, direction, out hit, maxDistance, layerMask))
+                    {
+                        if (showRaycastDebug)
+                        {
+                            Debug.DrawLine(origin, hit.point, hitColor, 0.3f);
+                        }
+
+                        Debug.Log($"?? Raycast {height}m: {hit.collider.gameObject.name} | Tag: '{hit.collider.tag}' | Layer: {hit.collider.gameObject.layer}");
+
                         if (hit.collider.CompareTag("Player"))
                         {
                             isPlayerVisible = true;
                             lastKnownPlayerPosition = player.position;
                             lastDirection = (player.position - transform.position).normalized;
+                            hitDetected = true;
+                            Debug.Log($"? JUGADOR DETECTADO desde altura {height}m");
                             break;
                         }
                     }
+                    else
+                    {
+                        if (showDebugLogs) Debug.Log($"? Raycast {height}m: No impactó en nada");
+                    }
                 }
 
-                if (!isPlayerVisible)
+                if (!hitDetected && !isPlayerVisible)
                 {
-                    Vector3 center = transform.position + Vector3.up * 1.2f;
+                    Vector3 center = transform.position + Vector3.up * sphereCastHeight + transform.forward * raycastForwardOffset;
                     Vector3 direction = (player.position - center).normalized;
                     float distance = Vector3.Distance(center, player.position);
 
-                    RaycastHit hit;
-                    if (Physics.SphereCast(center, 0.8f, direction, out hit, distance, obstacleMask))
+                    if (showRaycastDebug)
                     {
+                        Debug.DrawLine(center, center + direction * distance, Color.yellow, 0.2f);
+                    }
+
+                    RaycastHit hit;
+                    if (Physics.SphereCast(center, sphereCastRadius, direction, out hit, distance, layerMask))
+                    {
+                        if (showRaycastDebug)
+                        {
+                            Debug.DrawLine(center, hit.point, Color.magenta, 0.3f);
+                        }
+
+                        Debug.Log($"?? SphereCast: {hit.collider.gameObject.name} | Tag: '{hit.collider.tag}' | Layer: {hit.collider.gameObject.layer}");
+
                         if (hit.collider.CompareTag("Player"))
                         {
                             isPlayerVisible = true;
                             lastKnownPlayerPosition = player.position;
                             lastDirection = (player.position - transform.position).normalized;
+                            Debug.Log($"? SphereCast detectó al jugador");
                         }
                     }
+                    else
+                    {
+                        if (showDebugLogs) Debug.Log($"? SphereCast: No impactó en nada");
+                    }
+                }
+
+                if (!isPlayerVisible && showDebugLogs)
+                {
+                    Debug.Log($"? No se detectó al jugador. Distancia: {distanceToPlayer:F1}m, Ángulo: {angle:F1}°");
                 }
             }
+            else
+            {
+                if (showDebugLogs) Debug.Log($"? Jugador fuera del ángulo de visión: {angle:F1}°");
+            }
+        }
+        else
+        {
+            if (showDebugLogs) Debug.Log($"? Jugador fuera del rango de visión: {distanceToPlayer:F1}m");
         }
     }
 
@@ -712,27 +825,49 @@ public class EnemyIA : MonoBehaviour
         }
     }
 
+    // ============================================
+    // ?? UPDATE IDLE (MODIFICADO)
+    // ============================================
     void UpdateIdle()
     {
+        // Si estamos esperando después de que el jugador se haya escondido
         if (isWaitingAfterHide)
         {
             hideWaitTimer -= Time.deltaTime;
+
             if (hideWaitTimer <= 0)
             {
+                // ?? TIEMPO DE ESPERA TERMINADO - VOLVER A PATRULLAJE NORMAL
                 isWaitingAfterHide = false;
                 ReactivateAmbientSound();
 
-                if (isPlayerHiding)
+                // ?? VERIFICAR SI EL JUGADOR SIGUE ESCONDIDO
+                if (lockerSystem != null && !detectionDisabled)
                 {
+                    isPlayerHiding = lockerSystem.IsHiding();
+                }
+
+                // ?? SI EL JUGADOR SIGUE ESCONDIDO, PERO YA ESPERAMOS LO SUFICIENTE
+                // VOLVEMOS A PATRULLAR NORMALMENTE (pero sin poder detectarlo)
+                if (isPlayerHiding || detectionDisabled)
+                {
+                    if (showDebugLogs) Debug.Log($"?? El jugador sigue escondido, pero volviendo a patrullar normalmente");
+
+                    // ?? IMPORTANTE: NO llamamos a OnPlayerHid() de nuevo
+                    // Solo volvemos a patrullar
                     SelectNewWaypoint();
                     ChangeState(EnemyState.Walking);
+                    return;
                 }
-                else if (isPlayerVisible && !isPlayerHiding)
+
+                // Si ya no está escondido y es visible, perseguir
+                if (isPlayerVisible && !isPlayerHiding && !detectionDisabled)
                 {
                     ChangeState(EnemyState.Running);
                 }
                 else
                 {
+                    // Si no está visible, patrullar normalmente
                     SelectNewWaypoint();
                     ChangeState(EnemyState.Walking);
                 }
@@ -740,7 +875,8 @@ public class EnemyIA : MonoBehaviour
             return;
         }
 
-        if (isPlayerVisible && !isPlayerHiding)
+        // Comportamiento normal de Idle (cuando NO está esperando después de esconderse)
+        if (isPlayerVisible && !isPlayerHiding && !detectionDisabled)
         {
             ChangeState(EnemyState.Running);
             return;
@@ -750,7 +886,7 @@ public class EnemyIA : MonoBehaviour
 
         if (idleTimer <= 0)
         {
-            if (isPlayerVisible && !isPlayerHiding)
+            if (isPlayerVisible && !isPlayerHiding && !detectionDisabled)
             {
                 ChangeState(EnemyState.Running);
                 return;
@@ -762,13 +898,13 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? UPDATE WALKING (INTACTO - NO TOCAR)
+    // ?? UPDATE WALKING
     // ============================================
     void UpdateWalking()
     {
         if (isWaitingAfterHide) return;
 
-        if (isPlayerVisible && !isPlayerHiding)
+        if (isPlayerVisible && !isPlayerHiding && !detectionDisabled)
         {
             ChangeState(EnemyState.Running);
             return;
@@ -791,13 +927,20 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? UPDATE RUNNING (PERSECUCIÓN MEJORADA - SIN ROMPER PATRULLA)
+    // ?? UPDATE RUNNING (MODIFICADO)
     // ============================================
     void UpdateRunning()
     {
-        if (isPlayerHiding)
+        // ?? ACTUALIZAR isPlayerHiding DESDE EL SISTEMA DE TAQUILLA
+        if (lockerSystem != null && !detectionDisabled)
         {
-            if (showDebugLogs) Debug.Log($"?? Jugador escondido en taquilla, esperando {hideWaitTime}s");
+            isPlayerHiding = lockerSystem.IsHiding();
+        }
+
+        // ?? SI LA DETECCIÓN ESTÁ DESACTIVADA O EL JUGADOR ESTÁ ESCONDIDO
+        if (detectionDisabled || isPlayerHiding)
+        {
+            if (showDebugLogs) Debug.Log($"?? Jugador escondido en taquilla, esperando {hideWaitTime}s antes de volver a patrullar");
 
             lastKnownHidingPosition = player.position;
             isWaitingAfterHide = true;
@@ -807,6 +950,8 @@ public class EnemyIA : MonoBehaviour
             isPlayerInRange = false;
 
             StopAgentImmediately();
+
+            // ?? IMPORTANTE: Nos vamos a Idle pero con isWaitingAfterHide = true
             ChangeState(EnemyState.Idle);
 
             Vector3 directionToHide = (lastKnownHidingPosition - transform.position).normalized;
@@ -820,6 +965,7 @@ public class EnemyIA : MonoBehaviour
             return;
         }
 
+        // Resto del código de persecución...
         if (isPlayerVisible || isPlayerInRange)
         {
             playerLostTimer = 0f;
@@ -831,7 +977,6 @@ public class EnemyIA : MonoBehaviour
                 agent.speed = runSpeed;
                 agent.isStopped = false;
 
-                // ?? MOVIMIENTO DIRECTO MEJORADO
                 UpdateDirectMovement();
             }
 
@@ -882,29 +1027,24 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? MOVIMIENTO DIRECTO MEJORADO (CONTROL MANUAL - SIN RODEOS)
+    // ?? MOVIMIENTO DIRECTO MEJORADO
     // ============================================
     void UpdateDirectMovement()
     {
         if (agent == null || player == null) return;
 
-        // ?? Si el jugador está visible, perseguir
         if (isPlayerVisible)
         {
-            // ?? Calcular dirección hacia el jugador
             Vector3 directionToPlayer = (player.position - transform.position).normalized;
             directionToPlayer.y = 0;
 
             float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
-            // ?? Si está muy cerca (< 1.5m), ir DIRECTAMENTE sin NavMesh
             if (distanceToPlayer < 1.5f)
             {
-                // Movimiento directo
                 agent.velocity = directionToPlayer * runSpeed;
                 agent.ResetPath();
 
-                // Rotación suave
                 if (directionToPlayer.magnitude > 0.1f)
                 {
                     Quaternion targetRotation = Quaternion.LookRotation(directionToPlayer);
@@ -913,13 +1053,11 @@ public class EnemyIA : MonoBehaviour
                 return;
             }
 
-            // ?? Si está lejos, usar NavMesh pero con control de velocidad
             NavMeshHit hit;
             if (NavMesh.SamplePosition(player.position, out hit, 10f, agent.areaMask))
             {
                 Vector3 target = hit.position;
 
-                // ?? Solo actualizar el destino si cambió significativamente
                 if (Vector3.Distance(target, lastDestination) > 0.5f)
                 {
                     agent.SetDestination(target);
@@ -930,19 +1068,11 @@ public class EnemyIA : MonoBehaviour
                 }
             }
 
-            // ?? CONTROL MANUAL DE VELOCIDAD para evitar que se pegue a las paredes
-            // Si el agente está cerca de una pared (velocidad baja pero destino lejos)
-            // ?? CONTROL MANUAL DE VELOCIDAD para evitar que se pegue a las paredes
             if (agent.remainingDistance > 1f && agent.velocity.magnitude < 0.5f)
             {
-                // ?? REDUCIDO de 0.8f a 0.5f para menos deslizamiento
                 agent.velocity = directionToPlayer * runSpeed * 0.5f;
-
-                if (showDebugLogs && Time.frameCount % 60 == 0)
-                    Debug.Log($"? Forzando movimiento en dirección al jugador");
             }
 
-            // ?? Rotación suave hacia el jugador (no instantánea)
             Vector3 desiredDirection = (player.position - transform.position).normalized;
             desiredDirection.y = 0;
             if (desiredDirection.magnitude > 0.1f)
@@ -953,7 +1083,6 @@ public class EnemyIA : MonoBehaviour
         }
         else
         {
-            // ?? Si no ve al jugador, ir a la última posición conocida
             if (!agent.hasPath || agent.remainingDistance < 0.5f)
             {
                 NavMeshHit hit;
@@ -965,7 +1094,6 @@ public class EnemyIA : MonoBehaviour
             }
         }
 
-        // ?? Si el agente está atascado, forzar recálculo
         if (agent.remainingDistance > 2f && agent.velocity.magnitude < 0.1f)
         {
             directMovementTimer += Time.deltaTime;
@@ -1008,16 +1136,14 @@ public class EnemyIA : MonoBehaviour
     {
         if (player == null) return false;
 
-        float[] heights = { 0.2f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f };
-
-        foreach (float height in heights)
+        foreach (float height in raycastHeights)
         {
-            Vector3 origin = transform.position + Vector3.up * height;
+            Vector3 origin = transform.position + Vector3.up * height + transform.forward * raycastForwardOffset;
             Vector3 direction = (player.position - origin).normalized;
             float distance = Vector3.Distance(origin, player.position);
 
             RaycastHit hit;
-            if (Physics.Raycast(origin, direction, out hit, distance, obstacleMask))
+            if (Physics.Raycast(origin, direction, out hit, distance, -1))
             {
                 if (hit.collider.CompareTag("Player"))
                 {
@@ -1026,12 +1152,12 @@ public class EnemyIA : MonoBehaviour
             }
         }
 
-        Vector3 center = transform.position + Vector3.up * 1.2f;
+        Vector3 center = transform.position + Vector3.up * sphereCastHeight + transform.forward * raycastForwardOffset;
         Vector3 dir = (player.position - center).normalized;
         float dist = Vector3.Distance(center, player.position);
 
         RaycastHit sphereHit;
-        if (Physics.SphereCast(center, 0.8f, dir, out sphereHit, dist, obstacleMask))
+        if (Physics.SphereCast(center, sphereCastRadius, dir, out sphereHit, dist, -1))
         {
             if (sphereHit.collider.CompareTag("Player"))
             {
@@ -1106,13 +1232,17 @@ public class EnemyIA : MonoBehaviour
         }
     }
 
+    // ============================================
+    // ?? ON PLAYER HID (MODIFICADO)
+    // ============================================
     public void OnPlayerHid()
     {
         if (showDebugLogs) Debug.Log($"?? El jugador se ha escondido en una taquilla - {gameObject.name}");
 
+        // ?? FORZAR isPlayerHiding a TRUE
+        isPlayerHiding = true;
         isPlayerVisible = false;
         isPlayerInRange = false;
-        isPlayerHiding = true;
         playerLostTimer = 0f;
 
         if (player != null)
@@ -1120,6 +1250,7 @@ public class EnemyIA : MonoBehaviour
             lastKnownHidingPosition = player.position;
         }
 
+        // ?? INICIAR LA ESPERA PARA VOLVER A PATRULLAR
         isWaitingAfterHide = true;
         hideWaitTimer = hideWaitTime;
 
@@ -1138,6 +1269,9 @@ public class EnemyIA : MonoBehaviour
         }
     }
 
+    // ============================================
+    // ?? CAMBIAR ESTADO (MODIFICADO)
+    // ============================================
     void ChangeState(EnemyState newState)
     {
         if (currentState == newState) return;
@@ -1158,6 +1292,7 @@ public class EnemyIA : MonoBehaviour
                 }
                 if (showDebugLogs) Debug.Log($"?? IDLE por {(isWaitingAfterHide ? hideWaitTimer : idleTimer):F1}s");
 
+                // ?? Detener sonido de persecución
                 StopChaseSound();
                 break;
 
@@ -1173,6 +1308,7 @@ public class EnemyIA : MonoBehaviour
                 }
                 if (showDebugLogs) Debug.Log($"?? WALKING a {currentWaypoint?.name}");
 
+                // ?? DETENER SONIDO DE PERSECUCIÓN AL VOLVER A PATRULLAR
                 StopChaseSound();
                 break;
 
@@ -1291,6 +1427,9 @@ public class EnemyIA : MonoBehaviour
             Debug.Log($"?? Ambiente: {currentAmbientClip.name} | Duración: {clipDuration:F1}s | Pausa: {pauseBetweenSounds:F1}s | Total: {ambientTimer:F1}s");
     }
 
+    // ============================================
+    // ?? REACTIVAR SONIDO AMBIENTE (MODIFICADO)
+    // ============================================
     void ReactivateAmbientSound()
     {
         if (showDebugLogs) Debug.Log($"?? Reactivando sonidos ambientales...");
