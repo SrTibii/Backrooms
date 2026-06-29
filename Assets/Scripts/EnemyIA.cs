@@ -155,9 +155,35 @@ public class EnemyIA : MonoBehaviour
     private bool detectionDisabled = false;
     private bool playerHidden = false;
 
+    // ============================================
+    // ?? CACHE DE LAYER PARA OPTIMIZACIÓN
+    // ============================================
+    private int playerLayerMask = -1;
+    private int enemyLayer = -1;
+
     void Start()
     {
         Debug.Log($"?? Inicializando {gameObject.name}...");
+
+        // ?? OBTENER Y CACHEAR CAPAS
+        enemyLayer = gameObject.layer;
+        int playerLayer = LayerMask.NameToLayer("Player");
+
+        // ?? DEBUG: Verificar componentes
+        DebugComponents();
+
+        // Si no existe la capa "Player", usar "Default" como fallback
+        if (playerLayer == -1)
+        {
+            Debug.LogWarning("?? No existe la capa 'Player', usando 'Default' como fallback");
+            playerLayer = LayerMask.NameToLayer("Default");
+        }
+
+        // Crear layer mask que SOLO detecte la capa del jugador
+        playerLayerMask = 1 << playerLayer;
+
+        // ?? DEBUG: Mostrar información de capas
+        DebugLayerInfo();
 
         if (player == null)
             player = GameObject.FindGameObjectWithTag("Player")?.transform;
@@ -671,19 +697,18 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? DETECTAR JUGADOR (MODIFICADO)
+    // ?? DETECTAR JUGADOR - VERSIÓN MEJORADA CON MÚLTIPLES ALTURAS
     // ============================================
     void DetectPlayer()
     {
-        // ?? NUEVA VERIFICACIÓN: Si la detección está desactivada, salir inmediatamente
         if (detectionDisabled || playerHidden)
         {
             isPlayerVisible = false;
             isPlayerInRange = false;
-            if (showDebugLogs && Time.frameCount % 60 == 0)
-                Debug.Log($"?? Detección DESACTIVADA para {gameObject.name}");
             return;
         }
+
+        if (player == null) return;
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
         isPlayerInRange = distanceToPlayer <= detectionRadius;
@@ -695,113 +720,109 @@ public class EnemyIA : MonoBehaviour
             isPlayerVisible = true;
             lastKnownPlayerPosition = player.position;
             lastDirection = (player.position - transform.position).normalized;
-            Debug.Log($"?? Detección por proximidad: {distanceToPlayer:F1}m");
+            Debug.Log($"?? ? DETECTADO por PROXIMIDAD: {distanceToPlayer:F1}m");
             return;
         }
 
-        // ?? SI ESTÁ DENTRO DEL RANGO DE VISIÓN (RAYCAST)
+        // ?? SI ESTÁ DENTRO DEL RANGO DE VISIÓN
         if (distanceToPlayer <= visionRange)
         {
             Vector3 directionToPlayer = (player.position - transform.position).normalized;
             float angle = Vector3.Angle(transform.forward, directionToPlayer);
 
-            Debug.Log($"?? Distancia: {distanceToPlayer:F1}m | Ángulo: {angle:F1}° | Máx: {visionAngle * 0.5f}°");
-
             if (angle <= visionAngle * 0.5f)
             {
-                int layerMask = -1;
-                layerMask &= ~(1 << gameObject.layer);
+                // ?? PROBAR CON DIFERENTES ALTURAS PARA DETECTAR
+                float[] heights = { 0.2f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f };
+                bool foundPlayer = false;
 
-                Debug.Log($"?? LayerMask: {layerMask} | Offset: {raycastForwardOffset}");
-
-                bool hitDetected = false;
-
-                foreach (float height in raycastHeights)
+                foreach (float height in heights)
                 {
-                    Vector3 origin = transform.position + Vector3.up * height + transform.forward * raycastForwardOffset;
-                    Vector3 direction = (player.position - origin).normalized;
-                    float maxDistance = Vector3.Distance(origin, player.position) + 0.5f;
-
-                    RaycastHit hit;
+                    Vector3 start = transform.position + Vector3.up * height + transform.forward * raycastForwardOffset;
+                    Vector3 end = player.position;
 
                     if (showRaycastDebug)
                     {
-                        Debug.DrawRay(origin, direction * maxDistance, raycastColor, 0.2f);
+                        Debug.DrawLine(start, end, Color.yellow, 1.0f);
                     }
 
-                    if (Physics.Raycast(origin, direction, out hit, maxDistance, layerMask))
+                    RaycastHit hit;
+                    if (Physics.Linecast(start, end, out hit))
                     {
                         if (showRaycastDebug)
                         {
-                            Debug.DrawLine(origin, hit.point, hitColor, 0.3f);
+                            Debug.DrawLine(start, hit.point, Color.red, 1.0f);
                         }
 
-                        Debug.Log($"?? Raycast {height}m: {hit.collider.gameObject.name} | Tag: '{hit.collider.tag}' | Layer: {hit.collider.gameObject.layer}");
+                        Debug.Log($"?? LineCast altura {height}m: Impactó en '{hit.collider.gameObject.name}' | Tag: '{hit.collider.tag}'");
 
                         if (hit.collider.CompareTag("Player"))
                         {
                             isPlayerVisible = true;
                             lastKnownPlayerPosition = player.position;
-                            lastDirection = (player.position - transform.position).normalized;
-                            hitDetected = true;
-                            Debug.Log($"? JUGADOR DETECTADO desde altura {height}m");
+                            lastDirection = directionToPlayer;
+                            foundPlayer = true;
+                            Debug.Log($"? ? ? JUGADOR DETECTADO desde altura {height}m");
                             break;
                         }
+                        else
+                        {
+                            // Si impactó en un obstáculo, probar con otra altura
+                            Debug.Log($"? LineCast altura {height}m: Impactó en '{hit.collider.name}' (OBSTÁCULO)");
+                            continue;
+                        }
                     }
                     else
                     {
-                        if (showDebugLogs) Debug.Log($"? Raycast {height}m: No impactó en nada");
+                        Debug.Log($"? LineCast altura {height}m: No impactó en nada (esto es raro)");
                     }
                 }
 
-                if (!hitDetected && !isPlayerVisible)
+                if (!foundPlayer)
                 {
-                    Vector3 center = transform.position + Vector3.up * sphereCastHeight + transform.forward * raycastForwardOffset;
-                    Vector3 direction = (player.position - center).normalized;
-                    float distance = Vector3.Distance(center, player.position);
+                    // ?? ULTIMO RECURSO: Linecast desde la cabeza del enemigo
+                    Vector3 start = transform.position + Vector3.up * 1.5f;
+                    Vector3 end = player.position + Vector3.up * 0.5f; // Centro del jugador
 
                     if (showRaycastDebug)
                     {
-                        Debug.DrawLine(center, center + direction * distance, Color.yellow, 0.2f);
+                        Debug.DrawLine(start, end, Color.cyan, 1.0f);
                     }
 
                     RaycastHit hit;
-                    if (Physics.SphereCast(center, sphereCastRadius, direction, out hit, distance, layerMask))
+                    if (Physics.Linecast(start, end, out hit))
                     {
                         if (showRaycastDebug)
                         {
-                            Debug.DrawLine(center, hit.point, Color.magenta, 0.3f);
+                            Debug.DrawLine(start, hit.point, Color.magenta, 1.0f);
                         }
 
-                        Debug.Log($"?? SphereCast: {hit.collider.gameObject.name} | Tag: '{hit.collider.tag}' | Layer: {hit.collider.gameObject.layer}");
+                        Debug.Log($"?? LineCast FINAL: Impactó en '{hit.collider.gameObject.name}' | Tag: '{hit.collider.tag}'");
 
                         if (hit.collider.CompareTag("Player"))
                         {
                             isPlayerVisible = true;
                             lastKnownPlayerPosition = player.position;
-                            lastDirection = (player.position - transform.position).normalized;
-                            Debug.Log($"? SphereCast detectó al jugador");
+                            lastDirection = directionToPlayer;
+                            Debug.Log($"? ? ? JUGADOR DETECTADO por LineCast FINAL");
+                        }
+                        else
+                        {
+                            Debug.Log($"? LineCast FINAL: Impactó en '{hit.collider.name}' (OBSTÁCULO)");
                         }
                     }
-                    else
-                    {
-                        if (showDebugLogs) Debug.Log($"? SphereCast: No impactó en nada");
-                    }
-                }
-
-                if (!isPlayerVisible && showDebugLogs)
-                {
-                    Debug.Log($"? No se detectó al jugador. Distancia: {distanceToPlayer:F1}m, Ángulo: {angle:F1}°");
                 }
             }
             else
             {
-                if (showDebugLogs) Debug.Log($"? Jugador fuera del ángulo de visión: {angle:F1}°");
+                if (showDebugLogs && Time.frameCount % 30 == 0)
+                    Debug.Log($"? Jugador fuera del ángulo de visión: {angle:F1}° (máx: {visionAngle * 0.5f:F1}°)");
             }
         }
         else
         {
-            if (showDebugLogs) Debug.Log($"? Jugador fuera del rango de visión: {distanceToPlayer:F1}m");
+            if (showDebugLogs && Time.frameCount % 30 == 0)
+                Debug.Log($"? Jugador fuera del rango de visión: {distanceToPlayer:F1}m (máx: {visionRange:F1}m)");
         }
     }
 
@@ -1132,34 +1153,43 @@ public class EnemyIA : MonoBehaviour
         if (showDebugLogs) Debug.Log($"?? Agente detenido inmediatamente");
     }
 
+
     bool HasLineOfSightToPlayer()
     {
         if (player == null) return false;
 
-        foreach (float height in raycastHeights)
+        // ?? Probar con diferentes alturas
+        float[] heights = { 0.2f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f };
+
+        foreach (float height in heights)
         {
-            Vector3 origin = transform.position + Vector3.up * height + transform.forward * raycastForwardOffset;
-            Vector3 direction = (player.position - origin).normalized;
-            float distance = Vector3.Distance(origin, player.position);
+            Vector3 start = transform.position + Vector3.up * height + transform.forward * raycastForwardOffset;
+            Vector3 end = player.position;
 
             RaycastHit hit;
-            if (Physics.Raycast(origin, direction, out hit, distance, -1))
+            if (Physics.Linecast(start, end, out hit))
             {
+                // Si impacta en el jugador, tiene línea de visión
                 if (hit.collider.CompareTag("Player"))
                 {
                     return true;
                 }
+                // Si impacta en un obstáculo, probar con otra altura
+                else
+                {
+                    continue;
+                }
             }
         }
 
-        Vector3 center = transform.position + Vector3.up * sphereCastHeight + transform.forward * raycastForwardOffset;
-        Vector3 dir = (player.position - center).normalized;
-        float dist = Vector3.Distance(center, player.position);
+        // ?? ULTIMO RECURSO: Desde la cabeza del enemigo al centro del jugador
+        Vector3 startFinal = transform.position + Vector3.up * 1.5f;
+        Vector3 endFinal = player.position + Vector3.up * 0.5f;
 
-        RaycastHit sphereHit;
-        if (Physics.SphereCast(center, sphereCastRadius, dir, out sphereHit, dist, -1))
+        RaycastHit hitFinal;
+        if (Physics.Linecast(startFinal, endFinal, out hitFinal))
         {
-            if (sphereHit.collider.CompareTag("Player"))
+            if (hitFinal.collider.CompareTag("Player"))
             {
                 return true;
             }
@@ -1690,5 +1720,61 @@ public class EnemyIA : MonoBehaviour
         globalVolume = null;
         jumpscareCamera = null;
         playerCamera = null;
+    }
+
+    // ============================================
+    // ?? MÉTODO PARA DEBUGGEAR CAPAS
+    // ============================================
+    void DebugLayerInfo()
+    {
+        if (player == null) return;
+
+        int playerLayer = LayerMask.NameToLayer("Player");
+
+        Debug.Log($"=== INFORMACIÓN DE CAPAS ===");
+        Debug.Log($"Enemigo: {gameObject.name} | Layer: {gameObject.layer} ({LayerMask.LayerToName(gameObject.layer)})");
+        Debug.Log($"Jugador: {player.name} | Layer: {player.gameObject.layer} ({LayerMask.LayerToName(player.gameObject.layer)})");
+        Debug.Log($"Tag del jugador: {player.tag}");
+        Debug.Log($"Capa 'Player' existe: {(playerLayer != -1 ? "SÍ" : "NO")}");
+        if (playerLayer != -1)
+            Debug.Log($"LayerMask usado: {1 << playerLayer}");
+        Debug.Log($"=============================");
+    }
+
+    // ============================================
+    // ?? DEBUG: VERIFICAR COMPONENTES
+    // ============================================
+    void DebugComponents()
+    {
+        Debug.Log($"=== COMPONENTES DE {gameObject.name} ===");
+
+        Collider collider = GetComponent<Collider>();
+        if (collider != null)
+        {
+            Debug.Log($"? Collider: {collider.GetType().Name} | Enabled: {collider.enabled} | IsTrigger: {collider.isTrigger}");
+        }
+        else
+        {
+            Debug.LogError($"? {gameObject.name} NO tiene Collider!");
+        }
+
+        if (agent != null)
+        {
+            Debug.Log($"? NavMeshAgent: {agent.GetType().Name} | Enabled: {agent.enabled} | OnNavMesh: {agent.isOnNavMesh}");
+        }
+
+        if (player != null)
+        {
+            Collider playerCol = player.GetComponent<Collider>();
+            if (playerCol != null)
+            {
+                Debug.Log($"? Player Collider: {playerCol.GetType().Name} | Enabled: {playerCol.enabled} | IsTrigger: {playerCol.isTrigger}");
+            }
+            else
+            {
+                Debug.LogError($"? Player NO tiene Collider!");
+            }
+        }
+        Debug.Log($"=============================");
     }
 }

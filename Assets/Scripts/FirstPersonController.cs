@@ -393,10 +393,10 @@ public class FirstPersonController : MonoBehaviour
         crouchHeight = 1f;
 
         controller.height = standingHeight;
-        controller.radius = 0.3f;
+        //controller.radius = 0.5f;
 
         Vector3 center = controller.center;
-        center.y = 1f;  // ?? Center Y = 1
+        center.y = 1.5f;  // ?? Center Y = 1
         controller.center = center;
 
         currentHeight = standingHeight;

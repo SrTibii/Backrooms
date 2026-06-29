@@ -250,6 +250,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (20)
@@ -760,6 +764,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (1)
@@ -929,6 +937,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (21)
@@ -1103,6 +1115,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (39)
@@ -1310,6 +1326,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (33)
@@ -2341,6 +2361,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (3)
@@ -2623,6 +2647,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (7)
@@ -4222,6 +4250,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (13)
@@ -4391,6 +4423,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (40)
@@ -5049,6 +5085,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (11)
@@ -5110,6 +5150,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (32)
@@ -7179,6 +7223,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (19)
@@ -9018,6 +9066,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (36)
@@ -9970,6 +10022,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (35)
@@ -11188,6 +11244,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (25)
@@ -11780,6 +11840,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (5)
@@ -11837,6 +11901,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (29)
@@ -13113,6 +13181,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (4)
@@ -13170,6 +13242,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (38)
@@ -14617,6 +14693,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (2)
@@ -15364,6 +15444,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (15)
@@ -15594,6 +15678,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4919064810729858735, guid: 2d844de42badd024fb6945ac188401ad, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7727990573615894368, guid: 2d844de42badd024fb6945ac188401ad, type: 3}
+      propertyPath: m_Convex
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -15834,6 +15922,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (27)
@@ -16826,6 +16918,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (22)
@@ -17591,6 +17687,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (12)
@@ -18684,6 +18784,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (16)
@@ -19420,6 +19524,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (37)
@@ -22215,6 +22323,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (10)
@@ -23794,6 +23906,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (24)
@@ -24661,6 +24777,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (8)
@@ -26221,6 +26341,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (28)
@@ -26395,6 +26519,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (17)
@@ -28101,6 +28229,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (34)
@@ -29482,6 +29614,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (31)
@@ -29685,9 +29821,9 @@ MonoBehaviour:
   idleTimeMin: 2
   idleTimeMax: 5
   detectionRadius: 20
-  visionRange: 100
-  visionAngle: 250
-  proximityDetectionRange: 10
+  visionRange: 40
+  visionAngle: 160
+  proximityDetectionRange: 3
   obstacleMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -29701,7 +29837,7 @@ MonoBehaviour:
   sphereCastRadius: 1.17
   sphereCastHeight: 1.2
   raycastForwardOffset: 4
-  showRaycastDebug: 1
+  showRaycastDebug: 0
   raycastColor: {r: 0, g: 1, b: 0, a: 1}
   hitColor: {r: 1, g: 0, b: 0, a: 1}
   runSpeed: 15
@@ -29728,7 +29864,7 @@ MonoBehaviour:
   jumpscareCamera: {fileID: 1236680498}
   globalVolume: {fileID: 1570190007}
   jumpscareVolumeOverride: {fileID: 1654677601}
-  showDebugLogs: 1
+  showDebugLogs: 0
 --- !u!195 &1489431147
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -29739,7 +29875,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 30
-  m_Speed: 13
+  m_Speed: 11
   m_Acceleration: 10
   avoidancePriority: 50
   m_AngularSpeed: 120
@@ -29756,6 +29892,29 @@ Animator:
   m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: a33ecbffb6b8e7a4096d2adb449c93eb, type: 3}
   m_PrefabInstance: {fileID: 2080927493}
   m_PrefabAsset: {fileID: 0}
+--- !u!136 &1489431149
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1489431144}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 18.91687
+  m_Height: 96.74631
+  m_Direction: 1
+  m_Center: {x: 0, y: 24.7, z: 0}
 --- !u!1 &1492507929
 GameObject:
   m_ObjectHideFlags: 0
@@ -31015,6 +31174,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (14)
@@ -31072,6 +31235,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (23)
@@ -32631,6 +32798,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4919064810729858735, guid: 2d844de42badd024fb6945ac188401ad, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7727990573615894368, guid: 2d844de42badd024fb6945ac188401ad, type: 3}
+      propertyPath: m_Convex
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -35465,6 +35636,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (18)
@@ -35526,6 +35701,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (9)
@@ -36863,6 +37042,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (30)
@@ -39829,6 +40012,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (26)
@@ -39999,6 +40186,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510846216}
     m_Modifications:
+    - target: {fileID: 3452249254670748242, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
+      propertyPath: m_Convex
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5859138714999904738, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
       propertyPath: m_Name
       value: BR_Wall_A_3x3 (6)
@@ -40290,6 +40481,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4919064810729858735, guid: 2d844de42badd024fb6945ac188401ad, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7727990573615894368, guid: 2d844de42badd024fb6945ac188401ad, type: 3}
+      propertyPath: m_Convex
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -41300,7 +41495,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a33ecbffb6b8e7a4096d2adb449c93eb, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 90.63
+      value: 106.73
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a33ecbffb6b8e7a4096d2adb449c93eb, type: 3}
       propertyPath: m_LocalPosition.y
@@ -41363,6 +41558,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a33ecbffb6b8e7a4096d2adb449c93eb, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1489431146}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a33ecbffb6b8e7a4096d2adb449c93eb, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1489431149}
   m_SourcePrefab: {fileID: 100100000, guid: a33ecbffb6b8e7a4096d2adb449c93eb, type: 3}
 --- !u!1 &2082080031
 GameObject:
@@ -52858,7 +53056,7 @@ Transform:
   m_GameObject: {fileID: 5346311453154236445}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1121.91, y: 113.66, z: 1188.39}
+  m_LocalPosition: {x: 1169.26, y: 113.291, z: 1187.16}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -53065,7 +53263,7 @@ GameObject:
   - component: {fileID: 1845367599271135106}
   - component: {fileID: 2757837182214312205}
   - component: {fileID: 4645093018597630915}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -53561,7 +53759,7 @@ GameObject:
   - component: {fileID: 4657648971206769815}
   - component: {fileID: 5672025155052134026}
   - component: {fileID: 8285460623777166243}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
@@ -54607,10 +54805,10 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 2.5
-  m_Radius: 0.4
+  m_Height: 2
+  m_Radius: 1.28
   m_SlopeLimit: 45
-  m_StepOffset: 0.3
+  m_StepOffset: 0.5
   m_SkinWidth: 0.15
   m_MinMoveDistance: 0.005
   m_Center: {x: 0, y: 1, z: 0}
@@ -57689,7 +57887,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2409022814734067708}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: HoldPositionObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
