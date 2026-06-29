@@ -4,16 +4,16 @@ using UnityEngine.UI;
 public class InteractionSystem : MonoBehaviour
 {
     [Header("Configuración Raycast")]
-    public float interactionRange = 3f; // Distancia máxima de interacción
-    public string targetTag = "Object"; // Tag que deben tener los objetos interactuables
+    public float interactionRange = 3f;
+    public string[] targetTags = { "Object" }; // ?? MÚLTIPLES TAGS
 
     [Header("Crosshair")]
-    public RectTransform crosshair; // El circulo (UI Image)
-    public float normalSize = 20f; // Tamaño normal del crosshair
-    public float expandedSize = 35f; // Tamaño cuando mira un objeto
-    public float sizeTransitionSpeed = 8f; // Velocidad de transición
+    public RectTransform crosshair;
+    public float normalSize = 20f;
+    public float expandedSize = 35f;
+    public float sizeTransitionSpeed = 8f;
 
-    [Header("Feedback Visual (Opcional)")]
+    [Header("Feedback Visual")]
     public Color normalColor = Color.white;
     public Color highlightColor = Color.green;
 
@@ -22,17 +22,16 @@ public class InteractionSystem : MonoBehaviour
     private float currentSize;
     private Color currentColor;
     private bool isLookingAtObject = false;
+    private GameObject currentTarget;
 
     void Start()
     {
-        // Buscar la cámara principal
         playerCamera = Camera.main;
         if (playerCamera == null)
         {
             Debug.LogError("InteractionSystem: No se encontró una cámara con tag 'MainCamera'");
         }
 
-        // Configurar crosshair inicial
         if (crosshair != null)
         {
             currentSize = normalSize;
@@ -44,10 +43,7 @@ public class InteractionSystem : MonoBehaviour
 
     void Update()
     {
-        // Lanzar el raycast desde el centro de la pantalla
         PerformRaycast();
-
-        // Actualizar el tamaño y color del crosshair
         UpdateCrosshair();
     }
 
@@ -55,39 +51,41 @@ public class InteractionSystem : MonoBehaviour
     {
         if (playerCamera == null) return;
 
-        // Crear un raycast desde el centro de la pantalla
         Ray ray = playerCamera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
         RaycastHit hit;
 
-        // Debug: Dibujar el raycast en la escena
         Debug.DrawRay(ray.origin, ray.direction * interactionRange, Color.yellow);
 
-        // Lanzar el raycast
         if (Physics.Raycast(ray, out hit, interactionRange))
         {
-            // Comprobar si el objeto tiene el tag correcto
-            if (hit.collider.CompareTag(targetTag))
+            // ?? Comprobar si el objeto tiene ALGUNO de los tags
+            bool hasValidTag = false;
+            foreach (string tag in targetTags)
+            {
+                if (hit.collider.CompareTag(tag))
+                {
+                    hasValidTag = true;
+                    break;
+                }
+            }
+
+            if (hasValidTag)
             {
                 isLookingAtObject = true;
-
-                // Opcional: Debug para ver qué objeto estamos mirando
-                // Debug.Log("Mirando: " + hit.collider.gameObject.name);
-
-                // Cambiar color del crosshair a verde
+                currentTarget = hit.collider.gameObject;
                 currentColor = highlightColor;
-
-                // Opcional: Puedes añadir más feedback aquí
-                // Por ejemplo, cambiar el material del objeto o mostrar un texto
             }
             else
             {
                 isLookingAtObject = false;
+                currentTarget = null;
                 currentColor = normalColor;
             }
         }
         else
         {
             isLookingAtObject = false;
+            currentTarget = null;
             currentColor = normalColor;
         }
     }
@@ -96,16 +94,10 @@ public class InteractionSystem : MonoBehaviour
     {
         if (crosshair == null) return;
 
-        // Calcular el tamaño objetivo
         float targetSize = isLookingAtObject ? expandedSize : normalSize;
-
-        // Suavizar la transición del tamaño
         currentSize = Mathf.Lerp(currentSize, targetSize, Time.deltaTime * sizeTransitionSpeed);
-
-        // Aplicar el tamaño al crosshair
         crosshair.sizeDelta = new Vector2(currentSize, currentSize);
 
-        // Suavizar el cambio de color
         Image crosshairImage = crosshair.GetComponent<Image>();
         if (crosshairImage != null)
         {
@@ -113,13 +105,10 @@ public class InteractionSystem : MonoBehaviour
         }
     }
 
-    // Método público para saber si el jugador está mirando un objeto
     public bool IsLookingAtInteractable()
     {
         return isLookingAtObject;
     }
-
-    // Obtiene el objeto que el jugador está mirando (si existe)
 
     public GameObject GetTargetObject()
     {
@@ -130,17 +119,18 @@ public class InteractionSystem : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit, interactionRange))
         {
-            if (hit.collider.CompareTag(targetTag))
+            foreach (string tag in targetTags)
             {
-                return hit.collider.gameObject;
+                if (hit.collider.CompareTag(tag))
+                {
+                    return hit.collider.gameObject;
+                }
             }
         }
 
         return null;
     }
 
-
-    //Obtiene la distancia al objeto que se está mirando
     public float GetTargetDistance()
     {
         if (!isLookingAtObject || playerCamera == null) return -1f;
@@ -150,9 +140,12 @@ public class InteractionSystem : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit, interactionRange))
         {
-            if (hit.collider.CompareTag(targetTag))
+            foreach (string tag in targetTags)
             {
-                return hit.distance;
+                if (hit.collider.CompareTag(tag))
+                {
+                    return hit.distance;
+                }
             }
         }
 

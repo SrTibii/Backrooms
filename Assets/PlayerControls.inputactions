@@ -59,6 +59,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "InteractObject",
+                    "type": "Button",
+                    "id": "adae6adf-6585-43bc-b764-285a93e8a6e3",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -163,8 +172,8 @@
                 },
                 {
                     "name": "",
-                    "id": "1e0569bc-9bfa-4671-b33c-e61c8e9e7d95",
-                    "path": "<Keyboard>/e",
+                    "id": "c6b4dc86-4e7e-424f-a412-62711c491c66",
+                    "path": "<Mouse>/leftButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -174,12 +183,12 @@
                 },
                 {
                     "name": "",
-                    "id": "c6b4dc86-4e7e-424f-a412-62711c491c66",
-                    "path": "<Mouse>/leftButton",
+                    "id": "2cc26bd6-c79d-4405-b24b-a7e967b8c87e",
+                    "path": "<Keyboard>/e",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Interact",
+                    "action": "InteractObject",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
