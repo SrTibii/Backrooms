@@ -389,7 +389,7 @@ public class FirstPersonController : MonoBehaviour
         }
 
         // ?? FORZAR VALORES: Height = 2, Center Y = 1
-        standingHeight = 2f;
+        standingHeight = 2.5f;
         crouchHeight = 1f;
 
         controller.height = standingHeight;
@@ -636,12 +636,12 @@ public class FirstPersonController : MonoBehaviour
         }
 
         // ?? GRAVEDAD ACUMULATIVA (MEJORADA)
-        float gravity = -15f; // ?? Aumentado para caer más rápido
+        float gravity = -18f; // ?? Aumentado para caer más rápido
 
         if (controller.isGrounded && verticalVelocity < 0)
         {
             // ?? En el suelo: velocidad de caída más rápida para bajar escaleras
-            verticalVelocity = -2f; // ?? Cambiado de -0.5f a -2f
+            verticalVelocity = -10f; // ?? Cambiado de -0.5f a -2f
         }
         else
         {
@@ -649,8 +649,8 @@ public class FirstPersonController : MonoBehaviour
             verticalVelocity += gravity * Time.deltaTime;
 
             // ?? Velocidad máxima de caída (aumentada)
-            if (verticalVelocity < -30f) // ?? Cambiado de -20f a -30f
-                verticalVelocity = -30f;
+            if (verticalVelocity < -70f) // ?? Cambiado de -20f a -30f
+                verticalVelocity = -70f;
         }
 
         // ?? VELOCIDAD FINAL
