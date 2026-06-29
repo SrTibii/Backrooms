@@ -13,6 +13,11 @@ public class FirstPersonController : MonoBehaviour
     public float deceleration = 10f;
     public float maxVelocity = 5f;
 
+    // ?? NUEVAS VARIABLES
+    public float gravity = -15f;           // Fuerza de gravedad
+    public float groundStickForce = -2f;   // Velocidad al estar en el suelo
+    public float maxFallSpeed = -30f;      // Velocidad máxima de caída
+
     // ============================================
     // 2. STAMINA (RESISTENCIA)
     // ============================================
@@ -134,8 +139,8 @@ public class FirstPersonController : MonoBehaviour
     // 11.5. STAMINA AUDIO
     // ============================================
     [Header("Stamina Audio")]
-    public AudioClip staminaDepletedSound;      // Bucle de respiración agitada cuando estás agotado
-    public AudioClip staminaRecoveredSound;     // (Opcional) Ya no se usa, pero se mantiene
+    public AudioClip staminaDepletedSound;
+    public AudioClip staminaRecoveredSound;
     public float staminaSoundVolume = 0.5f;
 
     // ============================================
@@ -144,7 +149,7 @@ public class FirstPersonController : MonoBehaviour
     [Header("Crouch Settings")]
     public bool enableCrouch = true;
     public float crouchHeight = 1f;
-    public float standingHeight = 1.8f;
+    public float standingHeight = 2f;
     public float crouchSpeed = 2f;
     public float crouchTransitionSpeed = 8f;
     public float crouchCameraOffset = 0.6f;
@@ -188,6 +193,7 @@ public class FirstPersonController : MonoBehaviour
     private Vector3 cameraHorizontalOffset;
 
     private Vector3 currentVelocity;
+    private float verticalVelocity;
     public bool isMoving;
     private bool isSprinting;
     private bool isSprintPressed;
@@ -218,8 +224,6 @@ public class FirstPersonController : MonoBehaviour
     private float staminaRegenTimer;
     private bool isExhausted;
     private bool hasPlayedDepletedSound = false;
-
-    // ?? Bucle de respiración agitada
     private bool isPlayingStaminaBreath = false;
 
     // FOV
@@ -382,11 +386,20 @@ public class FirstPersonController : MonoBehaviour
         if (controller == null)
         {
             controller = gameObject.AddComponent<CharacterController>();
-            controller.height = 1.8f;
-            controller.radius = 0.3f;
         }
-        currentHeight = standingHeight;
+
+        // ?? FORZAR VALORES: Height = 2, Center Y = 1
+        standingHeight = 2f;
+        crouchHeight = 1f;
+
         controller.height = standingHeight;
+        controller.radius = 0.3f;
+
+        Vector3 center = controller.center;
+        center.y = 1f;  // ?? Center Y = 1
+        controller.center = center;
+
+        currentHeight = standingHeight;
 
         // --- Cámara ---
         cameraTransform = GetComponentInChildren<Camera>().transform;
@@ -455,7 +468,7 @@ public class FirstPersonController : MonoBehaviour
 
         // --- AudioSource para sonidos de stamina ---
         staminaAudioSource = gameObject.AddComponent<AudioSource>();
-        staminaAudioSource.loop = true; // ?? Loop activado para el bucle de respiración agitada
+        staminaAudioSource.loop = true;
         staminaAudioSource.playOnAwake = false;
         staminaAudioSource.spatialBlend = 0f;
         staminaAudioSource.volume = staminaSoundVolume;
@@ -505,7 +518,6 @@ public class FirstPersonController : MonoBehaviour
 
         if (canRun)
         {
-            // ? CORRIENDO - Gastar stamina
             currentStamina -= staminaDrainRate * Time.deltaTime;
             staminaRegenTimer = 0f;
             hasPlayedDepletedSound = false;
@@ -517,14 +529,13 @@ public class FirstPersonController : MonoBehaviour
                 isSprinting = false;
                 staminaRegenTimer = 0f;
 
-                // ?? Reproducir bucle de respiración agitada
                 if (staminaDepletedSound != null && !isPlayingStaminaBreath)
                 {
                     staminaAudioSource.Play();
                     isPlayingStaminaBreath = true;
                 }
 
-                Debug.Log("?? ¡Agotado! Esperando para recuperar...");
+                Debug.Log("¡Agotado! Esperando para recuperar...");
             }
             else
             {
@@ -537,7 +548,6 @@ public class FirstPersonController : MonoBehaviour
 
             if (isExhausted)
             {
-                // ? AGOTADO - Esperar delay antes de recuperar
                 staminaRegenTimer += Time.deltaTime;
 
                 if (staminaRegenTimer >= staminaRegenDelay)
@@ -551,20 +561,18 @@ public class FirstPersonController : MonoBehaviour
                         staminaRegenTimer = 0f;
                         hasPlayedDepletedSound = false;
 
-                        // ?? DETENER bucle de respiración agitada
                         if (isPlayingStaminaBreath)
                         {
                             staminaAudioSource.Stop();
                             isPlayingStaminaBreath = false;
                         }
 
-                        Debug.Log("? ¡Recuperado! Puedes correr de nuevo.");
+                        Debug.Log("¡Recuperado! Puedes correr de nuevo.");
                     }
                 }
             }
             else
             {
-                // ?? RECUPERACIÓN NORMAL (sin estar agotado)
                 if (!isSprintPressed || !isMoving)
                 {
                     staminaRegenTimer += Time.deltaTime;
@@ -574,11 +582,6 @@ public class FirstPersonController : MonoBehaviour
                         float previousStamina = currentStamina;
                         currentStamina += staminaRegenRate * Time.deltaTime;
                         currentStamina = Mathf.Min(currentStamina, maxStamina);
-
-                        if (currentStamina >= maxStamina && previousStamina < maxStamina)
-                        {
-                            // Si se recupera completamente sin haber estado agotado
-                        }
                     }
                 }
                 else
@@ -588,9 +591,8 @@ public class FirstPersonController : MonoBehaviour
             }
         }
     }
-
     // ============================================
-    // 19. MOVIMIENTO
+    // 19. MOVIMIENTO CORREGIDO
     // ============================================
     void HandleMovement()
     {
@@ -599,13 +601,19 @@ public class FirstPersonController : MonoBehaviour
 
         Vector3 inputDirection = (transform.right * horizontal + transform.forward * vertical).normalized;
 
+        // ?? MOVIMIENTO HORIZONTAL
+        if (!controller.isGrounded)
+        {
+            inputDirection *= 0.3f;
+        }
+
         float currentSpeed = walkSpeed;
 
         if (isCrouching)
         {
             currentSpeed = crouchSpeed;
         }
-        else if (isSprinting && isMoving && currentStamina > 0 && !isExhausted)
+        else if (isSprinting && isMoving && currentStamina > 0 && !isExhausted && controller.isGrounded)
         {
             currentSpeed = sprintSpeed;
         }
@@ -613,6 +621,7 @@ public class FirstPersonController : MonoBehaviour
         float speed = inputDirection.magnitude > 0 ? currentSpeed : 0f;
         Vector3 targetVelocity = inputDirection * speed;
 
+        // ?? VELOCIDAD HORIZONTAL CON INERCIA
         if (enableInertia)
         {
             float smoothTime = inputDirection.magnitude > 0 ? 1f / acceleration : 1f / deceleration;
@@ -626,8 +635,33 @@ public class FirstPersonController : MonoBehaviour
             currentVelocity = targetVelocity;
         }
 
-        controller.Move(currentVelocity * Time.deltaTime);
-        isMoving = inputDirection.magnitude > 0.1f;
+        // ?? GRAVEDAD ACUMULATIVA (MEJORADA)
+        float gravity = -15f; // ?? Aumentado para caer más rápido
+
+        if (controller.isGrounded && verticalVelocity < 0)
+        {
+            // ?? En el suelo: velocidad de caída más rápida para bajar escaleras
+            verticalVelocity = -2f; // ?? Cambiado de -0.5f a -2f
+        }
+        else
+        {
+            // ?? En el aire: caída libre (acumulativa)
+            verticalVelocity += gravity * Time.deltaTime;
+
+            // ?? Velocidad máxima de caída (aumentada)
+            if (verticalVelocity < -30f) // ?? Cambiado de -20f a -30f
+                verticalVelocity = -30f;
+        }
+
+        // ?? VELOCIDAD FINAL
+        Vector3 finalVelocity = currentVelocity;
+        finalVelocity.y = verticalVelocity;
+
+        controller.Move(finalVelocity * Time.deltaTime);
+
+        // ?? DETECCIÓN DE MOVIMIENTO (SOLO HORIZONTAL)
+        float horizontalMovement = new Vector2(currentVelocity.x, currentVelocity.z).magnitude;
+        isMoving = horizontalMovement > 0.1f;
     }
 
     // ============================================
@@ -803,7 +837,7 @@ public class FirstPersonController : MonoBehaviour
     }
 
     // ============================================
-    // 24. SONIDO DE RESPIRACIÓN (MODIFICADO)
+    // 24. SONIDO DE RESPIRACIÓN
     // ============================================
     void HandleBreathing()
     {
@@ -822,8 +856,6 @@ public class FirstPersonController : MonoBehaviour
         }
         else if (isExhausted)
         {
-            // ?? Cuando está agotado, silenciamos la respiración normal
-            // para que solo se escuche el bucle de respiración agitada
             targetVolume = 0f;
             targetPitch = 1f;
         }
@@ -905,7 +937,7 @@ public class FirstPersonController : MonoBehaviour
                 zoomAudioSource.PlayOneShot(zoomInSound);
             }
 
-            Debug.Log("?? Zoom IN - Efecto VHS activado");
+            Debug.Log("Zoom IN - Efecto VHS activado");
         }
         else
         {
@@ -914,7 +946,7 @@ public class FirstPersonController : MonoBehaviour
                 zoomAudioSource.PlayOneShot(zoomOutSound);
             }
 
-            Debug.Log("?? Zoom OUT - Efecto VHS desactivado");
+            Debug.Log("Zoom OUT - Efecto VHS desactivado");
         }
     }
 
@@ -1060,7 +1092,7 @@ public class FirstPersonController : MonoBehaviour
 
             if (isBlockedByCeiling)
             {
-                Debug.Log("?? ¡Bloqueado por techo! No puedes levantarte.");
+                Debug.Log("¡Bloqueado por techo! No puedes levantarte.");
                 return;
             }
         }
@@ -1074,7 +1106,7 @@ public class FirstPersonController : MonoBehaviour
             {
                 crouchAudioSource.PlayOneShot(crouchSound);
             }
-            Debug.Log("?? Agachado");
+            Debug.Log("Agachado");
         }
         else
         {
@@ -1082,7 +1114,7 @@ public class FirstPersonController : MonoBehaviour
             {
                 crouchAudioSource.PlayOneShot(standSound);
             }
-            Debug.Log("?? De pie");
+            Debug.Log("De pie");
         }
     }
 
@@ -1163,21 +1195,15 @@ public class FirstPersonController : MonoBehaviour
 
     public void ResetMovementState()
     {
-        // Resetear el input de movimiento
         moveInput = Vector2.zero;
-
-        // Resetear la velocidad actual
         currentVelocity = Vector3.zero;
-
-        // Resetear el estado de movimiento
         isMoving = false;
 
-        // Si el CharacterController está activo, detenerlo
         if (controller != null && controller.enabled)
         {
             controller.Move(Vector3.zero);
         }
 
-        Debug.Log("?? Movimiento reseteado");
+        Debug.Log("Movimiento reseteado");
     }
 }
