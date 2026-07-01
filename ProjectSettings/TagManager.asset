@@ -9,6 +9,7 @@ TagManager:
   - Door
   - Walkable
   - Puerta
+  - Drawer
   layers:
   - Default
   - TransparentFX

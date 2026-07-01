@@ -8,7 +8,7 @@ public class RecogerObjeto : MonoBehaviour
     public InputActionReference interactAction;
     public Transform holdPosition;
 
-    [Header("Configuraci�n")]
+    [Header("Configuración")]
     public float pickupRange = 3f;
     public float smoothSpeed = 15f;
 
@@ -19,7 +19,7 @@ public class RecogerObjeto : MonoBehaviour
     private Vector3 originalScale;
     private bool isHolding = false;
 
-    // ?? Guardar configuraci�n original del Rigidbody
+    // Guardar configuración original del Rigidbody
     private bool originalIsKinematic;
     private RigidbodyConstraints originalConstraints;
 
@@ -35,7 +35,7 @@ public class RecogerObjeto : MonoBehaviour
             defaultHold.transform.localPosition = new Vector3(0.5f, -0.3f, 0.8f);
             defaultHold.transform.localRotation = Quaternion.identity;
             holdPosition = defaultHold.transform;
-            Debug.Log("?? HoldPosition no asignado. Se ha creado uno por defecto.");
+            Debug.Log("HoldPosition no asignado. Se ha creado uno por defecto.");
         }
     }
 
@@ -66,7 +66,7 @@ public class RecogerObjeto : MonoBehaviour
     {
         if (isHolding && currentObject != null)
         {
-            // ?? Seguir la mano suavemente
+            // Seguir la mano suavemente
             Vector3 targetPosition = holdPosition.position;
             Quaternion targetRotation = holdPosition.rotation;
 
@@ -102,48 +102,48 @@ public class RecogerObjeto : MonoBehaviour
         GameObject target = interactionSystem.GetTargetObject();
         if (target == null) return;
 
-        // ?? Verificar distancia
+        // Verificar distancia
         float distance = Vector3.Distance(Camera.main.transform.position, target.transform.position);
         if (distance > pickupRange)
         {
-            Debug.Log($"?? Demasiado lejos ({distance:F1}m)");
+            Debug.Log($"Demasiado lejos ({distance:F1}m)");
             return;
         }
 
         Rigidbody rb = target.GetComponent<Rigidbody>();
         if (rb == null)
         {
-            Debug.LogWarning($"?? {target.name} no tiene Rigidbody");
+            Debug.LogWarning($"{target.name} no tiene Rigidbody");
             return;
         }
 
-        // ?? Guardar el objeto
+        // Guardar el objeto
         currentObject = target;
         currentRigidbody = rb;
         currentCollider = target.GetComponent<Collider>();
         originalScale = target.transform.localScale;
 
-        // ?? Guardar configuraci�n original
+        // Guardar configuración original
         originalIsKinematic = rb.isKinematic;
         originalConstraints = rb.constraints;
 
-        // ?? Desactivar f�sicas COMPLETAMENTE mientras se sostiene
+        // Desactivar físicas COMPLETAMENTE mientras se sostiene
         rb.isKinematic = true;
         rb.useGravity = false;
-        rb.constraints = RigidbodyConstraints.FreezeAll; // ?? Congelar todo
+        rb.constraints = RigidbodyConstraints.FreezeAll;
 
         if (currentCollider != null)
         {
-            currentCollider.enabled = false; // ?? Desactivar colisiones
+            currentCollider.enabled = false;
         }
 
-        // ?? Posicionar en la mano
+        // Posicionar en la mano
         target.transform.position = holdPosition.position;
         target.transform.rotation = holdPosition.rotation;
         target.transform.SetParent(holdPosition);
 
         isHolding = true;
-        Debug.Log($"? Recogido: {target.name}");
+        Debug.Log($"Recogido: {target.name}");
     }
 
     void DropObject()
@@ -154,31 +154,27 @@ public class RecogerObjeto : MonoBehaviour
             return;
         }
 
-        // ?? Desvincular del holdPosition
+        // Desvincular del holdPosition
         currentObject.transform.SetParent(null);
 
-        // ?? Restaurar f�sicas
+        // Restaurar físicas
         if (currentRigidbody != null)
         {
-            // ?? Restaurar configuraci�n original
-            currentRigidbody.isKinematic = false; // ?? Ya no es est�tico
+            currentRigidbody.isKinematic = false;
             currentRigidbody.useGravity = true;
-            currentRigidbody.constraints = RigidbodyConstraints.None; // ?? Sin restricciones
+            currentRigidbody.constraints = RigidbodyConstraints.None;
 
-            // ?? CA�DA SUAVE (sin impulso)
             currentRigidbody.linearVelocity = Vector3.zero;
             currentRigidbody.angularVelocity = Vector3.zero;
-
-            // ?? Peque�o impulso hacia abajo para que caiga
             currentRigidbody.linearVelocity = Vector3.down * 0.5f;
         }
 
         if (currentCollider != null)
         {
-            currentCollider.enabled = true; // ?? Reactivar colisiones
+            currentCollider.enabled = true;
         }
 
-        // ?? Restaurar escala
+        // Restaurar escala
         currentObject.transform.localScale = originalScale;
 
         string objectName = currentObject.name;
@@ -187,7 +183,7 @@ public class RecogerObjeto : MonoBehaviour
         currentCollider = null;
         isHolding = false;
 
-        Debug.Log($"?? Soltado: {objectName}");
+        Debug.Log($"Soltado: {objectName}");
     }
 
     public bool IsHolding()
