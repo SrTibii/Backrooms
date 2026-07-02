@@ -1,22 +1,23 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class RecogerObjeto : MonoBehaviour
+public class RecogerLinterna : MonoBehaviour
 {
     [Header("Referencias")]
     public InteractionSystem interactionSystem;
     public InputActionReference interactAction;
-    public Transform holdPosition; // Mano izquierda
+    public Transform holdPosition; // Mano derecha
 
-    [Header("Configuración")]
+    [Header("Configuraci�n")]
     public float pickupRange = 3f;
     public float smoothSpeed = 15f;
-    public string[] tagsValidos = { "Object" }; // Tags que puede recoger
+    public string linternaTag = "Linterna";
 
     // Estado interno
     private GameObject currentObject = null;
     private Rigidbody currentRigidbody = null;
     private Collider currentCollider = null;
+    private Linterna currentLinterna = null;
     private Vector3 originalScale;
     private bool isHolding = false;
 
@@ -34,17 +35,17 @@ public class RecogerObjeto : MonoBehaviour
         {
             GameObject defaultHold = new GameObject("HoldPosition");
             defaultHold.transform.SetParent(Camera.main.transform);
-            defaultHold.transform.localPosition = new Vector3(0.5f, -0.3f, 0.8f);
+            defaultHold.transform.localPosition = new Vector3(-0.5f, -0.3f, 0.8f);
             defaultHold.transform.localRotation = Quaternion.identity;
             holdPosition = defaultHold.transform;
             Debug.Log("HoldPosition no asignado. Se ha creado uno por defecto.");
         }
 
-        // 🔥 Buscar el ManosManager
+        // ?? Buscar el ManosManager
         manosManager = FindObjectOfType<ManosManager>();
         if (manosManager == null)
         {
-            Debug.LogError("❌ No se encontró ManosManager en la escena");
+            Debug.LogError("? No se encontr� ManosManager en la escena");
         }
     }
 
@@ -108,58 +109,47 @@ public class RecogerObjeto : MonoBehaviour
         if (interactionSystem == null) return;
         if (manosManager == null) return;
 
-        // 🔥 Verificar si la mano derecha está ocupada
-        if (manosManager.manoDerechaOcupada)
+        // ?? Verificar si la mano izquierda est� ocupada
+        if (manosManager.manoIzquierdaOcupada)
         {
-            Debug.Log("⚠️ No puedes coger nada, tienes la linterna en la mano derecha");
+            Debug.Log("?? No puedes coger la linterna, tienes un objeto en la mano izquierda");
             return;
         }
 
         GameObject target = interactionSystem.GetTargetObject();
         if (target == null) return;
 
-        // 🔥 Verificar que el objeto tenga un tag válido
-        bool tagValido = false;
-        foreach (string tag in tagsValidos)
+        if (!target.CompareTag(linternaTag))
         {
-            if (target.CompareTag(tag))
-            {
-                tagValido = true;
-                break;
-            }
-        }
-
-        if (!tagValido)
-        {
-            Debug.Log($"❌ {target.name} no es válido para recoger (tag: {target.tag})");
+            Debug.Log($"? {target.name} no es una linterna (tag: {target.tag})");
             return;
         }
 
         float distance = Vector3.Distance(Camera.main.transform.position, target.transform.position);
         if (distance > pickupRange)
         {
-            Debug.Log($"📏 Demasiado lejos ({distance:F1}m)");
+            Debug.Log($"?? Demasiado lejos ({distance:F1}m)");
             return;
         }
 
         Rigidbody rb = target.GetComponent<Rigidbody>();
         if (rb == null)
         {
-            Debug.LogWarning($"⚠️ {target.name} no tiene Rigidbody");
+            Debug.LogWarning($"?? {target.name} no tiene Rigidbody");
             return;
         }
 
-        // 🔥 Intentar ocupar la mano izquierda
-        if (!manosManager.OcuparManoIzquierda(target))
+        // ?? Intentar ocupar la mano derecha
+        if (!manosManager.OcuparManoDerecha(target))
         {
-            Debug.Log("⚠️ Mano izquierda ocupada, no puedes recoger más objetos");
+            Debug.Log("?? Mano derecha ocupada, no puedes recoger m�s objetos");
             return;
         }
 
-        // Guardar el objeto
         currentObject = target;
         currentRigidbody = rb;
         currentCollider = target.GetComponent<Collider>();
+        currentLinterna = target.GetComponent<Linterna>();
         originalScale = target.transform.localScale;
 
         originalIsKinematic = rb.isKinematic;
@@ -178,8 +168,15 @@ public class RecogerObjeto : MonoBehaviour
         target.transform.rotation = holdPosition.rotation;
         target.transform.SetParent(holdPosition);
 
+        target.transform.localScale = originalScale;
+
+        if (currentLinterna != null)
+        {
+            currentLinterna.SetInHand(true);
+        }
+
         isHolding = true;
-        Debug.Log($"✅ Recogido: {target.name}");
+        Debug.Log($"? Linterna recogida: {target.name}");
     }
 
     void DropObject()
@@ -190,12 +187,25 @@ public class RecogerObjeto : MonoBehaviour
             return;
         }
 
+        Vector3 currentPosition = currentObject.transform.position;
+        Quaternion currentRotation = currentObject.transform.rotation;
+
         if (manosManager != null)
         {
-            manosManager.LiberarManoIzquierda();
+            manosManager.LiberarManoDerecha();
         }
 
         currentObject.transform.SetParent(null);
+
+        currentObject.transform.position = currentPosition;
+        currentObject.transform.rotation = currentRotation;
+
+        currentObject.transform.localScale = originalScale;
+
+        if (currentLinterna != null)
+        {
+            currentLinterna.SetInHand(false);
+        }
 
         if (currentRigidbody != null)
         {
@@ -213,15 +223,14 @@ public class RecogerObjeto : MonoBehaviour
             currentCollider.enabled = true;
         }
 
-        currentObject.transform.localScale = originalScale;
-
         string objectName = currentObject.name;
         currentObject = null;
         currentRigidbody = null;
         currentCollider = null;
+        currentLinterna = null;
         isHolding = false;
 
-        Debug.Log($"✅ Soltado: {objectName}");
+        Debug.Log($"? Linterna soltada: {objectName}");
     }
 
     public bool IsHolding()

@@ -10,6 +10,7 @@ TagManager:
   - Walkable
   - Puerta
   - Drawer
+  - Linterna
   layers:
   - Default
   - TransparentFX

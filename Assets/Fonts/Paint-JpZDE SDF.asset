@@ -2738,7 +2738,7 @@ Material:
     - _DecalLayerMaskFromDecal: 1
     - _Diffuse: 0.5
     - _DrawOrder: 0
-    - _FaceDilate: -0.02
+    - _FaceDilate: -0.08
     - _FaceShininess: 0
     - _FaceUVSpeedX: 0
     - _FaceUVSpeedY: 0
@@ -2760,8 +2760,8 @@ Material:
     - _PerspectiveFilter: 0.875
     - _Reflectivity: 10
     - _ScaleRatioA: 0.8333333
-    - _ScaleRatioB: 0.69374996
-    - _ScaleRatioC: 0.69374996
+    - _ScaleRatioB: 0.74375004
+    - _ScaleRatioC: 0.74375004
     - _ScaleX: 1
     - _ScaleY: 1
     - _ShaderFlags: 0
