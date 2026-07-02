@@ -61011,6 +61011,8 @@ GameObject:
   - component: {fileID: 4963575697579155648}
   - component: {fileID: 6178067170444092195}
   - component: {fileID: 5573327828399750999}
+  - component: {fileID: 6178067170444092197}
+  - component: {fileID: 6178067170444092196}
   m_Layer: 0
   m_Name: Drawer46_4
   m_TagString: Drawer
@@ -62031,6 +62033,8 @@ GameObject:
   - component: {fileID: 355546113534813166}
   - component: {fileID: 4583932555028747247}
   - component: {fileID: 8182466513530626944}
+  - component: {fileID: 8182466513530626946}
+  - component: {fileID: 8182466513530626945}
   m_Layer: 0
   m_Name: Drawer46_8
   m_TagString: Drawer
@@ -64118,6 +64122,8 @@ GameObject:
   - component: {fileID: 808850754583432244}
   - component: {fileID: 5840926101661374333}
   - component: {fileID: 4842466184318171029}
+  - component: {fileID: 5840926101661374335}
+  - component: {fileID: 5840926101661374334}
   m_Layer: 0
   m_Name: Drawer46_6
   m_TagString: Drawer
@@ -64419,6 +64425,8 @@ GameObject:
   - component: {fileID: 2594184902400842866}
   - component: {fileID: 3004190072519549555}
   - component: {fileID: 6140490751902223787}
+  - component: {fileID: 6140490751902223789}
+  - component: {fileID: 6140490751902223788}
   m_Layer: 0
   m_Name: Drawer46_9
   m_TagString: Drawer
@@ -71669,6 +71677,51 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1858127245641710124}
   m_Mesh: {fileID: 2891229141278399955, guid: 96a8d58ea47824843817211dde529f48, type: 3}
+--- !u!114 &5840926101661374334
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1858127245641710124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f29548e933327f742b4d51a913d13995, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DrawerInteraction
+  interactionSystem: {fileID: 2757837182214312205}
+  interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
+  interactionDistance: 3
+  openDistance: 0.5
+  speed: 2
+  startOpen: 0
+  localOpenDirection: {x: 0, y: -1, z: 0}
+  drawerTag: Drawer
+  openSound: {fileID: 8300000, guid: 8a09810e72a10734cadae7d2d1e95a0f, type: 3}
+  closeSound: {fileID: 8300000, guid: a156157d718650945a1719213351f518, type: 3}
+  soundVolume: 1
+--- !u!64 &5840926101661374335
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1858127245641710124}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 2891229141278399955, guid: 96a8d58ea47824843817211dde529f48, type: 3}
 --- !u!4 &5841560587289644795 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7235060532697205863, guid: 36f77e3c3fc556d4a9390ff6cdadf03f, type: 3}
@@ -72174,6 +72227,51 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &6140490751902223788
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2129568123778435108}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f29548e933327f742b4d51a913d13995, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DrawerInteraction
+  interactionSystem: {fileID: 2757837182214312205}
+  interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
+  interactionDistance: 3
+  openDistance: 0.5
+  speed: 2
+  startOpen: 0
+  localOpenDirection: {x: 0, y: -1, z: 0}
+  drawerTag: Drawer
+  openSound: {fileID: 8300000, guid: 8a09810e72a10734cadae7d2d1e95a0f, type: 3}
+  closeSound: {fileID: 8300000, guid: a156157d718650945a1719213351f518, type: 3}
+  soundVolume: 1
+--- !u!64 &6140490751902223789
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2129568123778435108}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -7928314033469205362, guid: 96a8d58ea47824843817211dde529f48, type: 3}
 --- !u!4 &6140869831300107276 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1858052160529588876, guid: bc44ac5b4896c61439a201bb752c707b, type: 3}
@@ -72243,6 +72341,51 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 404259643464656500}
+  m_Mesh: {fileID: -552598361368926725, guid: 96a8d58ea47824843817211dde529f48, type: 3}
+--- !u!114 &6178067170444092196
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 404259643464656500}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f29548e933327f742b4d51a913d13995, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DrawerInteraction
+  interactionSystem: {fileID: 2757837182214312205}
+  interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
+  interactionDistance: 3
+  openDistance: 0.5
+  speed: 2
+  startOpen: 0
+  localOpenDirection: {x: 0, y: -1, z: 0}
+  drawerTag: Drawer
+  openSound: {fileID: 8300000, guid: 8a09810e72a10734cadae7d2d1e95a0f, type: 3}
+  closeSound: {fileID: 8300000, guid: a156157d718650945a1719213351f518, type: 3}
+  soundVolume: 1
+--- !u!64 &6178067170444092197
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 404259643464656500}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
   m_Mesh: {fileID: -552598361368926725, guid: 96a8d58ea47824843817211dde529f48, type: 3}
 --- !u!1001 &6212571283592789922
 PrefabInstance:
@@ -74895,6 +75038,8 @@ GameObject:
   - component: {fileID: 8070549297076153726}
   - component: {fileID: 7435447485561026389}
   - component: {fileID: 6098024561617269261}
+  - component: {fileID: 8070549297076153728}
+  - component: {fileID: 8070549297076153727}
   m_Layer: 0
   m_Name: Drawer46_5
   m_TagString: Drawer
@@ -75338,6 +75483,8 @@ GameObject:
   - component: {fileID: 5289973422500386819}
   - component: {fileID: 8313220072758847755}
   - component: {fileID: 3133331570276774439}
+  - component: {fileID: 8313220072758847757}
+  - component: {fileID: 8313220072758847756}
   m_Layer: 0
   m_Name: Drawer46_3
   m_TagString: Drawer
@@ -75615,6 +75762,51 @@ Transform:
   m_Children: []
   m_Father: {fileID: 596533801642452097}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8070549297076153727
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7698754839859479235}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f29548e933327f742b4d51a913d13995, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DrawerInteraction
+  interactionSystem: {fileID: 2757837182214312205}
+  interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
+  interactionDistance: 3
+  openDistance: 0.5
+  speed: 2
+  startOpen: 0
+  localOpenDirection: {x: 0, y: -1, z: 0}
+  drawerTag: Drawer
+  openSound: {fileID: 8300000, guid: 8a09810e72a10734cadae7d2d1e95a0f, type: 3}
+  closeSound: {fileID: 8300000, guid: a156157d718650945a1719213351f518, type: 3}
+  soundVolume: 1
+--- !u!64 &8070549297076153728
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7698754839859479235}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -7332222194614708352, guid: 96a8d58ea47824843817211dde529f48, type: 3}
 --- !u!4 &8077363919302413589 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1609829396451838459, guid: 962a659ec0ee2ca43bb5b443825e4657, type: 3}
@@ -75969,6 +76161,51 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &8182466513530626945
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 851698418938960223}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f29548e933327f742b4d51a913d13995, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DrawerInteraction
+  interactionSystem: {fileID: 2757837182214312205}
+  interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
+  interactionDistance: 3
+  openDistance: 0.5
+  speed: 2
+  startOpen: 0
+  localOpenDirection: {x: 0, y: -1, z: 0}
+  drawerTag: Drawer
+  openSound: {fileID: 8300000, guid: 8a09810e72a10734cadae7d2d1e95a0f, type: 3}
+  closeSound: {fileID: 8300000, guid: a156157d718650945a1719213351f518, type: 3}
+  soundVolume: 1
+--- !u!64 &8182466513530626946
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 851698418938960223}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 1202017894838377077, guid: 96a8d58ea47824843817211dde529f48, type: 3}
 --- !u!1 &8200066843209512900
 GameObject:
   m_ObjectHideFlags: 0
@@ -75980,6 +76217,8 @@ GameObject:
   - component: {fileID: 8834133778688097259}
   - component: {fileID: 1025727822983301036}
   - component: {fileID: 4814583322212622058}
+  - component: {fileID: 8834133778688097261}
+  - component: {fileID: 8834133778688097260}
   m_Layer: 0
   m_Name: Drawer46_1
   m_TagString: Drawer
@@ -76160,6 +76399,51 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7940359706321209473}
   m_Mesh: {fileID: -1697764595098405807, guid: 96a8d58ea47824843817211dde529f48, type: 3}
+--- !u!114 &8313220072758847756
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7940359706321209473}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f29548e933327f742b4d51a913d13995, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DrawerInteraction
+  interactionSystem: {fileID: 2757837182214312205}
+  interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
+  interactionDistance: 3
+  openDistance: 0.5
+  speed: 2
+  startOpen: 0
+  localOpenDirection: {x: 0, y: -1, z: 0}
+  drawerTag: Drawer
+  openSound: {fileID: 8300000, guid: 8a09810e72a10734cadae7d2d1e95a0f, type: 3}
+  closeSound: {fileID: 8300000, guid: a156157d718650945a1719213351f518, type: 3}
+  soundVolume: 1
+--- !u!64 &8313220072758847757
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7940359706321209473}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -1697764595098405807, guid: 96a8d58ea47824843817211dde529f48, type: 3}
 --- !u!4 &8327483316323267033 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6091554823949525343, guid: c613ace097940fd4586421ecf0a09b28, type: 3}
@@ -76264,6 +76548,8 @@ GameObject:
   - component: {fileID: 7234057569683782493}
   - component: {fileID: 2158598342374347612}
   - component: {fileID: 9072383522832052016}
+  - component: {fileID: 9072383522832052018}
+  - component: {fileID: 9072383522832052017}
   m_Layer: 0
   m_Name: Drawer46_2
   m_TagString: Drawer
@@ -76344,6 +76630,8 @@ GameObject:
   - component: {fileID: 2210685221728692509}
   - component: {fileID: 6557193832427089987}
   - component: {fileID: 3237531856032302573}
+  - component: {fileID: 8461849596507426740}
+  - component: {fileID: 8461849596507426739}
   m_Layer: 0
   m_Name: Drawer46_7
   m_TagString: Drawer
@@ -76351,6 +76639,51 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &8461849596507426739
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8461849596507426738}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f29548e933327f742b4d51a913d13995, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DrawerInteraction
+  interactionSystem: {fileID: 2757837182214312205}
+  interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
+  interactionDistance: 3
+  openDistance: 0.5
+  speed: 2
+  startOpen: 0
+  localOpenDirection: {x: 0, y: -1, z: 0}
+  drawerTag: Drawer
+  openSound: {fileID: 8300000, guid: 8a09810e72a10734cadae7d2d1e95a0f, type: 3}
+  closeSound: {fileID: 8300000, guid: a156157d718650945a1719213351f518, type: 3}
+  soundVolume: 1
+--- !u!64 &8461849596507426740
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8461849596507426738}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -2084067394434686828, guid: 96a8d58ea47824843817211dde529f48, type: 3}
 --- !u!1 &8463024190610562278
 GameObject:
   m_ObjectHideFlags: 0
@@ -77404,6 +77737,51 @@ Transform:
   m_Children: []
   m_Father: {fileID: 596533801642452097}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8834133778688097260
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8200066843209512900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f29548e933327f742b4d51a913d13995, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DrawerInteraction
+  interactionSystem: {fileID: 2757837182214312205}
+  interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
+  interactionDistance: 3
+  openDistance: 0.5
+  speed: 2
+  startOpen: 0
+  localOpenDirection: {x: 0, y: -1, z: 0}
+  drawerTag: Drawer
+  openSound: {fileID: 8300000, guid: 8a09810e72a10734cadae7d2d1e95a0f, type: 3}
+  closeSound: {fileID: 8300000, guid: a156157d718650945a1719213351f518, type: 3}
+  soundVolume: 1
+--- !u!64 &8834133778688097261
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8200066843209512900}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 1485108920853971587, guid: 96a8d58ea47824843817211dde529f48, type: 3}
 --- !u!4 &8837609153007122505 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2028303107846433685, guid: c24174e2dc46a814fa17df498d698c8e, type: 3}
@@ -78034,6 +78412,51 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &9072383522832052017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8381500193873536632}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f29548e933327f742b4d51a913d13995, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DrawerInteraction
+  interactionSystem: {fileID: 2757837182214312205}
+  interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
+  interactionDistance: 3
+  openDistance: 0.5
+  speed: 2
+  startOpen: 0
+  localOpenDirection: {x: 0, y: -1, z: 0}
+  drawerTag: Drawer
+  openSound: {fileID: 8300000, guid: 8a09810e72a10734cadae7d2d1e95a0f, type: 3}
+  closeSound: {fileID: 8300000, guid: a156157d718650945a1719213351f518, type: 3}
+  soundVolume: 1
+--- !u!64 &9072383522832052018
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8381500193873536632}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -1050556741531997936, guid: 96a8d58ea47824843817211dde529f48, type: 3}
 --- !u!4 &9081787590706438836
 Transform:
   m_ObjectHideFlags: 0
