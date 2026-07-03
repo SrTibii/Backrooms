@@ -11,6 +11,9 @@ TagManager:
   - Puerta
   - Drawer
   - Linterna
+  - LlaveRojo
+  - LlaveAzul
+  - LlaveVerde
   layers:
   - Default
   - TransparentFX
