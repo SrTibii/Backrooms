@@ -38308,7 +38308,7 @@ GameObject:
   - component: {fileID: 1336134980}
   - component: {fileID: 1336134983}
   - component: {fileID: 1336134982}
-  - component: {fileID: 1336134981}
+  - component: {fileID: 1336134984}
   m_Layer: 0
   m_Name: SueloPrueba (3)
   m_TagString: Walkable
@@ -38331,28 +38331,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 477452749}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!64 &1336134981
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1336134979}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!23 &1336134982
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -38410,6 +38388,27 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1336134979}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!65 &1336134984
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1336134979}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 10, y: 2.220446e-16, z: 10}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1337064220
 GameObject:
   m_ObjectHideFlags: 0
@@ -74499,7 +74498,7 @@ Transform:
   m_GameObject: {fileID: 5346311453154236445}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 984.2, y: 114.041, z: 1189.553}
+  m_LocalPosition: {x: 982.46, y: 114.041, z: 1179.25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -81495,12 +81494,12 @@ Camera:
   m_ShutterSpeed: 0.005
   m_Aperture: 16
   m_FocusDistance: 10
-  m_FocalLength: 20.78461
+  m_FocalLength: 17.158201
   m_BladeCount: 5
   m_Curvature: {x: 2, y: 11}
   m_BarrelClipping: 0.25
   m_Anamorphism: 0
-  m_SensorSize: {x: 36, y: 24}
+  m_SensorSize: {x: 21.946, y: 16.002}
   m_LensShift: {x: 0, y: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
@@ -81508,11 +81507,11 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
-  far clip plane: 1000
-  field of view: 60.000004
+  near clip plane: 0.1
+  far clip plane: 5000
+  field of view: 49.999996
   orthographic: 0
-  orthographic size: 5
+  orthographic size: 10
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -81738,8 +81737,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.28040454, y: 0.55527735, z: 0.07263084}
-  m_Center: {x: 0.000000014901161, y: -0.24945211, z: 0}
+  m_Size: {x: 0.28040454, y: 0.55527735, z: 0.111946285}
+  m_Center: {x: 0.000000014901161, y: -0.24945211, z: 0.019657731}
 --- !u!54 &8659787118283372096
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -82034,8 +82033,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.28040454, y: 0.55527735, z: 0.07263084}
-  m_Center: {x: 0.000000014901161, y: -0.24945211, z: 0}
+  m_Size: {x: 0.28040454, y: 0.55527735, z: 0.12020892}
+  m_Center: {x: 0.000000014901161, y: -0.24945211, z: 0.023789048}
 --- !u!54 &8732664828197985792
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -82984,8 +82983,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.28040454, y: 0.55527735, z: 0.07263084}
-  m_Center: {x: 0.000000014901161, y: -0.24945211, z: 0}
+  m_Size: {x: 0.28040454, y: 0.55527735, z: 0.09314748}
+  m_Center: {x: 0.000000014901161, y: -0.24945211, z: 0.010258323}
 --- !u!54 &9023483753154557931
 Rigidbody:
   m_ObjectHideFlags: 0
