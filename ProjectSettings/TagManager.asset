@@ -15,6 +15,7 @@ TagManager:
   - LlaveAzul
   - LlaveVerde
   - NumeroCajaFuerte
+  - BotonGenerador
   layers:
   - Default
   - TransparentFX
