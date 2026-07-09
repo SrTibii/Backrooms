@@ -13,6 +13,11 @@ public class RecogerLinterna : MonoBehaviour
     public float smoothSpeed = 15f;
     public string linternaTag = "Linterna";
 
+    [Header("Sonidos")]
+    public AudioClip sonidoRecogerLinterna;
+    public AudioClip sonidoSoltarLinterna;
+    [Range(0f, 1f)] public float volumenSonidos = 0.7f;
+
     // Estado interno
     private GameObject currentObject = null;
     private Rigidbody currentRigidbody = null;
@@ -25,6 +30,7 @@ public class RecogerLinterna : MonoBehaviour
     private RigidbodyConstraints originalConstraints;
 
     private ManosManager manosManager;
+    private AudioSource audioSource;
 
     void Start()
     {
@@ -41,7 +47,13 @@ public class RecogerLinterna : MonoBehaviour
             Debug.Log("HoldPosition no asignado. Se ha creado uno por defecto.");
         }
 
-        // ?? Buscar el ManosManager
+        // Configurar AudioSource
+        audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.loop = false;
+        audioSource.playOnAwake = false;
+        audioSource.spatialBlend = 0f;
+
+        // Buscar el ManosManager
         manosManager = FindObjectOfType<ManosManager>();
         if (manosManager == null)
         {
@@ -109,7 +121,7 @@ public class RecogerLinterna : MonoBehaviour
         if (interactionSystem == null) return;
         if (manosManager == null) return;
 
-        // ?? Verificar si la mano izquierda está ocupada
+        // Verificar si la mano izquierda está ocupada
         if (manosManager.manoIzquierdaOcupada)
         {
             Debug.Log("?? No puedes coger la linterna, tienes un objeto en la mano izquierda");
@@ -139,7 +151,7 @@ public class RecogerLinterna : MonoBehaviour
             return;
         }
 
-        // ?? Intentar ocupar la mano derecha
+        // Intentar ocupar la mano derecha
         if (!manosManager.OcuparManoDerecha(target))
         {
             Debug.Log("?? Mano derecha ocupada, no puedes recoger más objetos");
@@ -176,6 +188,14 @@ public class RecogerLinterna : MonoBehaviour
         }
 
         isHolding = true;
+
+        // ?? REPRODUCIR SONIDO DE RECOGER LINTERNA
+        if (sonidoRecogerLinterna != null)
+        {
+            audioSource.volume = volumenSonidos;
+            audioSource.PlayOneShot(sonidoRecogerLinterna);
+        }
+
         Debug.Log($"? Linterna recogida: {target.name}");
     }
 
@@ -221,6 +241,13 @@ public class RecogerLinterna : MonoBehaviour
         if (currentCollider != null)
         {
             currentCollider.enabled = true;
+        }
+
+        // ?? REPRODUCIR SONIDO DE SOLTAR LINTERNA
+        if (sonidoSoltarLinterna != null)
+        {
+            audioSource.volume = volumenSonidos;
+            audioSource.PlayOneShot(sonidoSoltarLinterna);
         }
 
         string objectName = currentObject.name;

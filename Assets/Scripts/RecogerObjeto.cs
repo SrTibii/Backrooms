@@ -13,6 +13,13 @@ public class RecogerObjeto : MonoBehaviour
     public float smoothSpeed = 15f;
     public string[] tagsValidos = { "Object" }; // Tags que puede recoger
 
+    [Header("Sonidos por Tag")]
+    public SonidoPorTag[] sonidosPorTag; // Array de sonidos según el tag
+
+    [Header("Sonido por defecto")]
+    public AudioClip sonidoPorDefecto;
+    [Range(0f, 1f)] public float volumenPorDefecto = 0.7f;
+
     // Estado interno
     private GameObject currentObject = null;
     private Rigidbody currentRigidbody = null;
@@ -24,6 +31,15 @@ public class RecogerObjeto : MonoBehaviour
     private RigidbodyConstraints originalConstraints;
 
     private ManosManager manosManager;
+    private AudioSource audioSource;
+
+    [System.Serializable]
+    public class SonidoPorTag
+    {
+        public string tag;
+        public AudioClip sonido;
+        [Range(0f, 1f)] public float volumen = 0.7f;
+    }
 
     void Start()
     {
@@ -40,7 +56,13 @@ public class RecogerObjeto : MonoBehaviour
             Debug.Log("HoldPosition no asignado. Se ha creado uno por defecto.");
         }
 
-        // 🔥 Buscar el ManosManager
+        // Configurar AudioSource
+        audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.loop = false;
+        audioSource.playOnAwake = false;
+        audioSource.spatialBlend = 0f;
+
+        // Buscar el ManosManager
         manosManager = FindObjectOfType<ManosManager>();
         if (manosManager == null)
         {
@@ -108,7 +130,7 @@ public class RecogerObjeto : MonoBehaviour
         if (interactionSystem == null) return;
         if (manosManager == null) return;
 
-        // 🔥 Verificar si la mano derecha está ocupada
+        // Verificar si la mano derecha está ocupada
         if (manosManager.manoDerechaOcupada)
         {
             Debug.Log("⚠️ No puedes coger nada, tienes la linterna en la mano derecha");
@@ -118,7 +140,7 @@ public class RecogerObjeto : MonoBehaviour
         GameObject target = interactionSystem.GetTargetObject();
         if (target == null) return;
 
-        // 🔥 Verificar que el objeto tenga un tag válido
+        // Verificar que el objeto tenga un tag válido
         bool tagValido = false;
         foreach (string tag in tagsValidos)
         {
@@ -149,7 +171,7 @@ public class RecogerObjeto : MonoBehaviour
             return;
         }
 
-        // 🔥 Intentar ocupar la mano izquierda
+        // Intentar ocupar la mano izquierda
         if (!manosManager.OcuparManoIzquierda(target))
         {
             Debug.Log("⚠️ Mano izquierda ocupada, no puedes recoger más objetos");
@@ -179,7 +201,46 @@ public class RecogerObjeto : MonoBehaviour
         target.transform.SetParent(holdPosition);
 
         isHolding = true;
-        Debug.Log($"✅ Recogido: {target.name}");
+
+        // 🔥 REPRODUCIR SONIDO SEGÚN EL TAG
+        ReproducirSonidoPorTag(target.tag);
+
+        Debug.Log($"✅ Recogido: {target.name} (tag: {target.tag})");
+    }
+
+    // 🔥 Método para reproducir sonido según el tag
+    private void ReproducirSonidoPorTag(string tag)
+    {
+        AudioClip clip = null;
+        float volumen = volumenPorDefecto;
+
+        // Buscar si hay un sonido configurado para este tag
+        foreach (SonidoPorTag item in sonidosPorTag)
+        {
+            if (item.tag == tag)
+            {
+                clip = item.sonido;
+                volumen = item.volumen;
+                break;
+            }
+        }
+
+        // Si no se encontró sonido para el tag, usar el por defecto
+        if (clip == null)
+        {
+            clip = sonidoPorDefecto;
+        }
+
+        if (clip != null)
+        {
+            audioSource.volume = volumen;
+            audioSource.PlayOneShot(clip);
+            Debug.Log($"🔊 Sonido reproducido para tag '{tag}'");
+        }
+        else
+        {
+            Debug.Log($"🔇 No hay sonido asignado para el tag '{tag}'");
+        }
     }
 
     void DropObject()

@@ -16,6 +16,8 @@ TagManager:
   - LlaveVerde
   - NumeroCajaFuerte
   - BotonGenerador
+  - Moneda
+  - MaquinaExpendedora
   layers:
   - Default
   - TransparentFX
