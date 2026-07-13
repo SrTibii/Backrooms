@@ -19,6 +19,9 @@ TagManager:
   - Moneda
   - MaquinaExpendedora
   - CintaVHS
+  - BotonColor
+  - PuertaColoresTV
+  - PuertaGenerador
   layers:
   - Default
   - TransparentFX

@@ -33,6 +33,11 @@ public class PuertaGeneradores : MonoBehaviour
         audioSource.playOnAwake = false;
         audioSource.spatialBlend = 0f;
 
+        if (puerta != null)
+        {
+            puerta.tag = "PuertaGenerador";
+        }
+
         // Estado inicial: todos los cubos rojos
         ActualizarCubos();
     }

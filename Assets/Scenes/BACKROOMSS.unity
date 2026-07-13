@@ -1356,9 +1356,10 @@ GameObject:
   - component: {fileID: 63484088}
   - component: {fileID: 63484087}
   - component: {fileID: 63484086}
+  - component: {fileID: 63484089}
   m_Layer: 0
   m_Name: BotonRojo
-  m_TagString: Untagged
+  m_TagString: BotonColor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1456,6 +1457,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 63484084}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &63484089
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 63484084}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e86d6403f1c1b64c8332149d5a8d7f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BotonColorColor
+  color: Rojo
 --- !u!1001 &65488076
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6181,165 +6195,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 206201780}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &208855125
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 208855126}
-  - component: {fileID: 208855131}
-  - component: {fileID: 208855130}
-  - component: {fileID: 208855129}
-  - component: {fileID: 208855128}
-  - component: {fileID: 208855127}
-  m_Layer: 0
-  m_Name: Puerta2
-  m_TagString: Puerta
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &208855126
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 208855125}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -3.666, y: 1.023, z: -1.366}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1343927225}
-  m_Father: {fileID: 3591688976780034307}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &208855127
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 208855125}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5c662e5db268684d9336e2d05bb68be, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DoorInteraction
-  interactionSystem: {fileID: 2757837182214312205}
-  interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
-  doorAnimator: {fileID: 208855128}
-  interactionDistance: 3
-  startOpen: 0
-  doorTag: Puerta
-  openSound: {fileID: 8300000, guid: 697f0f96ef0e8fd4ea7d978c1a6839b1, type: 3}
-  closeSound: {fileID: 8300000, guid: b9291abf2e853c448a3230d007b98681, type: 3}
-  soundVolume: 0.7
---- !u!95 &208855128
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 208855125}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: b2e225257609d864489d40274cbfcacc, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
---- !u!64 &208855129
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 208855125}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -642889857091853129, guid: e1013e1dfa795d640818f5f7ae9f4d0e, type: 3}
---- !u!23 &208855130
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 208855125}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 1d81b0d7cae57744186549f40cf3dea8, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_MaskInteraction: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &208855131
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 208855125}
-  m_Mesh: {fileID: -642889857091853129, guid: e1013e1dfa795d640818f5f7ae9f4d0e, type: 3}
 --- !u!1 &219593438
 GameObject:
   m_ObjectHideFlags: 0
@@ -15002,9 +14857,10 @@ GameObject:
   - component: {fileID: 488079571}
   - component: {fileID: 488079570}
   - component: {fileID: 488079569}
+  - component: {fileID: 488079572}
   m_Layer: 0
   m_Name: BotonAzul
-  m_TagString: Untagged
+  m_TagString: BotonColor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -15102,6 +14958,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 488079567}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &488079572
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 488079567}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e86d6403f1c1b64c8332149d5a8d7f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BotonColorColor
+  color: Azul
 --- !u!1001 &488598330
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18524,6 +18393,7 @@ GameObject:
   - component: {fileID: 578308606}
   - component: {fileID: 578308605}
   - component: {fileID: 578308604}
+  - component: {fileID: 578308607}
   m_Layer: 0
   m_Name: PanelColores9x9
   m_TagString: Untagged
@@ -18572,7 +18442,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -18633,6 +18503,41 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 578308602}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &578308607
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 578308602}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a430c18d276fd2a4ba58f8b356fe80a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PanelColores
+  combinacionCorrecta:
+  - Rojo
+  - Naranja
+  - Blanco
+  - Verde
+  maxPulsaciones: 4
+  botonesColores:
+  - {fileID: 63484084}
+  - {fileID: 1227727314}
+  - {fileID: 823857379}
+  - {fileID: 488079567}
+  - {fileID: 1318094820}
+  - {fileID: 1371873643}
+  - {fileID: 1727617853}
+  - {fileID: 1572983475}
+  - {fileID: 1488518721}
+  interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
+  puerta: {fileID: 1713559231}
+  triggerAbrir: Abrir
+  sonidoPulsarBoton: {fileID: 8300000, guid: c2ae10cbb81b3494d864e86fadb2ffc0, type: 3}
+  sonidoCombinacionCorrecta: {fileID: 8300000, guid: 67710b508e8fd9b4994bc44df10e277c, type: 3}
+  sonidoCombinacionIncorrecta: {fileID: 8300000, guid: 5ac0b56526a42614cbe1dfea067181e9, type: 3}
+  volumenSonidos: 0.7
 --- !u!1 &580747723
 GameObject:
   m_ObjectHideFlags: 0
@@ -19243,6 +19148,61 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4919064810729858735, guid: 2d844de42badd024fb6945ac188401ad, type: 3}
   m_PrefabInstance: {fileID: 2025307827}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &618313426
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 618313428}
+  - component: {fileID: 618313427}
+  m_Layer: 0
+  m_Name: PuertasBloqueadasManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &618313427
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 618313426}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce237e375fa97c04b986e96ba980879f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PuertaBloqueada
+  interactionDistance: 3
+  sonidosPorTag:
+  - tag: PuertaGenerador
+    sonido: {fileID: 8300000, guid: 8f84fdc67ed75f440a4f1b28d55b467c, type: 3}
+    volumen: 0.7
+  - tag: PuertaColoresTV
+    sonido: {fileID: 8300000, guid: 8f84fdc67ed75f440a4f1b28d55b467c, type: 3}
+    volumen: 0.7
+  sonidoPorDefecto: {fileID: 0}
+  volumenPorDefecto: 0.7
+  interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
+--- !u!4 &618313428
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 618313426}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1010.1439, y: 115.55303, z: 1202.5881}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &622136396
 GameObject:
   m_ObjectHideFlags: 0
@@ -25827,9 +25787,10 @@ GameObject:
   - component: {fileID: 823857383}
   - component: {fileID: 823857382}
   - component: {fileID: 823857381}
+  - component: {fileID: 823857384}
   m_Layer: 0
   m_Name: BotonMorado
-  m_TagString: Untagged
+  m_TagString: BotonColor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -25927,6 +25888,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 823857379}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &823857384
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 823857379}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e86d6403f1c1b64c8332149d5a8d7f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BotonColorColor
+  color: Morado
 --- !u!1 &824948626
 GameObject:
   m_ObjectHideFlags: 0
@@ -40620,9 +40594,10 @@ GameObject:
   - component: {fileID: 1227727318}
   - component: {fileID: 1227727317}
   - component: {fileID: 1227727316}
+  - component: {fileID: 1227727319}
   m_Layer: 0
   m_Name: BotonAmarillo
-  m_TagString: Untagged
+  m_TagString: BotonColor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -40720,6 +40695,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1227727314}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1227727319
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1227727314}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e86d6403f1c1b64c8332149d5a8d7f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BotonColorColor
+  color: Amarillo
 --- !u!1001 &1227848757
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -43937,9 +43925,10 @@ GameObject:
   - component: {fileID: 1318094824}
   - component: {fileID: 1318094823}
   - component: {fileID: 1318094822}
+  - component: {fileID: 1318094825}
   m_Layer: 0
   m_Name: BotonNaranja
-  m_TagString: Untagged
+  m_TagString: BotonColor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -44037,6 +44026,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1318094820}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1318094825
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1318094820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e86d6403f1c1b64c8332149d5a8d7f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BotonColorColor
+  color: Naranja
 --- !u!1001 &1319200992
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -45391,119 +45393,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1342948924}
   m_Mesh: {fileID: -5721940704493655731, guid: 2dc91f3d47ca06c429bd817b63347936, type: 3}
---- !u!1 &1343927224
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1343927225}
-  - component: {fileID: 1343927228}
-  - component: {fileID: 1343927227}
-  - component: {fileID: 1343927226}
-  m_Layer: 0
-  m_Name: PuertaPomo
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1343927225
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1343927224}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.67458725, y: 0.009348869, z: -0.038427398}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 208855126}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!64 &1343927226
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1343927224}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -8235981043639529675, guid: e1013e1dfa795d640818f5f7ae9f4d0e, type: 3}
---- !u!23 &1343927227
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1343927224}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 1d81b0d7cae57744186549f40cf3dea8, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_MaskInteraction: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &1343927228
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1343927224}
-  m_Mesh: {fileID: -8235981043639529675, guid: e1013e1dfa795d640818f5f7ae9f4d0e, type: 3}
 --- !u!4 &1345328111 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8597330632845430329, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
@@ -46958,9 +46847,10 @@ GameObject:
   - component: {fileID: 1371873647}
   - component: {fileID: 1371873646}
   - component: {fileID: 1371873645}
+  - component: {fileID: 1371873648}
   m_Layer: 0
   m_Name: BotonCyan
-  m_TagString: Untagged
+  m_TagString: BotonColor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -47058,6 +46948,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1371873643}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1371873648
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1371873643}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e86d6403f1c1b64c8332149d5a8d7f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BotonColorColor
+  color: Cyan
 --- !u!1 &1372317522
 GameObject:
   m_ObjectHideFlags: 0
@@ -51309,9 +51212,10 @@ GameObject:
   - component: {fileID: 1488518725}
   - component: {fileID: 1488518724}
   - component: {fileID: 1488518723}
+  - component: {fileID: 1488518726}
   m_Layer: 0
   m_Name: BotonBlanco
-  m_TagString: Untagged
+  m_TagString: BotonColor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -51409,6 +51313,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1488518721}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1488518726
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1488518721}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e86d6403f1c1b64c8332149d5a8d7f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BotonColorColor
+  color: Blanco
 --- !u!1 &1488974909
 GameObject:
   m_ObjectHideFlags: 0
@@ -53309,9 +53226,10 @@ GameObject:
   - component: {fileID: 1572983479}
   - component: {fileID: 1572983478}
   - component: {fileID: 1572983477}
+  - component: {fileID: 1572983480}
   m_Layer: 0
   m_Name: BotonRosa
-  m_TagString: Untagged
+  m_TagString: BotonColor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -53409,6 +53327,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1572983475}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1572983480
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1572983475}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e86d6403f1c1b64c8332149d5a8d7f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BotonColorColor
+  color: Rosa
 --- !u!1001 &1574165259
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -57796,10 +57727,11 @@ GameObject:
   - component: {fileID: 1713559236}
   - component: {fileID: 1713559235}
   - component: {fileID: 1713559234}
-  - component: {fileID: 1713559233}
+  - component: {fileID: 1713559237}
+  - component: {fileID: 1713559238}
   m_Layer: 0
-  m_Name: PuertaTV
-  m_TagString: Puerta
+  m_Name: PuertaColoresTV
+  m_TagString: PuertaColoresTV
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -57820,28 +57752,6 @@ Transform:
   - {fileID: 1951790531}
   m_Father: {fileID: 627057283}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!95 &1713559233
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1713559231}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: b2e225257609d864489d40274cbfcacc, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!64 &1713559234
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -57921,6 +57831,63 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1713559231}
   m_Mesh: {fileID: -642889857091853129, guid: e1013e1dfa795d640818f5f7ae9f4d0e, type: 3}
+--- !u!95 &1713559237
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1713559231}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: e6e5ac2d8cb21274c8e7e863900d0735, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1713559238
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1713559231}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a430c18d276fd2a4ba58f8b356fe80a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PanelColores
+  combinacionCorrecta:
+  - Rojo
+  - Naranja
+  - Blanco
+  - Verde
+  maxPulsaciones: 4
+  botonesColores:
+  - {fileID: 63484084}
+  - {fileID: 1227727314}
+  - {fileID: 823857379}
+  - {fileID: 488079567}
+  - {fileID: 1318094820}
+  - {fileID: 1371873643}
+  - {fileID: 1727617853}
+  - {fileID: 1572983475}
+  - {fileID: 1488518721}
+  interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
+  puerta: {fileID: 1713559231}
+  triggerAbrir: Abrir
+  sonidoPulsarBoton: {fileID: 8300000, guid: c2ae10cbb81b3494d864e86fadb2ffc0, type: 3}
+  sonidoCombinacionCorrecta: {fileID: 8300000, guid: 67710b508e8fd9b4994bc44df10e277c, type: 3}
+  sonidoCombinacionIncorrecta: {fileID: 8300000, guid: 5ac0b56526a42614cbe1dfea067181e9, type: 3}
+  volumenSonidos: 0.7
 --- !u!1001 &1713611688
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -58399,9 +58366,10 @@ GameObject:
   - component: {fileID: 1727617857}
   - component: {fileID: 1727617856}
   - component: {fileID: 1727617855}
+  - component: {fileID: 1727617858}
   m_Layer: 0
   m_Name: BotonVerde
-  m_TagString: Untagged
+  m_TagString: BotonColor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -58499,6 +58467,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1727617853}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1727617858
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1727617853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e86d6403f1c1b64c8332149d5a8d7f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BotonColorColor
+  color: Verde
 --- !u!1001 &1729872255
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -78609,7 +78590,7 @@ GameObject:
   - component: {fileID: 9119292329488832278}
   m_Layer: 0
   m_Name: Door_D_Door
-  m_TagString: Untagged
+  m_TagString: PuertaGenerador
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -79793,6 +79774,9 @@ MonoBehaviour:
   - Moneda
   - MaquinaExpendedora
   - CintaVHS
+  - BotonColor
+  - PuertaColoresTV
+  - PuertaGenerador
   crosshair: {fileID: 8780529686480506420}
   normalSize: 10
   expandedSize: 15
@@ -82331,7 +82315,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 147959156719402134}
-  - {fileID: 208855126}
   m_Father: {fileID: 2009873905}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &3592173284976769110
@@ -97540,6 +97523,7 @@ SceneRoots:
   - {fileID: 776855600}
   - {fileID: 1149926363}
   - {fileID: 1093445727}
+  - {fileID: 618313428}
   - {fileID: 886565456}
   - {fileID: 2009873905}
   - {fileID: 397856559}
