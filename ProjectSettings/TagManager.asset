@@ -22,6 +22,8 @@ TagManager:
   - BotonColor
   - PuertaColoresTV
   - PuertaGenerador
+  - PuertaFinal
+  - Candado
   layers:
   - Default
   - TransparentFX
