@@ -16664,8 +16664,11 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 6520944188726999927}
   - {fileID: 8996911047909489826}
   - {fileID: 632877583}
+  - {fileID: 1414354463}
+  - {fileID: 694625526}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &531155550
@@ -20263,7 +20266,7 @@ Transform:
   m_GameObject: {fileID: 632877582}
   serializedVersion: 2
   m_LocalRotation: {x: 0.6593867, y: -0.27721548, z: 0.27083567, w: 0.64421177}
-  m_LocalPosition: {x: 12.22, y: -0.26, z: 2.9}
+  m_LocalPosition: {x: 12.388, y: -0.261, z: 2.941}
   m_LocalScale: {x: 333.6963, y: 8.186508, z: 44.802624}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -20282,10 +20285,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TablaMadera
   interactionDistance: 5
-  martilloTag: Martillo
   sonidoRomper: {fileID: 8300000, guid: e616d28ccdc297445b3b995e977c65fe, type: 3}
   volumenSonido: 1
-  tiempoDestruccion: 0.5
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
 --- !u!65 &632877585
 BoxCollider:
@@ -21406,14 +21407,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 656462592}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -9.42, y: -1.5927277, z: -10.84}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: 12.65, y: -1.5927277, z: -4.94}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 63926882}
   m_Father: {fileID: 2009873905}
-  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!1 &663660800
 GameObject:
   m_ObjectHideFlags: 0
@@ -21883,6 +21884,135 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8597330632845430329, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
   m_PrefabInstance: {fileID: 679144224}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &694625525
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 694625526}
+  - component: {fileID: 694625530}
+  - component: {fileID: 694625529}
+  - component: {fileID: 694625528}
+  - component: {fileID: 694625527}
+  m_Layer: 0
+  m_Name: TablaMadera (3)
+  m_TagString: Tabla
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &694625526
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 694625525}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.29883623, y: 0.29883623, z: 0.64085644, w: 0.64085644}
+  m_LocalPosition: {x: 15.405151, y: -0.0032043457, z: 7.3276367}
+  m_LocalScale: {x: 333.6963, y: 8.18651, z: 44.802628}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 531052014}
+  m_LocalEulerAnglesHint: {x: -50, y: 0, z: 90}
+--- !u!65 &694625527
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 694625525}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.01, y: 0.010000003, z: 0.010000001}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &694625528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 694625525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16e1e67c2fb6879458e578fb50cd2ad1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TablaMadera
+  interactionDistance: 5
+  sonidoRomper: {fileID: 8300000, guid: e616d28ccdc297445b3b995e977c65fe, type: 3}
+  volumenSonido: 1
+  interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
+--- !u!23 &694625529
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 694625525}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: dc0f47a6209b3254899bffbd443b464e, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &694625530
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 694625525}
+  m_Mesh: {fileID: 664456749670281567, guid: 89ab709ca0af3794eb4375ce06674a49, type: 3}
 --- !u!1 &702537166
 GameObject:
   m_ObjectHideFlags: 0
@@ -50823,6 +50953,135 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BotonNumero
   numero: 9
   textMesh: {fileID: 1328486332}
+--- !u!1 &1414354462
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1414354463}
+  - component: {fileID: 1414354467}
+  - component: {fileID: 1414354466}
+  - component: {fileID: 1414354465}
+  - component: {fileID: 1414354464}
+  m_Layer: 0
+  m_Name: TablaMadera (2)
+  m_TagString: Tabla
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1414354463
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1414354462}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.29883623, y: -0.29883623, z: 0.64085644, w: 0.64085644}
+  m_LocalPosition: {x: 15.405151, y: -0.0032043457, z: 7.3276367}
+  m_LocalScale: {x: 333.6963, y: 8.18651, z: 44.802628}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 531052014}
+  m_LocalEulerAnglesHint: {x: 50, y: 0, z: 90}
+--- !u!65 &1414354464
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1414354462}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.01, y: 0.010000003, z: 0.010000001}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1414354465
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1414354462}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16e1e67c2fb6879458e578fb50cd2ad1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TablaMadera
+  interactionDistance: 5
+  sonidoRomper: {fileID: 8300000, guid: e616d28ccdc297445b3b995e977c65fe, type: 3}
+  volumenSonido: 1
+  interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
+--- !u!23 &1414354466
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1414354462}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: dc0f47a6209b3254899bffbd443b464e, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &1414354467
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1414354462}
+  m_Mesh: {fileID: 664456749670281567, guid: 89ab709ca0af3794eb4375ce06674a49, type: 3}
 --- !u!1 &1414804625
 GameObject:
   m_ObjectHideFlags: 0
@@ -89186,7 +89445,7 @@ Transform:
   m_GameObject: {fileID: 5346311453154236445}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 982.57, y: 114.041, z: 1182.72}
+  m_LocalPosition: {x: 997.24, y: 114.041, z: 1195.24}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -92119,12 +92378,12 @@ Transform:
   m_GameObject: {fileID: 3100779592831883906}
   serializedVersion: 2
   m_LocalRotation: {x: -0.50000006, y: -0.50000006, z: 0.49999997, w: 0.49999997}
-  m_LocalPosition: {x: 979.223, y: 114.58973, z: 1185.9197}
+  m_LocalPosition: {x: 6.6151123, y: -0.35347748, z: 2.607666}
   m_LocalScale: {x: 300, y: 299.99997, z: 300.00003}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2827315140678449334}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 531052014}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &6520944188726999929
 Rigidbody:
@@ -99542,10 +99801,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TablaMadera
   interactionDistance: 5
-  martilloTag: Martillo
   sonidoRomper: {fileID: 8300000, guid: e616d28ccdc297445b3b995e977c65fe, type: 3}
   volumenSonido: 1
-  tiempoDestruccion: 0.5
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
 --- !u!65 &8996911047909489828
 BoxCollider:
@@ -100656,5 +100913,4 @@ SceneRoots:
   - {fileID: 119362036}
   - {fileID: 627057283}
   - {fileID: 2026005086}
-  - {fileID: 6520944188726999927}
   - {fileID: 531052014}
