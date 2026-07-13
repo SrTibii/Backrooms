@@ -24,6 +24,8 @@ TagManager:
   - PuertaGenerador
   - PuertaFinal
   - Candado
+  - Martillo
+  - Tabla
   layers:
   - Default
   - TransparentFX
