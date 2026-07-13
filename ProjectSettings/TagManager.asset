@@ -18,6 +18,7 @@ TagManager:
   - BotonGenerador
   - Moneda
   - MaquinaExpendedora
+  - CintaVHS
   layers:
   - Default
   - TransparentFX
