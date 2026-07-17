@@ -437,6 +437,14 @@ public class EnemyIA : MonoBehaviour
         if (isJumpscareActive) return;
         isJumpscareActive = true;
 
+        // ?? FORZAR EL CIERRE DE LA NOTA SI ESTÁ ABIERTA
+        LeerNota leerNota = FindObjectOfType<LeerNota>();
+        if (leerNota != null)
+        {
+            leerNota.CerrarNotaForzado();
+            Debug.Log("?? Nota forzada a cerrar por jumpscare");
+        }
+
         Debug.Log($"?? JUMBSCARE ACTIVADO! {gameObject.name} atrapó al jugador");
 
         currentState = EnemyState.Jumpscare;
