@@ -35,6 +35,9 @@ public class VHSGlitchManager : MonoBehaviour
     private bool isGlitching = false;
     private AudioSource glitchAudioSource;
 
+    // ?? NUEVO: Control de pausa para cuando se leen notas
+    private bool isPaused = false;
+
     void Start()
     {
         // Buscar referencias si no se asignaron
@@ -67,6 +70,9 @@ public class VHSGlitchManager : MonoBehaviour
 
     void Update()
     {
+        // ?? Si está en pausa, NO ejecutar glitches
+        if (isPaused) return;
+
         if (!enableTrackingGlitch) return;
         if (vhsCamera == null) return;
 
@@ -167,5 +173,45 @@ public class VHSGlitchManager : MonoBehaviour
             vhsCamera.transform.localPosition = cameraOriginalPosition;
             vhsCamera.transform.localRotation = cameraOriginalRotation;
         }
+    }
+
+    // ?? NUEVO: Pausar los glitches (cuando se abre una nota)
+    public void PausarGlitches()
+    {
+        isPaused = true;
+
+        // Restaurar cámara a la posición original inmediatamente
+        if (vhsCamera != null)
+        {
+            vhsCamera.transform.localPosition = cameraOriginalPosition;
+            vhsCamera.transform.localRotation = cameraOriginalRotation;
+        }
+
+        // Detener cualquier glitch en curso
+        if (isGlitching)
+        {
+            StopAllCoroutines();
+            isGlitching = false;
+        }
+
+        Debug.Log("?? Glitches de VHS pausados");
+    }
+
+    // ?? NUEVO: Reanudar los glitches (cuando se cierra la nota)
+    public void ReanudarGlitches()
+    {
+        isPaused = false;
+
+        // Restaurar cámara a la posición original
+        if (vhsCamera != null)
+        {
+            vhsCamera.transform.localPosition = cameraOriginalPosition;
+            vhsCamera.transform.localRotation = cameraOriginalRotation;
+        }
+
+        // Programar el siguiente glitch
+        ScheduleNextGlitch();
+
+        Debug.Log("?? Glitches de VHS reanudados");
     }
 }
