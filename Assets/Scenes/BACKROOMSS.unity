@@ -6164,7 +6164,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &198515276
 Transform:
   m_ObjectHideFlags: 0
@@ -24691,7 +24691,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &776855600
 Transform:
   m_ObjectHideFlags: 0
@@ -35267,7 +35267,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1019728150
 Transform:
   m_ObjectHideFlags: 0
@@ -37694,9 +37694,10 @@ GameObject:
   - component: {fileID: 1104950484}
   - component: {fileID: 1104950483}
   - component: {fileID: 1104950482}
+  - component: {fileID: 1104950485}
   m_Layer: 0
   m_Name: GeneradorBase
-  m_TagString: Untagged
+  m_TagString: BotonGenerador
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -37739,8 +37740,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 5.3378735, y: 3.2323763, z: 3.9188027}
-  m_Center: {x: -2.489512, y: -0.01805598, z: 0.31606808}
+  m_Size: {x: 5.337874, y: 3.5796928, z: 3.9188025}
+  m_Center: {x: -2.4895115, y: -0.19171143, z: 0.3160681}
 --- !u!23 &1104950483
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -37798,6 +37799,29 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1104950480}
   m_Mesh: {fileID: -3243264717552843444, guid: c0707963c8b97b144b0e0816a988f24b, type: 3}
+--- !u!114 &1104950485
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1104950480}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b936201a6f6dd1044b926c4a5eff61c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Generador
+  generadorID: 2
+  isActive: 0
+  luzGenerador: {fileID: 609657239}
+  colorApagado: {r: 1, g: 0, b: 0, a: 1}
+  colorEncendido: {r: 0, g: 1, b: 0, a: 1}
+  luzRenderer: {fileID: 828019516}
+  materialApagado: {fileID: 2100000, guid: 7dae7cdae8e52ff48b850efe7b988f44, type: 2}
+  materialEncendido: {fileID: 2100000, guid: c497d953ac5aa9841b1d99c4cd37ee9e, type: 2}
+  sonidoActivacion: {fileID: 8300000, guid: 0c5e464e37670044e980441209c00293, type: 3}
+  volumenSonido: 0.7
+  interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
 --- !u!4 &1108319603 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8597330632845430329, guid: f3909436a4d6f2141bf3d43ee15f4b7a, type: 3}
@@ -47911,7 +47935,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1362244933
 Transform:
   m_ObjectHideFlags: 0
@@ -53034,9 +53058,10 @@ GameObject:
   - component: {fileID: 1468256704}
   - component: {fileID: 1468256703}
   - component: {fileID: 1468256702}
+  - component: {fileID: 1468256705}
   m_Layer: 0
   m_Name: GeneradorBase
-  m_TagString: Untagged
+  m_TagString: BotonGenerador
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -53079,8 +53104,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 5.3378735, y: 3.2323763, z: 3.9188027}
-  m_Center: {x: -2.489512, y: -0.01805598, z: 0.31606808}
+  m_Size: {x: 5.3378735, y: 3.5656085, z: 3.9188025}
+  m_Center: {x: -2.489512, y: -0.18467271, z: 0.3160681}
 --- !u!23 &1468256703
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -53138,6 +53163,29 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1468256700}
   m_Mesh: {fileID: -3243264717552843444, guid: c0707963c8b97b144b0e0816a988f24b, type: 3}
+--- !u!114 &1468256705
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1468256700}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b936201a6f6dd1044b926c4a5eff61c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Generador
+  generadorID: 3
+  isActive: 0
+  luzGenerador: {fileID: 1166938760}
+  colorApagado: {r: 1, g: 0, b: 0, a: 1}
+  colorEncendido: {r: 0, g: 1, b: 0, a: 1}
+  luzRenderer: {fileID: 380639669}
+  materialApagado: {fileID: 2100000, guid: 7dae7cdae8e52ff48b850efe7b988f44, type: 2}
+  materialEncendido: {fileID: 2100000, guid: c497d953ac5aa9841b1d99c4cd37ee9e, type: 2}
+  sonidoActivacion: {fileID: 8300000, guid: 0c5e464e37670044e980441209c00293, type: 3}
+  volumenSonido: 0.7
+  interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
 --- !u!1 &1470321419
 GameObject:
   m_ObjectHideFlags: 0
@@ -70818,11 +70866,11 @@ Transform:
   m_GameObject: {fileID: 1972117392}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1051.5825, y: 462.03354, z: 30.130127}
+  m_LocalPosition: {x: 54.34253, y: 347.99255, z: -1152.3899}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 5303942437428696374}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1975919277
 GameObject:
@@ -90040,11 +90088,12 @@ Transform:
   m_GameObject: {fileID: 5346311453154236445}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 997.24, y: 114.041, z: 1195.24}
+  m_LocalPosition: {x: 997.24, y: 114.041, z: 1182.52}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 258618616725351469}
+  - {fileID: 1972117394}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &5317987844729574058
@@ -96534,9 +96583,10 @@ GameObject:
   - component: {fileID: 6304387807065011290}
   - component: {fileID: 8821730540194622158}
   - component: {fileID: 8821730540194622159}
+  - component: {fileID: 8821730540194622160}
   m_Layer: 0
   m_Name: GeneradorBase
-  m_TagString: Untagged
+  m_TagString: BotonGenerador
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -99916,8 +99966,31 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 5.3378735, y: 3.2323763, z: 3.9188027}
-  m_Center: {x: -2.489512, y: -0.01805598, z: 0.31606808}
+  m_Size: {x: 5.3378735, y: 3.3613265, z: 3.9188025}
+  m_Center: {x: -2.489512, y: -0.08253106, z: 0.3160681}
+--- !u!114 &8821730540194622160
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7846557681416809303}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b936201a6f6dd1044b926c4a5eff61c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Generador
+  generadorID: 1
+  isActive: 0
+  luzGenerador: {fileID: 173813932}
+  colorApagado: {r: 1, g: 0, b: 0, a: 1}
+  colorEncendido: {r: 0, g: 1, b: 0, a: 1}
+  luzRenderer: {fileID: 47561724}
+  materialApagado: {fileID: 2100000, guid: 7dae7cdae8e52ff48b850efe7b988f44, type: 2}
+  materialEncendido: {fileID: 2100000, guid: c497d953ac5aa9841b1d99c4cd37ee9e, type: 2}
+  sonidoActivacion: {fileID: 8300000, guid: 0c5e464e37670044e980441209c00293, type: 3}
+  volumenSonido: 0.7
+  interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
 --- !u!4 &8823576764115504781 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3241916423606918202, guid: c5cbb765b4cf7f845af5ef491c50760a, type: 3}
@@ -101492,7 +101565,6 @@ SceneRoots:
   - {fileID: 889783903}
   - {fileID: 2073680493}
   - {fileID: 1092829848}
-  - {fileID: 1972117394}
   - {fileID: 5303942437428696374}
   - {fileID: 4914115800531380055}
   - {fileID: 776855600}
