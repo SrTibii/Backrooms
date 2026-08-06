@@ -6,32 +6,33 @@ public class RecogerObjeto : MonoBehaviour
     [Header("Referencias")]
     public InteractionSystem interactionSystem;
     public InputActionReference interactAction;
-    public Transform holdPosition; // Mano izquierda
+    public Transform holdPosition;
 
     [Header("Configuración")]
     public float pickupRange = 3f;
     public float smoothSpeed = 15f;
-    public string[] tagsValidos = { "Object" }; // Tags que puede recoger
+    public string[] tagsValidos = { "Object" };
 
     [Header("Sonidos por Tag")]
-    public SonidoPorTag[] sonidosPorTag; // Array de sonidos según el tag
+    public SonidoPorTag[] sonidosPorTag;
 
     [Header("Sonido por defecto")]
     public AudioClip sonidoPorDefecto;
     [Range(0f, 1f)] public float volumenPorDefecto = 0.7f;
 
-    // Estado interno
     private GameObject currentObject = null;
     private Rigidbody currentRigidbody = null;
     private Collider currentCollider = null;
     private Vector3 originalScale;
     private bool isHolding = false;
+    private Material[] originalMaterials;
 
     private bool originalIsKinematic;
     private RigidbodyConstraints originalConstraints;
 
     private ManosManager manosManager;
     private AudioSource audioSource;
+    private Material alwaysOnTopMat;
 
     [System.Serializable]
     public class SonidoPorTag
@@ -53,16 +54,20 @@ public class RecogerObjeto : MonoBehaviour
             defaultHold.transform.localPosition = new Vector3(0.5f, -0.3f, 0.8f);
             defaultHold.transform.localRotation = Quaternion.identity;
             holdPosition = defaultHold.transform;
-            Debug.Log("HoldPosition no asignado. Se ha creado uno por defecto.");
         }
 
-        // Configurar AudioSource
+        Shader shader = Shader.Find("Custom/AlwaysOnTop");
+        if (shader != null)
+        {
+            alwaysOnTopMat = new Material(shader);
+            alwaysOnTopMat.renderQueue = 4000;
+        }
+
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.loop = false;
         audioSource.playOnAwake = false;
         audioSource.spatialBlend = 0f;
 
-        // Buscar el ManosManager
         manosManager = FindObjectOfType<ManosManager>();
         if (manosManager == null)
         {
@@ -97,18 +102,16 @@ public class RecogerObjeto : MonoBehaviour
     {
         if (isHolding && currentObject != null)
         {
-            Vector3 targetPosition = holdPosition.position;
-            Quaternion targetRotation = holdPosition.rotation;
-
+            // 🔥 El objeto sigue la mano
             currentObject.transform.position = Vector3.Lerp(
                 currentObject.transform.position,
-                targetPosition,
+                holdPosition.position,
                 Time.deltaTime * smoothSpeed
             );
 
             currentObject.transform.rotation = Quaternion.Lerp(
                 currentObject.transform.rotation,
-                targetRotation,
+                holdPosition.rotation,
                 Time.deltaTime * smoothSpeed
             );
         }
@@ -130,7 +133,6 @@ public class RecogerObjeto : MonoBehaviour
         if (interactionSystem == null) return;
         if (manosManager == null) return;
 
-        // Verificar si la mano derecha está ocupada
         if (manosManager.manoDerechaOcupada)
         {
             Debug.Log("⚠️ No puedes coger nada, tienes la linterna en la mano derecha");
@@ -140,7 +142,6 @@ public class RecogerObjeto : MonoBehaviour
         GameObject target = interactionSystem.GetTargetObject();
         if (target == null) return;
 
-        // Verificar que el objeto tenga un tag válido
         bool tagValido = false;
         foreach (string tag in tagsValidos)
         {
@@ -171,14 +172,12 @@ public class RecogerObjeto : MonoBehaviour
             return;
         }
 
-        // Intentar ocupar la mano izquierda
         if (!manosManager.OcuparManoIzquierda(target))
         {
             Debug.Log("⚠️ Mano izquierda ocupada, no puedes recoger más objetos");
             return;
         }
 
-        // Guardar el objeto
         currentObject = target;
         currentRigidbody = rb;
         currentCollider = target.GetComponent<Collider>();
@@ -196,25 +195,44 @@ public class RecogerObjeto : MonoBehaviour
             currentCollider.enabled = false;
         }
 
+        // 🔥 APLICAR SHADER
+        Renderer renderer = target.GetComponent<Renderer>();
+        if (renderer != null && alwaysOnTopMat != null)
+        {
+            originalMaterials = renderer.materials;
+
+            Material[] newMats = new Material[originalMaterials.Length];
+            for (int i = 0; i < originalMaterials.Length; i++)
+            {
+                Material mat = new Material(alwaysOnTopMat);
+                if (originalMaterials[i].mainTexture != null)
+                {
+                    mat.mainTexture = originalMaterials[i].mainTexture;
+                }
+                if (originalMaterials[i].HasProperty("_Color"))
+                {
+                    mat.color = originalMaterials[i].color;
+                }
+                newMats[i] = mat;
+            }
+            renderer.materials = newMats;
+        }
+
         target.transform.position = holdPosition.position;
         target.transform.rotation = holdPosition.rotation;
         target.transform.SetParent(holdPosition);
 
         isHolding = true;
-
-        // 🔥 REPRODUCIR SONIDO SEGÚN EL TAG
         ReproducirSonidoPorTag(target.tag);
 
         Debug.Log($"✅ Recogido: {target.name} (tag: {target.tag})");
     }
 
-    // 🔥 Método para reproducir sonido según el tag
     private void ReproducirSonidoPorTag(string tag)
     {
         AudioClip clip = null;
         float volumen = volumenPorDefecto;
 
-        // Buscar si hay un sonido configurado para este tag
         foreach (SonidoPorTag item in sonidosPorTag)
         {
             if (item.tag == tag)
@@ -225,21 +243,13 @@ public class RecogerObjeto : MonoBehaviour
             }
         }
 
-        // Si no se encontró sonido para el tag, usar el por defecto
-        if (clip == null)
-        {
-            clip = sonidoPorDefecto;
-        }
+        if (clip == null) clip = sonidoPorDefecto;
 
         if (clip != null)
         {
             audioSource.volume = volumen;
             audioSource.PlayOneShot(clip);
             Debug.Log($"🔊 Sonido reproducido para tag '{tag}'");
-        }
-        else
-        {
-            Debug.Log($"🔇 No hay sonido asignado para el tag '{tag}'");
         }
     }
 
@@ -256,13 +266,53 @@ public class RecogerObjeto : MonoBehaviour
             manosManager.LiberarManoIzquierda();
         }
 
+        // 🔥 RESTAURAR MATERIALES
+        Renderer renderer = currentObject.GetComponent<Renderer>();
+        if (renderer != null && originalMaterials != null)
+        {
+            renderer.materials = originalMaterials;
+            originalMaterials = null;
+        }
+
+        // 🔥 CALCULAR POSICIÓN SEGURA (DELANTE DE LA PARED)
+        Camera cam = Camera.main;
+        Vector3 posicionFinal;
+        Quaternion rotacionFinal = holdPosition.rotation;
+
+        if (cam != null)
+        {
+            Vector3 camForward = cam.transform.forward;
+            float distanciaSegura = 0.3f;
+
+            RaycastHit hit;
+            Vector3 startPos = cam.transform.position;
+            float maxDistance = 3f;
+
+            if (Physics.Raycast(startPos, camForward, out hit, maxDistance))
+            {
+                posicionFinal = hit.point - camForward * distanciaSegura;
+                Debug.Log($"🧱 Pared a {hit.distance:F2}m - Objeto a {distanciaSegura:F2}m");
+            }
+            else
+            {
+                posicionFinal = holdPosition.position + camForward * 0.3f;
+            }
+        }
+        else
+        {
+            posicionFinal = holdPosition.position;
+        }
+
         currentObject.transform.SetParent(null);
+        currentObject.transform.position = posicionFinal;
+        currentObject.transform.rotation = rotacionFinal;
 
         if (currentRigidbody != null)
         {
             currentRigidbody.isKinematic = false;
             currentRigidbody.useGravity = true;
             currentRigidbody.constraints = RigidbodyConstraints.None;
+            currentRigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
             currentRigidbody.linearVelocity = Vector3.zero;
             currentRigidbody.angularVelocity = Vector3.zero;

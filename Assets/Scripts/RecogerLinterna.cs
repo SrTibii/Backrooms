@@ -6,7 +6,7 @@ public class RecogerLinterna : MonoBehaviour
     [Header("Referencias")]
     public InteractionSystem interactionSystem;
     public InputActionReference interactAction;
-    public Transform holdPosition; // Mano derecha
+    public Transform holdPosition;
 
     [Header("Configuración")]
     public float pickupRange = 3f;
@@ -18,19 +18,20 @@ public class RecogerLinterna : MonoBehaviour
     public AudioClip sonidoSoltarLinterna;
     [Range(0f, 1f)] public float volumenSonidos = 0.7f;
 
-    // Estado interno
     private GameObject currentObject = null;
     private Rigidbody currentRigidbody = null;
     private Collider currentCollider = null;
     private Linterna currentLinterna = null;
     private Vector3 originalScale;
     private bool isHolding = false;
+    private Material[] originalMaterials;
 
     private bool originalIsKinematic;
     private RigidbodyConstraints originalConstraints;
 
     private ManosManager manosManager;
     private AudioSource audioSource;
+    private Material alwaysOnTopMat;
 
     void Start()
     {
@@ -44,16 +45,20 @@ public class RecogerLinterna : MonoBehaviour
             defaultHold.transform.localPosition = new Vector3(-0.5f, -0.3f, 0.8f);
             defaultHold.transform.localRotation = Quaternion.identity;
             holdPosition = defaultHold.transform;
-            Debug.Log("HoldPosition no asignado. Se ha creado uno por defecto.");
         }
 
-        // Configurar AudioSource
+        Shader shader = Shader.Find("Custom/AlwaysOnTop");
+        if (shader != null)
+        {
+            alwaysOnTopMat = new Material(shader);
+            alwaysOnTopMat.renderQueue = 4000;
+        }
+
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.loop = false;
         audioSource.playOnAwake = false;
         audioSource.spatialBlend = 0f;
 
-        // Buscar el ManosManager
         manosManager = FindObjectOfType<ManosManager>();
         if (manosManager == null)
         {
@@ -88,18 +93,15 @@ public class RecogerLinterna : MonoBehaviour
     {
         if (isHolding && currentObject != null)
         {
-            Vector3 targetPosition = holdPosition.position;
-            Quaternion targetRotation = holdPosition.rotation;
-
             currentObject.transform.position = Vector3.Lerp(
                 currentObject.transform.position,
-                targetPosition,
+                holdPosition.position,
                 Time.deltaTime * smoothSpeed
             );
 
             currentObject.transform.rotation = Quaternion.Lerp(
                 currentObject.transform.rotation,
-                targetRotation,
+                holdPosition.rotation,
                 Time.deltaTime * smoothSpeed
             );
         }
@@ -121,7 +123,6 @@ public class RecogerLinterna : MonoBehaviour
         if (interactionSystem == null) return;
         if (manosManager == null) return;
 
-        // Verificar si la mano izquierda está ocupada
         if (manosManager.manoIzquierdaOcupada)
         {
             Debug.Log("?? No puedes coger la linterna, tienes un objeto en la mano izquierda");
@@ -151,7 +152,6 @@ public class RecogerLinterna : MonoBehaviour
             return;
         }
 
-        // Intentar ocupar la mano derecha
         if (!manosManager.OcuparManoDerecha(target))
         {
             Debug.Log("?? Mano derecha ocupada, no puedes recoger más objetos");
@@ -176,6 +176,29 @@ public class RecogerLinterna : MonoBehaviour
             currentCollider.enabled = false;
         }
 
+        // ?? APLICAR SHADER
+        Renderer renderer = target.GetComponent<Renderer>();
+        if (renderer != null && alwaysOnTopMat != null)
+        {
+            originalMaterials = renderer.materials;
+
+            Material[] newMats = new Material[originalMaterials.Length];
+            for (int i = 0; i < originalMaterials.Length; i++)
+            {
+                Material mat = new Material(alwaysOnTopMat);
+                if (originalMaterials[i].mainTexture != null)
+                {
+                    mat.mainTexture = originalMaterials[i].mainTexture;
+                }
+                if (originalMaterials[i].HasProperty("_Color"))
+                {
+                    mat.color = originalMaterials[i].color;
+                }
+                newMats[i] = mat;
+            }
+            renderer.materials = newMats;
+        }
+
         target.transform.position = holdPosition.position;
         target.transform.rotation = holdPosition.rotation;
         target.transform.SetParent(holdPosition);
@@ -189,7 +212,6 @@ public class RecogerLinterna : MonoBehaviour
 
         isHolding = true;
 
-        // ?? REPRODUCIR SONIDO DE RECOGER LINTERNA
         if (sonidoRecogerLinterna != null)
         {
             audioSource.volume = volumenSonidos;
@@ -207,31 +229,64 @@ public class RecogerLinterna : MonoBehaviour
             return;
         }
 
-        Vector3 currentPosition = currentObject.transform.position;
-        Quaternion currentRotation = currentObject.transform.rotation;
-
         if (manosManager != null)
         {
             manosManager.LiberarManoDerecha();
         }
 
-        currentObject.transform.SetParent(null);
+        // ?? RESTAURAR MATERIALES
+        Renderer renderer = currentObject.GetComponent<Renderer>();
+        if (renderer != null && originalMaterials != null)
+        {
+            renderer.materials = originalMaterials;
+            originalMaterials = null;
+        }
 
-        currentObject.transform.position = currentPosition;
-        currentObject.transform.rotation = currentRotation;
+        // ?? CALCULAR POSICIÓN SEGURA
+        Camera cam = Camera.main;
+        Vector3 posicionFinal;
+        Quaternion rotacionFinal = holdPosition.rotation;
 
-        currentObject.transform.localScale = originalScale;
+        if (cam != null)
+        {
+            Vector3 camForward = cam.transform.forward;
+            float distanciaSegura = 0.3f;
+
+            RaycastHit hit;
+            Vector3 startPos = cam.transform.position;
+            float maxDistance = 3f;
+
+            if (Physics.Raycast(startPos, camForward, out hit, maxDistance))
+            {
+                posicionFinal = hit.point - camForward * distanciaSegura;
+            }
+            else
+            {
+                posicionFinal = holdPosition.position + camForward * 0.3f;
+            }
+        }
+        else
+        {
+            posicionFinal = holdPosition.position;
+        }
 
         if (currentLinterna != null)
         {
             currentLinterna.SetInHand(false);
         }
 
+        currentObject.transform.SetParent(null);
+        currentObject.transform.position = posicionFinal;
+        currentObject.transform.rotation = rotacionFinal;
+
+        currentObject.transform.localScale = originalScale;
+
         if (currentRigidbody != null)
         {
             currentRigidbody.isKinematic = false;
             currentRigidbody.useGravity = true;
             currentRigidbody.constraints = RigidbodyConstraints.None;
+            currentRigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
             currentRigidbody.linearVelocity = Vector3.zero;
             currentRigidbody.angularVelocity = Vector3.zero;
@@ -243,7 +298,6 @@ public class RecogerLinterna : MonoBehaviour
             currentCollider.enabled = true;
         }
 
-        // ?? REPRODUCIR SONIDO DE SOLTAR LINTERNA
         if (sonidoSoltarLinterna != null)
         {
             audioSource.volume = volumenSonidos;
