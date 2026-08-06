@@ -250,6 +250,10 @@ public class FirstPersonController : MonoBehaviour
     private Vector3 swayTargetPosition = Vector3.zero;
     private Vector3 swayCurrentPosition = Vector3.zero;
 
+    // ?? NUEVO: Cooldown para el crouch
+    private float crouchCooldownTimer = 0f;
+    private float crouchCooldown = 0.3f; // Tiempo mínimo entre agacharse y levantarse
+
     // ============================================
     // 14. ONENABLE / ONDISABLE
     // ============================================
@@ -485,6 +489,12 @@ public class FirstPersonController : MonoBehaviour
     // ============================================
     void Update()
     {
+        // ?? REDUCIR COOLDOWN DEL CROUCH
+        if (crouchCooldownTimer > 0f)
+        {
+            crouchCooldownTimer -= Time.deltaTime;
+        }
+
         HandleStamina();
         HandleCrouch();
         HandleMovement();
@@ -1086,6 +1096,9 @@ public class FirstPersonController : MonoBehaviour
         if (!enableCrouch) return;
         if (isZoomed) return;
 
+        // ?? COOLDOWN: Si el timer es mayor que 0, no se puede cambiar de estado
+        if (crouchCooldownTimer > 0f) return;
+
         if (isCrouching)
         {
             isBlockedByCeiling = CheckCeilingBlock();
@@ -1099,6 +1112,9 @@ public class FirstPersonController : MonoBehaviour
 
         isCrouching = !isCrouching;
         isBlockedByCeiling = false;
+
+        // ?? INICIAR COOLDOWN
+        crouchCooldownTimer = crouchCooldown;
 
         if (isCrouching)
         {
