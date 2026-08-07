@@ -36771,8 +36771,8 @@ MonoBehaviour:
   tagLlaveAzul: LlaveAzul
   tagLlaveVerde: LlaveVerde
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
-  sonidoCandadoAbierto: {fileID: 8300000, guid: c2ae10cbb81b3494d864e86fadb2ffc0, type: 3}
-  sonidoLlaveIncorrecta: {fileID: 8300000, guid: 5ac0b56526a42614cbe1dfea067181e9, type: 3}
+  sonidoCandadoAbierto: {fileID: 8300000, guid: 9ecd590b572156e46aa99baa856e9596, type: 3}
+  sonidoLlaveIncorrecta: {fileID: 8300000, guid: 8c6b7084bee814d49b6dfa7183978f65, type: 3}
   sonidoPuertaAbierta: {fileID: 8300000, guid: 697f0f96ef0e8fd4ea7d978c1a6839b1, type: 3}
   volumenSonidos: 0.7
 --- !u!1 &1082715052
