@@ -101006,6 +101006,7 @@ MonoBehaviour:
   monedaTag: Moneda
   llaveFalsa: {fileID: 392951443}
   llaveBuena: {fileID: 8315454898275150980}
+  colliderInteractuable: {fileID: 1223767154}
   sonidoInsertarMoneda: {fileID: 8300000, guid: bf62cd15ae565d9488b8d34d90d6e2af, type: 3}
   sonidoCaerLlave: {fileID: 8300000, guid: 36a43d4c42d87e945bd910a2ed3c56b8, type: 3}
   volumenSonidos: 1

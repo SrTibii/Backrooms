@@ -15,6 +15,9 @@ public class MaquinaExpendedora : MonoBehaviour
     public GameObject llaveFalsa;
     public GameObject llaveBuena;
 
+    [Header("Collider a desactivar")]
+    public Collider colliderInteractuable; // ?? Arrastra el collider aquí
+
     [Header("Audio")]
     public AudioClip sonidoInsertarMoneda;
     public AudioClip sonidoCaerLlave;
@@ -41,14 +44,34 @@ public class MaquinaExpendedora : MonoBehaviour
         interactionSystem = FindObjectOfType<InteractionSystem>();
         if (interactionSystem == null)
         {
-            //Debug.LogError("? No se encontró InteractionSystem en la escena");
+            Debug.LogError("? No se encontró InteractionSystem en la escena");
         }
 
-        // Estado inicial
+        // Si no se asignó el collider, intentar encontrarlo automáticamente
+        if (colliderInteractuable == null)
+        {
+            colliderInteractuable = GetComponent<Collider>();
+            if (colliderInteractuable == null)
+            {
+                // Buscar en los hijos
+                colliderInteractuable = GetComponentInChildren<Collider>();
+                if (colliderInteractuable != null)
+                {
+                    Debug.Log($"?? Collider encontrado automáticamente en hijo: {colliderInteractuable.gameObject.name}");
+                }
+            }
+        }
+
+        if (colliderInteractuable == null)
+        {
+            Debug.LogError("? No se encontró ningún collider. Asigna uno manualmente en el Inspector.");
+        }
+
+        // Estado inicial: llave falsa visible, llave buena oculta
         if (llaveFalsa != null) llaveFalsa.SetActive(true);
         if (llaveBuena != null) llaveBuena.SetActive(false);
 
-        //Debug.Log("?? Máquina expendedora inicializada correctamente");
+        Debug.Log("?? Máquina expendedora inicializada correctamente");
     }
 
     private void OnEnable()
@@ -57,11 +80,11 @@ public class MaquinaExpendedora : MonoBehaviour
         {
             interactAction.action.performed += OnInteractPerformed;
             interactAction.action.Enable();
-            //Debug.Log("? Input Action 'Interact' habilitado");
+            Debug.Log("? Input Action 'Interact' habilitado");
         }
         else
         {
-            //Debug.LogError("? interactAction NO está asignado en el Inspector");
+            Debug.LogError("? interactAction NO está asignado en el Inspector");
         }
     }
 
@@ -81,25 +104,25 @@ public class MaquinaExpendedora : MonoBehaviour
         // Si ya se insertó una moneda o ya se entregó la llave
         if (monedaInsertada || llaveEntregada)
         {
-            //Debug.Log($"? Máquina ya usada (monedaInsertada={monedaInsertada}, llaveEntregada={llaveEntregada})");
+            Debug.Log($"? Máquina ya usada (monedaInsertada={monedaInsertada}, llaveEntregada={llaveEntregada})");
             return;
         }
 
-        // ?? Verificar si está mirando la máquina
+        // Verificar si está mirando la máquina
         if (!IsLookingAtMachine())
         {
-            //Debug.Log("?? No estás mirando la máquina expendedora");
+            Debug.Log("?? No estás mirando la máquina expendedora");
             return;
         }
 
-        // ?? Verificar si tiene una moneda en la mano
+        // Verificar si tiene una moneda en la mano
         if (!TieneMonedaEnMano())
         {
-            //Debug.Log("?? No tienes una moneda en la mano");
+            Debug.Log("?? No tienes una moneda en la mano");
             return;
         }
 
-        //Debug.Log("? Todas las condiciones cumplidas. Insertando moneda...");
+        Debug.Log("? Todas las condiciones cumplidas. Insertando moneda...");
         StartCoroutine(InsertarMoneda());
     }
 
@@ -107,20 +130,20 @@ public class MaquinaExpendedora : MonoBehaviour
     {
         if (interactionSystem == null)
         {
-            //Debug.LogWarning("?? InteractionSystem es NULL, usando Raycast directo");
+            Debug.LogWarning("?? InteractionSystem es NULL, usando Raycast directo");
             return IsLookingAtMachineDirect();
         }
 
         GameObject target = interactionSystem.GetTargetObject();
         if (target == null)
         {
-            //Debug.Log("?? No hay objeto en el punto de mira");
+            Debug.Log("?? No hay objeto en el punto de mira");
             return false;
         }
 
-        //Debug.Log($"?? Objeto en mira: {target.name} (tag: {target.tag})");
+        Debug.Log($"?? Objeto en mira: {target.name} (tag: {target.tag})");
 
-        // ?? Verificar si es la máquina (por tag o por GameObject)
+        // Verificar si es la máquina (por tag o por GameObject)
         if (target == gameObject || target.CompareTag("MaquinaExpendedora"))
         {
             return true;
@@ -139,7 +162,7 @@ public class MaquinaExpendedora : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit, interactionDistance))
         {
-            //Debug.Log($"?? Raycast directo impactó en: {hit.collider.gameObject.name}");
+            Debug.Log($"?? Raycast directo impactó en: {hit.collider.gameObject.name}");
             return hit.collider.gameObject == gameObject;
         }
 
@@ -152,7 +175,7 @@ public class MaquinaExpendedora : MonoBehaviour
         RecogerObjeto recoger = FindObjectOfType<RecogerObjeto>();
         if (recoger == null)
         {
-            //Debug.LogWarning("?? No se encontró RecogerObjeto en la escena");
+            Debug.LogWarning("?? No se encontró RecogerObjeto en la escena");
             return false;
         }
 
@@ -160,27 +183,27 @@ public class MaquinaExpendedora : MonoBehaviour
         GameObject objetoEnMano = recoger.GetHeldObject();
         if (objetoEnMano == null)
         {
-            //Debug.Log("??? No hay objeto en la mano");
+            Debug.Log("??? No hay objeto en la mano");
             return false;
         }
 
-        //Debug.Log($"??? Objeto en mano: {objetoEnMano.name} (tag: {objetoEnMano.tag})");
+        Debug.Log($"??? Objeto en mano: {objetoEnMano.name} (tag: {objetoEnMano.tag})");
 
         // Verificar si el objeto tiene el tag "Moneda"
         if (objetoEnMano.CompareTag(monedaTag))
         {
-            //Debug.Log("?? ¡Es una moneda!");
+            Debug.Log("?? ¡Es una moneda!");
             return true;
         }
 
-        //Debug.Log($"? El objeto en mano NO es una moneda (tag: {objetoEnMano.tag})");
+        Debug.Log($"? El objeto en mano NO es una moneda (tag: {objetoEnMano.tag})");
         return false;
     }
 
     private IEnumerator InsertarMoneda()
     {
         monedaInsertada = true;
-        //Debug.Log("?? Iniciando inserción de moneda...");
+        Debug.Log("?? Iniciando inserción de moneda...");
 
         // ?? 1. Sonido de insertar moneda
         if (sonidoInsertarMoneda != null)
@@ -201,7 +224,7 @@ public class MaquinaExpendedora : MonoBehaviour
             if (moneda != null)
             {
                 Destroy(moneda);
-                //Debug.Log("?? Moneda destruida");
+                Debug.Log("?? Moneda destruida");
                 recoger.ForceDrop();
             }
             else
@@ -211,45 +234,56 @@ public class MaquinaExpendedora : MonoBehaviour
         }
 
         // ?? 3. Esperar
-        //Debug.Log($"? Esperando {tiempoEspera} segundos...");
+        Debug.Log($"? Esperando {tiempoEspera} segundos...");
         yield return new WaitForSeconds(tiempoEspera);
 
         // ?? 4. Sonido de caer la llave
         if (sonidoCaerLlave != null)
         {
             ReproducirSonido(sonidoCaerLlave);
-            //Debug.Log("?? Sonido de caer llave reproducido");
+            Debug.Log("?? Sonido de caer llave reproducido");
         }
         else
         {
-            //Debug.LogWarning("?? No hay sonido de caer llave asignado");
+            Debug.LogWarning("?? No hay sonido de caer llave asignado");
         }
 
         // ?? 5. Ocultar llave falsa
         if (llaveFalsa != null)
         {
             llaveFalsa.SetActive(false);
-            //Debug.Log("?? Llave falsa oculta");
+            Debug.Log("?? Llave falsa oculta");
         }
         else
         {
-            //Debug.LogWarning("?? No hay llave falsa asignada");
+            Debug.LogWarning("?? No hay llave falsa asignada");
         }
 
         // ?? 6. Mostrar llave buena
         if (llaveBuena != null)
         {
             llaveBuena.SetActive(true);
-            //Debug.Log("?? Llave buena activada en el suelo");
+            Debug.Log("?? Llave buena activada en el suelo");
         }
         else
         {
-            //Debug.LogWarning("?? No hay llave buena asignada");
+            Debug.LogWarning("?? No hay llave buena asignada");
+        }
+
+        // ?? 7. DESACTIVAR EL COLLIDER
+        if (colliderInteractuable != null)
+        {
+            colliderInteractuable.enabled = false;
+            Debug.Log($"?? Collider '{colliderInteractuable.gameObject.name}' desactivado");
+        }
+        else
+        {
+            Debug.LogWarning("?? No hay collider asignado para desactivar");
         }
 
         llaveEntregada = true;
         monedaInsertada = false;
-        //Debug.Log("? Proceso completado. Llave entregada.");
+        Debug.Log("? Proceso completado. Llave entregada. Máquina desactivada.");
     }
 
     private void ReproducirSonido(AudioClip clip)
@@ -258,13 +292,4 @@ public class MaquinaExpendedora : MonoBehaviour
         audioSource.volume = volumenSonidos;
         audioSource.PlayOneShot(clip);
     }
-
-    //public void ResetearMaquina()
-    //{
-    //    monedaInsertada = false;
-    //    llaveEntregada = false;
-    //    if (llaveFalsa != null) llaveFalsa.SetActive(true);
-    //    if (llaveBuena != null) llaveBuena.SetActive(false);
-    //    Debug.Log("?? Máquina reseteada");
-    //}
 }
