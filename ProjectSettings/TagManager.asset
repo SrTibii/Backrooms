@@ -28,6 +28,9 @@ TagManager:
   - Tabla
   - NotaPapel
   - Usado
+  - CandadoRojo
+  - CandadoAzul
+  - CandadoVerde
   layers:
   - Default
   - TransparentFX

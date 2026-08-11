@@ -8,7 +8,7 @@ public class PuertaFinal : MonoBehaviour
     public float interactionDistance = 3f;
 
     [Header("Candados")]
-    public Candado[] candados; // Array de 3 candados (Rojo, Azul, Verde)
+    public Candado[] candados;
 
     [Header("Tags de las llaves")]
     public string tagLlaveRoja = "LlaveRojo";
@@ -24,7 +24,6 @@ public class PuertaFinal : MonoBehaviour
     public AudioClip sonidoPuertaAbierta;
     [Range(0f, 1f)] public float volumenSonidos = 0.7f;
 
-    // Estado interno
     private int candadosAbiertos = 0;
     private bool puertaAbierta = false;
     private AudioSource audioSource;
@@ -33,34 +32,23 @@ public class PuertaFinal : MonoBehaviour
     [System.Serializable]
     public class Candado
     {
-        public string nombre; // "Rojo", "Azul", "Verde"
-        public GameObject candadoGO; // El GameObject del candado
+        public string nombre;
+        public GameObject candadoGO;
         public bool isOpen = false;
     }
 
     void Start()
     {
-        // Configurar AudioSource
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.loop = false;
         audioSource.playOnAwake = false;
         audioSource.spatialBlend = 1f;
         audioSource.volume = volumenSonidos;
 
-        // Buscar referencias
         interactionSystem = FindObjectOfType<InteractionSystem>();
         if (interactionSystem == null)
         {
             Debug.LogError("? No se encontró InteractionSystem en la escena");
-        }
-
-        // Asegurar que los candados tienen el tag correcto
-        foreach (Candado candado in candados)
-        {
-            if (candado.candadoGO != null)
-            {
-                candado.candadoGO.tag = "Candado";
-            }
         }
 
         Debug.Log("?? Puerta final inicializada");
@@ -92,7 +80,7 @@ public class PuertaFinal : MonoBehaviour
         if (target == null) return;
 
         // Verificar si es un candado
-        if (target.CompareTag("Candado"))
+        if (target.CompareTag("CandadoRojo") || target.CompareTag("CandadoAzul") || target.CompareTag("CandadoVerde"))
         {
             float distance = Vector3.Distance(Camera.main.transform.position, target.transform.position);
             if (distance > interactionDistance) return;
@@ -105,7 +93,6 @@ public class PuertaFinal : MonoBehaviour
             return;
         }
 
-        // Verificar si está mirando la puerta
         if (target == gameObject)
         {
             float distance = Vector3.Distance(Camera.main.transform.position, transform.position);
@@ -183,7 +170,6 @@ public class PuertaFinal : MonoBehaviour
         }
     }
 
-    // ?? MÉTODO CORREGIDO: El sonido se reproduce ANTES de ocultar el candado
     private void IntentarAbrirCandado(Candado candado)
     {
         if (candado.isOpen) return;
@@ -193,32 +179,21 @@ public class PuertaFinal : MonoBehaviour
 
         if (TieneLlaveEnMano(tagLlave))
         {
-            // ?? 1. PRIMERO: Reproducir sonido (ANTES de ocultar el candado)
             if (sonidoCandadoAbierto != null)
             {
                 audioSource.volume = volumenSonidos;
                 audioSource.PlayOneShot(sonidoCandadoAbierto);
                 Debug.Log($"?? Sonido de candado abierto reproducido para {candado.nombre}");
             }
-            else
-            {
-                Debug.LogWarning("?? No hay sonido de candado abierto asignado");
-            }
 
-            // ?? 2. Marcar como abierto
             candado.isOpen = true;
             candadosAbiertos++;
 
-            // ?? 3. Ocultar el candado (DESPUÉS del sonido)
             if (candado.candadoGO != null)
             {
-                // Opcional: esperar un poco antes de ocultar para que el sonido se escuche completo
                 StartCoroutine(OcultarCandadoConDelay(candado.candadoGO, 0.3f));
-                // Si no quieres delay, usa esto en su lugar:
-                // candado.candadoGO.SetActive(false);
             }
 
-            // ?? 4. Eliminar la llave de la mano
             EliminarLlaveDeLaMano();
 
             Debug.Log($"?? Candado {candado.nombre} abierto! ({candadosAbiertos}/3)");
@@ -230,7 +205,6 @@ public class PuertaFinal : MonoBehaviour
         }
         else
         {
-            // ?? Sonido de llave incorrecta (también se reproduce antes de cualquier otra acción)
             if (sonidoLlaveIncorrecta != null)
             {
                 audioSource.volume = volumenSonidos;
@@ -240,7 +214,6 @@ public class PuertaFinal : MonoBehaviour
         }
     }
 
-    // ?? CORRUTINA PARA OCULTAR EL CANDADO CON DELAY
     private IEnumerator OcultarCandadoConDelay(GameObject candadoGO, float delay)
     {
         yield return new WaitForSeconds(delay);
@@ -256,6 +229,10 @@ public class PuertaFinal : MonoBehaviour
         if (candadosAbiertos >= candados.Length)
         {
             puertaAbierta = true;
+
+            // ?? CAMBIAR EL TAG DE LA PUERTA A "Usado"
+            gameObject.tag = "Usado";
+            Debug.Log("??? Tag de la puerta final cambiado a 'Usado'");
 
             if (sonidoPuertaAbierta != null)
             {

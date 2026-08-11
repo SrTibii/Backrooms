@@ -12919,7 +12919,7 @@ GameObject:
   - component: {fileID: 430522963}
   m_Layer: 0
   m_Name: CandadoVerde
-  m_TagString: Candado
+  m_TagString: CandadoVerde
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -22867,7 +22867,7 @@ GameObject:
   - component: {fileID: 716386962}
   m_Layer: 0
   m_Name: CandadoAzul
-  m_TagString: Candado
+  m_TagString: CandadoAzul
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -38038,21 +38038,21 @@ MonoBehaviour:
     exactMatch: 1
     verificarEstado: 0
     estadoEsperado: 1
-  - tagObjeto: Candado
+  - tagObjeto: CandadoRojo
     tagNecesario: LlaveRojo
-    mensaje: '"I need a key"'
+    mensaje: '"I need a red key"'
     exactMatch: 1
     verificarEstado: 0
     estadoEsperado: 1
-  - tagObjeto: Candado
+  - tagObjeto: CandadoAzul
     tagNecesario: LlaveAzul
-    mensaje: '"I need a key"'
+    mensaje: '"I need a blue key"'
     exactMatch: 1
     verificarEstado: 0
     estadoEsperado: 1
-  - tagObjeto: Candado
+  - tagObjeto: CandadoVerde
     tagNecesario: LlaveVerde
-    mensaje: '"I need a key"'
+    mensaje: '"I need a green key"'
     exactMatch: 1
     verificarEstado: 0
     estadoEsperado: 1
@@ -38065,6 +38065,12 @@ MonoBehaviour:
   - tagObjeto: PuertaColoresTV
     tagNecesario: 
     mensaje: '"I need to solve the color puzzle"'
+    exactMatch: 1
+    verificarEstado: 0
+    estadoEsperado: 1
+  - tagObjeto: PuertaFinal
+    tagNecesario: 
+    mensaje: '"I need to find three keys"'
     exactMatch: 1
     verificarEstado: 0
     estadoEsperado: 1
@@ -83957,6 +83963,9 @@ MonoBehaviour:
   - Martillo
   - Tabla
   - NotaPapel
+  - CandadoRojo
+  - CandadoAzul
+  - CandadoVerde
   crosshair: {fileID: 8780529686480506420}
   normalSize: 10
   expandedSize: 15
@@ -98354,7 +98363,7 @@ GameObject:
   - component: {fileID: 8197791897519334165}
   m_Layer: 0
   m_Name: CandadoRojo
-  m_TagString: Candado
+  m_TagString: CandadoRojo
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -99751,7 +99760,7 @@ Transform:
   m_GameObject: {fileID: 8315454898275150980}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: -1, w: 0}
-  m_LocalPosition: {x: 0.255, y: -0.973, z: 1.382}
+  m_LocalPosition: {x: 0.255, y: -0.973, z: 1.366}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
