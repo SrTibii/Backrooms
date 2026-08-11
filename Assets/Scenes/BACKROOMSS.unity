@@ -38030,22 +38030,44 @@ MonoBehaviour:
     tagNecesario: Martillo
     mensaje: '"I need a hammer"'
     exactMatch: 1
+    verificarEstado: 0
+    estadoEsperado: 1
   - tagObjeto: MaquinaExpendedora
     tagNecesario: Moneda
     mensaje: '"I need a coin"'
     exactMatch: 1
+    verificarEstado: 0
+    estadoEsperado: 1
   - tagObjeto: Candado
     tagNecesario: LlaveRojo
     mensaje: '"I need a key"'
     exactMatch: 1
+    verificarEstado: 0
+    estadoEsperado: 1
   - tagObjeto: Candado
     tagNecesario: LlaveAzul
     mensaje: '"I need a key"'
     exactMatch: 1
+    verificarEstado: 0
+    estadoEsperado: 1
   - tagObjeto: Candado
     tagNecesario: LlaveVerde
     mensaje: '"I need a key"'
     exactMatch: 1
+    verificarEstado: 0
+    estadoEsperado: 1
+  - tagObjeto: PuertaGenerador
+    tagNecesario: 
+    mensaje: '"I need to activate three generators"'
+    exactMatch: 1
+    verificarEstado: 0
+    estadoEsperado: 1
+  - tagObjeto: PuertaColoresTV
+    tagNecesario: 
+    mensaje: '"I need to solve the color puzzle"'
+    exactMatch: 1
+    verificarEstado: 0
+    estadoEsperado: 1
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
 --- !u!4 &1109366735
 Transform:

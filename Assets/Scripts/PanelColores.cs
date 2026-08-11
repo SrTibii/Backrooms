@@ -48,7 +48,7 @@ public class PanelColores : MonoBehaviour
             }
         }
 
-        // ?? Asignar tag a la puerta
+        // Asignar tag a la puerta
         if (puerta != null)
         {
             puerta.tag = "PuertaColoresTV";
@@ -185,6 +185,10 @@ public class PanelColores : MonoBehaviour
             return;
         }
 
+        // ?? CAMBIAR EL TAG DE LA PUERTA A "Usado"
+        puerta.tag = "Usado";
+        Debug.Log("??? Tag de la puerta cambiado a 'Usado'");
+
         Animator anim = puerta.GetComponent<Animator>();
         if (anim != null)
         {
@@ -222,7 +226,7 @@ public class PanelColores : MonoBehaviour
         return puzzleCompletado;
     }
 
-    // ?? NUEVO: Método para saber si la puerta está abierta (para PuertaBloqueada)
+    // Método para saber si la puerta está abierta (para PuertaBloqueada)
     public bool IsOpen()
     {
         return puzzleCompletado;

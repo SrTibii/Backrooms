@@ -7,13 +7,13 @@ public class PuertaGeneradores : MonoBehaviour
     public int generadoresNecesarios = 3;
 
     [Header("Cubos de la puerta")]
-    public Renderer[] cubosPuerta; // Array de 3 cubos rojos/verdes (Renderer)
+    public Renderer[] cubosPuerta;
     public Material materialRojo;
     public Material materialVerde;
 
     [Header("Puerta")]
-    public GameObject puerta; // La puerta que se abre
-    public string triggerAbrir = "Abrir"; // Nombre del Trigger en el Animator
+    public GameObject puerta;
+    public string triggerAbrir = "Abrir";
 
     [Header("Audio")]
     public AudioClip sonidoPuertaAbierta;
@@ -27,7 +27,6 @@ public class PuertaGeneradores : MonoBehaviour
 
     void Start()
     {
-        // Configurar AudioSource
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.loop = false;
         audioSource.playOnAwake = false;
@@ -38,29 +37,22 @@ public class PuertaGeneradores : MonoBehaviour
             puerta.tag = "PuertaGenerador";
         }
 
-        // Estado inicial: todos los cubos rojos
         ActualizarCubos();
     }
 
-    // ?? Método que llaman los generadores cuando se activan
     public void GeneradorActivado(int id)
     {
-        // Convertir ID (1,2,3) a índice (0,1,2)
         int index = id - 1;
 
-        // Si el generador ya estaba activado, ignorar
         if (generadoresActivados[index]) return;
 
-        // Marcar como activado
         generadoresActivados[index] = true;
         contadorActivados++;
 
-        Debug.Log($"?? Generadores activados: {contadorActivados}/{generadoresNecesarios}");
+        Debug.Log($"? Generadores activados: {contadorActivados}/{generadoresNecesarios}");
 
-        // ?? Actualizar los cubos de la puerta
         ActualizarCubos();
 
-        // ?? Si todos los generadores están activados, abrir la puerta
         if (contadorActivados >= generadoresNecesarios)
         {
             AbrirPuerta();
@@ -69,7 +61,6 @@ public class PuertaGeneradores : MonoBehaviour
 
     private void ActualizarCubos()
     {
-        // Actualizar cada cubo según el estado de su generador
         for (int i = 0; i < cubosPuerta.Length && i < generadoresActivados.Length; i++)
         {
             if (cubosPuerta[i] != null)
@@ -86,14 +77,19 @@ public class PuertaGeneradores : MonoBehaviour
         puertaAbierta = true;
         Debug.Log("?? ¡PUERTA ABIERTA! Todos los generadores activados.");
 
-        // ?? Reproducir sonido
+        // ?? CAMBIAR EL TAG PARA QUE NO SE MUESTRE EL MENSAJE
+        if (puerta != null)
+        {
+            puerta.tag = "Usado";
+            Debug.Log("??? Tag de la puerta cambiado a 'Usado'");
+        }
+
         if (sonidoPuertaAbierta != null)
         {
             audioSource.volume = volumenSonido;
             audioSource.PlayOneShot(sonidoPuertaAbierta);
         }
 
-        // ?? Activar animación de la puerta
         if (puerta != null)
         {
             Animator anim = puerta.GetComponent<Animator>();
@@ -103,19 +99,16 @@ public class PuertaGeneradores : MonoBehaviour
             }
             else
             {
-                // Si no tiene Animator, hacer que desaparezca
                 puerta.SetActive(false);
             }
         }
     }
 
-    // ?? Método para comprobar si la puerta está abierta
     public bool IsOpen()
     {
         return puertaAbierta;
     }
 
-    // ?? Método para saber cuántos generadores faltan
     public int GeneradoresFaltantes()
     {
         return generadoresNecesarios - contadorActivados;

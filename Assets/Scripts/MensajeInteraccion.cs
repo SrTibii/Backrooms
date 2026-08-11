@@ -21,15 +21,16 @@ public class MensajeInteraccion : MonoBehaviour
     [System.Serializable]
     public class Requisito
     {
-        public string tagObjeto; // Tag del objeto con el que interactúas (ej: "Tabla")
-        public string tagNecesario; // Tag que necesitas tener en la mano (ej: "Martillo")
-        public string mensaje; // Mensaje a mostrar (ej: "I need a hammer")
-        public bool exactMatch = true; // Si es true, el objeto en mano debe tener EXACTAMENTE el tagNecesario
+        public string tagObjeto;
+        public string tagNecesario;
+        public string mensaje;
+        public bool exactMatch = true;
+        public bool verificarEstado = false;
+        public bool estadoEsperado = true;
     }
 
     private InteractionSystem interactionSystem;
     private ManosManager manosManager;
-    private float timer = 0f;
     private bool mensajeActivo = false;
     private Coroutine corrutinaCerrar;
 
@@ -64,25 +65,22 @@ public class MensajeInteraccion : MonoBehaviour
 
     private void OnInteractPerformed(InputAction.CallbackContext context)
     {
-        // Si el panel ya está visible, no hacer nada
         if (mensajeActivo) return;
-
         if (interactionSystem == null) return;
         if (manosManager == null) return;
 
-        // Obtener el objeto que el jugador está mirando
         GameObject target = interactionSystem.GetTargetObject();
         if (target == null) return;
 
-        // Verificar distancia
+        // ?? IGNORAR OBJETOS YA USADOS
+        if (target.CompareTag("Usado")) return;
+
         float distance = Vector3.Distance(Camera.main.transform.position, target.transform.position);
         if (distance > interactionDistance) return;
 
-        // Buscar si hay un requisito para este tag
         Requisito req = ObtenerRequisito(target.tag);
         if (req == null) return;
 
-        // Verificar si el objeto en mano cumple el requisito
         if (!CumpleRequisito(req))
         {
             MostrarMensaje(req.mensaje);
@@ -101,30 +99,57 @@ public class MensajeInteraccion : MonoBehaviour
         return null;
     }
 
+    // ?? VERIFICAR ESTADO DEL OBJETO
+    private bool VerificarEstadoObjeto(GameObject obj, Requisito req)
+    {
+        // ?? Buscar el script PuertaGeneradores en este objeto o en sus padres/hijos
+        PuertaGeneradores puerta = obj.GetComponent<PuertaGeneradores>();
+
+        // Si no está en el objeto, buscar en el padre
+        if (puerta == null && obj.transform.parent != null)
+        {
+            puerta = obj.transform.parent.GetComponent<PuertaGeneradores>();
+        }
+
+        // Si no está en el padre, buscar en cualquier hijo
+        if (puerta == null)
+        {
+            puerta = obj.GetComponentInChildren<PuertaGeneradores>();
+        }
+
+        // ?? Si encontramos la puerta, verificar su estado
+        if (puerta != null)
+        {
+            bool isOpen = puerta.IsOpen();
+            Debug.Log($"?? Puerta verificada: IsOpen = {isOpen}, Estado esperado = {req.estadoEsperado}");
+
+            // Devolver true si la puerta está en el estado esperado (NO mostrar mensaje)
+            return isOpen == req.estadoEsperado;
+        }
+
+        // ?? Si no encontramos PuertaGeneradores, buscar otros scripts con estado
+        // Puedes añadir más casos aquí
+
+        // Si no se encuentra ningún script con estado, mostrar mensaje normalmente
+        return false;
+    }
+
     private bool CumpleRequisito(Requisito req)
     {
-        // Buscar en ambas manos
         GameObject objetoEnMano = manosManager.objetoEnManoIzquierda;
         if (objetoEnMano == null)
         {
             objetoEnMano = manosManager.objetoEnManoDerecha;
         }
 
-        // Si no hay objeto en mano
-        if (objetoEnMano == null)
-        {
-            // Si el requisito exige tener algo, no cumple
-            return false;
-        }
+        if (objetoEnMano == null) return false;
 
-        // Verificar el tag del objeto en mano
         if (req.exactMatch)
         {
             return objetoEnMano.CompareTag(req.tagNecesario);
         }
         else
         {
-            // Si no es exacto, puedes añadir lógica adicional aquí
             return objetoEnMano.CompareTag(req.tagNecesario);
         }
     }
@@ -133,7 +158,6 @@ public class MensajeInteraccion : MonoBehaviour
     {
         if (panelMensaje == null || textoMensaje == null) return;
 
-        // Cancelar corrutina anterior si existe
         if (corrutinaCerrar != null)
         {
             StopCoroutine(corrutinaCerrar);
@@ -143,7 +167,6 @@ public class MensajeInteraccion : MonoBehaviour
         panelMensaje.SetActive(true);
         mensajeActivo = true;
 
-        // Iniciar corrutina para ocultar el mensaje
         corrutinaCerrar = StartCoroutine(CerrarMensajeConDelay());
     }
 
@@ -159,7 +182,6 @@ public class MensajeInteraccion : MonoBehaviour
         corrutinaCerrar = null;
     }
 
-    // ?? Método para cerrar el mensaje manualmente (opcional)
     public void CerrarMensaje()
     {
         if (panelMensaje != null)
