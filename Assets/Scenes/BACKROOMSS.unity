@@ -90216,7 +90216,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5aa22e861705f6d45b42a773316f850b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FosoCollider
-  delayReinicio: 0.1
+  delayReinicio: 1
   tagJugador: Player
   sonidoMuerte: {fileID: 0}
   volumenSonido: 0.8

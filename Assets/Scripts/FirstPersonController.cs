@@ -13,10 +13,9 @@ public class FirstPersonController : MonoBehaviour
     public float deceleration = 10f;
     public float maxVelocity = 5f;
 
-    // ?? NUEVAS VARIABLES
-    public float gravity = -15f;           // Fuerza de gravedad
-    public float groundStickForce = -2f;   // Velocidad al estar en el suelo
-    public float maxFallSpeed = -30f;      // Velocidad máxima de caída
+    public float gravity = -15f;
+    public float groundStickForce = -2f;
+    public float maxFallSpeed = -30f;
 
     // ============================================
     // 2. STAMINA (RESISTENCIA)
@@ -250,9 +249,12 @@ public class FirstPersonController : MonoBehaviour
     private Vector3 swayTargetPosition = Vector3.zero;
     private Vector3 swayCurrentPosition = Vector3.zero;
 
-    // ?? NUEVO: Cooldown para el crouch
+    // Cooldown para el crouch
     private float crouchCooldownTimer = 0f;
-    private float crouchCooldown = 0.3f; // Tiempo mínimo entre agacharse y levantarse
+    private float crouchCooldown = 0.3f;
+
+    // ?? NUEVO: Control de muerte
+    private bool estaMuerto = false;
 
     // ============================================
     // 14. ONENABLE / ONDISABLE
@@ -392,15 +394,13 @@ public class FirstPersonController : MonoBehaviour
             controller = gameObject.AddComponent<CharacterController>();
         }
 
-        // ?? FORZAR VALORES: Height = 2, Center Y = 1
         standingHeight = 2f;
         crouchHeight = 1f;
 
         controller.height = standingHeight;
-        //controller.radius = 0.5f;
 
         Vector3 center = controller.center;
-        center.y = 1.5f;  // ?? Center Y = 1
+        center.y = 1.5f;
         controller.center = center;
 
         currentHeight = standingHeight;
@@ -489,7 +489,10 @@ public class FirstPersonController : MonoBehaviour
     // ============================================
     void Update()
     {
-        // ?? REDUCIR COOLDOWN DEL CROUCH
+        // ?? SI EL JUGADOR ESTÁ MUERTO, NO EJECUTAR NADA
+        if (estaMuerto) return;
+
+        // Reducir cooldown del crouch
         if (crouchCooldownTimer > 0f)
         {
             crouchCooldownTimer -= Time.deltaTime;
@@ -601,6 +604,7 @@ public class FirstPersonController : MonoBehaviour
             }
         }
     }
+
     // ============================================
     // 19. MOVIMIENTO CORREGIDO
     // ============================================
@@ -611,7 +615,6 @@ public class FirstPersonController : MonoBehaviour
 
         Vector3 inputDirection = (transform.right * horizontal + transform.forward * vertical).normalized;
 
-        // ?? MOVIMIENTO HORIZONTAL
         if (!controller.isGrounded)
         {
             inputDirection *= 0.3f;
@@ -631,7 +634,6 @@ public class FirstPersonController : MonoBehaviour
         float speed = inputDirection.magnitude > 0 ? currentSpeed : 0f;
         Vector3 targetVelocity = inputDirection * speed;
 
-        // ?? VELOCIDAD HORIZONTAL CON INERCIA
         if (enableInertia)
         {
             float smoothTime = inputDirection.magnitude > 0 ? 1f / acceleration : 1f / deceleration;
@@ -645,31 +647,25 @@ public class FirstPersonController : MonoBehaviour
             currentVelocity = targetVelocity;
         }
 
-        // ?? GRAVEDAD ACUMULATIVA (MEJORADA)
-        float gravity = -18f; // ?? Aumentado para caer más rápido
+        float gravity = -18f;
 
         if (controller.isGrounded && verticalVelocity < 0)
         {
-            // ?? En el suelo: velocidad de caída más rápida para bajar escaleras
-            verticalVelocity = -10f; // ?? Cambiado de -0.5f a -2f
+            verticalVelocity = -10f;
         }
         else
         {
-            // ?? En el aire: caída libre (acumulativa)
             verticalVelocity += gravity * Time.deltaTime;
 
-            // ?? Velocidad máxima de caída (aumentada)
-            if (verticalVelocity < -70f) // ?? Cambiado de -20f a -30f
+            if (verticalVelocity < -70f)
                 verticalVelocity = -70f;
         }
 
-        // ?? VELOCIDAD FINAL
         Vector3 finalVelocity = currentVelocity;
         finalVelocity.y = verticalVelocity;
 
         controller.Move(finalVelocity * Time.deltaTime);
 
-        // ?? DETECCIÓN DE MOVIMIENTO (SOLO HORIZONTAL)
         float horizontalMovement = new Vector2(currentVelocity.x, currentVelocity.z).magnitude;
         isMoving = horizontalMovement > 0.1f;
     }
@@ -1096,7 +1092,7 @@ public class FirstPersonController : MonoBehaviour
         if (!enableCrouch) return;
         if (isZoomed) return;
 
-        // ?? COOLDOWN: Si el timer es mayor que 0, no se puede cambiar de estado
+        // Cooldown: Si el timer es mayor que 0, no se puede cambiar de estado
         if (crouchCooldownTimer > 0f) return;
 
         if (isCrouching)
@@ -1113,7 +1109,7 @@ public class FirstPersonController : MonoBehaviour
         isCrouching = !isCrouching;
         isBlockedByCeiling = false;
 
-        // ?? INICIAR COOLDOWN
+        // Iniciar cooldown
         crouchCooldownTimer = crouchCooldown;
 
         if (isCrouching)
@@ -1221,5 +1217,65 @@ public class FirstPersonController : MonoBehaviour
         }
 
         Debug.Log("Movimiento reseteado");
+    }
+
+    // ============================================
+    // ?? NUEVOS MÉTODOS PARA CONTROL DE MUERTE
+    // ============================================
+
+    /// <summary>
+    /// Marca al jugador como muerto. Detiene todo movimiento y actualización.
+    /// </summary>
+    public void MarcarComoMuerto()
+    {
+        if (estaMuerto) return;
+
+        estaMuerto = true;
+        Debug.Log("?? Jugador marcado como muerto");
+
+        // Desactivar el CharacterController para evitar errores
+        if (controller != null && controller.enabled)
+        {
+            controller.enabled = false;
+            Debug.Log("? CharacterController desactivado");
+        }
+
+        // Desactivar el movimiento actual
+        currentVelocity = Vector3.zero;
+        verticalVelocity = 0f;
+        isMoving = false;
+        moveInput = Vector2.zero;
+
+        // Opcional: ocultar el cursor (dependiendo de tu juego)
+        // Cursor.lockState = CursorLockMode.None;
+        // Cursor.visible = true;
+    }
+
+    /// <summary>
+    /// Devuelve true si el jugador está muerto.
+    /// </summary>
+    public bool EstaMuerto()
+    {
+        return estaMuerto;
+    }
+
+    /// <summary>
+    /// Reinicia el estado de muerte (para reiniciar el nivel sin recargar la escena).
+    /// </summary>
+    public void Revivir()
+    {
+        estaMuerto = false;
+        Debug.Log("?? Jugador revivido");
+
+        if (controller != null)
+        {
+            controller.enabled = true;
+            Debug.Log("? CharacterController reactivado");
+        }
+
+        // Restaurar posición y otras variables si es necesario
+        currentVelocity = Vector3.zero;
+        verticalVelocity = 0f;
+        isMoving = false;
     }
 }
