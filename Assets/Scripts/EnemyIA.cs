@@ -23,9 +23,6 @@ public class EnemyIA : MonoBehaviour
     public float proximityDetectionRange = 2.5f;
     public LayerMask obstacleMask = -1;
 
-    // ============================================
-    // ?? RAYCASTS CONFIGURABLES DESDE EL INSPECTOR
-    // ============================================
     [Header("Raycast Heights (Múltiples alturas)")]
     public float[] raycastHeights = { 0.2f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f };
     public float sphereCastRadius = 0.8f;
@@ -65,9 +62,6 @@ public class EnemyIA : MonoBehaviour
     public AudioRolloffMode rolloffMode = AudioRolloffMode.Logarithmic;
     public float chaseFadeTime = 0.5f;
 
-    // ============================================
-    // ?? JUMPSCARE
-    // ============================================
     [Header("Jumpscare")]
     public float jumpscareDistance = 2.5f;
     public AudioClip jumpscareSound;
@@ -113,22 +107,18 @@ public class EnemyIA : MonoBehaviour
     private bool isWaitingAfterHide = false;
     private float hideWaitTimer = 0f;
 
-    // Variables para control de ruta
     private float stuckTimer = 0f;
     private float stuckThreshold = 2f;
     private Vector3 lastPosition;
 
-    // Variables de persecución
     private float directMovementTimer = 0f;
     private float directMovementUpdateRate = 0.1f;
     private Vector3 lastDestination;
 
-    // Para detectar si el jugador está quieto
     private Vector3 lastPlayerPosition;
     private float playerIdleTimer = 0f;
     private float playerIdleThreshold = 0.3f;
 
-    // Variables para Jumpscare
     private bool isJumpscareActive = false;
     private FirstPersonController playerController;
     private CharacterController playerCharacterController;
@@ -144,20 +134,18 @@ public class EnemyIA : MonoBehaviour
     private bool wasCrosshairActive;
     private bool wasLockerSystemEnabled;
 
-    // Guardar estado de las cámaras
     private bool wasPlayerCameraActive;
     private bool wasJumpscareCameraActive;
     private Camera playerCamera;
 
-    // ============================================
-    // ?? NUEVAS VARIABLES PARA CONTROL DE DETECCIÓN
-    // ============================================
     private bool detectionDisabled = false;
     private bool playerHidden = false;
 
     // ============================================
-    // ?? CACHE DE LAYER PARA OPTIMIZACIÓN
+    // ?? CONTROL DE INVISIBILIDAD POR ZONA
     // ============================================
+    private bool isPlayerInvisible = false;
+
     private int playerLayerMask = -1;
     private int enemyLayer = -1;
 
@@ -165,24 +153,19 @@ public class EnemyIA : MonoBehaviour
     {
         Debug.Log($"?? Inicializando {gameObject.name}...");
 
-        // ?? OBTENER Y CACHEAR CAPAS
         enemyLayer = gameObject.layer;
         int playerLayer = LayerMask.NameToLayer("Player");
 
-        // ?? DEBUG: Verificar componentes
         DebugComponents();
 
-        // Si no existe la capa "Player", usar "Default" como fallback
         if (playerLayer == -1)
         {
             Debug.LogWarning("?? No existe la capa 'Player', usando 'Default' como fallback");
             playerLayer = LayerMask.NameToLayer("Default");
         }
 
-        // Crear layer mask que SOLO detecte la capa del jugador
         playerLayerMask = 1 << playerLayer;
 
-        // ?? DEBUG: Mostrar información de capas
         DebugLayerInfo();
 
         if (player == null)
@@ -215,13 +198,11 @@ public class EnemyIA : MonoBehaviour
             agent.angularSpeed = 360f;
         }
 
-        // Obtener la cámara del player
         if (playerCamera == null)
         {
             playerCamera = Camera.main;
         }
 
-        // Obtener referencias para Jumpscare
         if (player != null)
         {
             playerController = player.GetComponent<FirstPersonController>();
@@ -241,7 +222,6 @@ public class EnemyIA : MonoBehaviour
             }
         }
 
-        // Solo LEER el globalVolume (no modificarlo)
         if (globalVolume != null && globalVolume.profile != null)
         {
             if (globalVolume.profile.TryGet<UnityEngine.Rendering.Universal.ColorAdjustments>(out globalColorAdjustments))
@@ -251,16 +231,12 @@ public class EnemyIA : MonoBehaviour
             }
         }
 
-        // Asegurarse de que el jumpscareVolumeOverride empieza DESACTIVADO
         if (jumpscareVolumeOverride != null)
         {
             jumpscareVolumeOverride.enabled = false;
             Debug.Log("?? Jumpscare Volume desactivado al inicio");
         }
 
-        // ============================================
-        // CONFIGURAR AUDIOSOURCES
-        // ============================================
         ambientAudioSource = gameObject.AddComponent<AudioSource>();
         ambientAudioSource.loop = false;
         ambientAudioSource.playOnAwake = false;
@@ -288,7 +264,6 @@ public class EnemyIA : MonoBehaviour
         jumpscareAudioSource.volume = jumpscareVolume;
         jumpscareAudioSource.priority = 0;
 
-        // Verificar que la cámara de jumpscare esté asignada
         if (jumpscareCamera == null)
         {
             Debug.LogWarning($"?? {gameObject.name}: No se ha asignado JumpscareCamera. Se usará cámara por defecto.");
@@ -303,9 +278,6 @@ public class EnemyIA : MonoBehaviour
             }
         }
 
-        // ============================================
-        // INICIALIZAR SONIDOS
-        // ============================================
         PlayRandomAmbientSound();
 
         if (chaseSounds != null && chaseSounds.Length > 0)
@@ -347,7 +319,6 @@ public class EnemyIA : MonoBehaviour
     {
         if (player == null) return;
 
-        // ?? ACTUALIZAR ESTADO DE ESCONDIDO (solo si no estamos forzados)
         UpdateHidingStatus();
 
         if (isJumpscareActive) return;
@@ -377,23 +348,24 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? NUEVO MÉTODO PARA CONTROLAR LA DETECCIÓN DESDE EL EXTERIOR
+    // ?? MÉTODOS PARA CONTROL DE INVISIBILIDAD
     // ============================================
     public void SetPlayerHidden(bool hidden)
     {
-        playerHidden = hidden;
+        isPlayerInvisible = hidden;
         detectionDisabled = hidden;
 
         if (showDebugLogs)
-            Debug.Log($"{(hidden ? "??" : "??")} Detección {(hidden ? "DESACTIVADA" : "ACTIVADA")} para {gameObject.name}");
+            Debug.Log($"{(hidden ? "??" : "??")} Jugador {(hidden ? "INVISIBLE" : "VISIBLE")} para {gameObject.name}");
     }
 
-    // ============================================
-    // ?? ACTUALIZAR ESTADO DE ESCONDIDO
-    // ============================================
+    public bool IsPlayerHidden()
+    {
+        return isPlayerInvisible;
+    }
+
     void UpdateHidingStatus()
     {
-        // Si la detección está desactivada, no actualizar el estado
         if (detectionDisabled) return;
 
         if (lockerSystem != null)
@@ -408,15 +380,13 @@ public class EnemyIA : MonoBehaviour
         }
     }
 
-    // ============================================
-    // ?? CHECK JUMBSCARE
-    // ============================================
     void CheckJumpscare()
     {
         if (isJumpscareActive) return;
         if (player == null) return;
         if (isPlayerHiding) return;
         if (detectionDisabled) return;
+        if (isPlayerInvisible) return;
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
@@ -429,15 +399,11 @@ public class EnemyIA : MonoBehaviour
         }
     }
 
-    // ============================================
-    // ?? INICIAR JUMBSCARE
-    // ============================================
     void StartJumpscare()
     {
         if (isJumpscareActive) return;
         isJumpscareActive = true;
 
-        // ?? FORZAR EL CIERRE DE LA NOTA SI ESTÁ ABIERTA
         LeerNota leerNota = FindObjectOfType<LeerNota>();
         if (leerNota != null)
         {
@@ -475,9 +441,6 @@ public class EnemyIA : MonoBehaviour
         StartCoroutine(JumpscareSequence());
     }
 
-    // ============================================
-    // ?? ACTIVAR CÁMARA DE JUMPSCARE
-    // ============================================
     void ActivateJumpscareCamera()
     {
         if (jumpscareCamera == null)
@@ -569,9 +532,6 @@ public class EnemyIA : MonoBehaviour
         Debug.Log($"?? Cámara de Jumpscare ACTIVADA: {jumpscareCamera.name}");
     }
 
-    // ============================================
-    // ?? DESACTIVAR CÁMARA DE JUMPSCARE
-    // ============================================
     void DeactivateJumpscareCamera()
     {
         if (jumpscareCamera == null)
@@ -643,9 +603,6 @@ public class EnemyIA : MonoBehaviour
         Debug.Log($"?? Cámara de Jumpscare DESACTIVADA");
     }
 
-    // ============================================
-    // ?? DESACTIVAR CONTROLES DEL JUGADOR
-    // ============================================
     void DisablePlayerControls()
     {
         if (playerController != null)
@@ -690,9 +647,6 @@ public class EnemyIA : MonoBehaviour
         }
     }
 
-    // ============================================
-    // ?? CORRUTINA DE JUMBSCARE
-    // ============================================
     IEnumerator JumpscareSequence()
     {
         yield return new WaitForSeconds(jumpscareDuration);
@@ -705,14 +659,21 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? DETECTAR JUGADOR - VERSIÓN MEJORADA CON MÚLTIPLES ALTURAS
+    // ?? DETECTAR JUGADOR - CON INVISIBILIDAD
     // ============================================
     void DetectPlayer()
     {
-        if (detectionDisabled || playerHidden)
+        // SI EL JUGADOR ESTÁ EN ZONA INVISIBLE, NO DETECTAR
+        if (detectionDisabled || playerHidden || isPlayerInvisible)
         {
             isPlayerVisible = false;
             isPlayerInRange = false;
+
+            // Si estábamos persiguiendo y el jugador se volvió invisible, perderlo
+            if (currentState == EnemyState.Running)
+            {
+                playerLostTimer = lostPlayerTime; // Forzar pérdida inmediata
+            }
             return;
         }
 
@@ -722,121 +683,117 @@ public class EnemyIA : MonoBehaviour
         isPlayerInRange = distanceToPlayer <= detectionRadius;
         isPlayerVisible = false;
 
-        // ?? SI EL JUGADOR ESTÁ CERCA, DETECTARLO SIEMPRE (PROXIMIDAD)
+        // PROXIMIDAD
         if (distanceToPlayer < proximityDetectionRange)
         {
             isPlayerVisible = true;
             lastKnownPlayerPosition = player.position;
             lastDirection = (player.position - transform.position).normalized;
-            Debug.Log($"?? ? DETECTADO por PROXIMIDAD: {distanceToPlayer:F1}m");
+            Debug.Log($"?? DETECTADO por PROXIMIDAD: {distanceToPlayer:F1}m");
             return;
         }
 
-        // ?? SI ESTÁ DENTRO DEL RANGO DE VISIÓN
-        if (distanceToPlayer <= visionRange)
-        {
-            Vector3 directionToPlayer = (player.position - transform.position).normalized;
-            float angle = Vector3.Angle(transform.forward, directionToPlayer);
+        // FUERA DE RANGO
+        if (distanceToPlayer > visionRange) return;
 
-            if (angle <= visionAngle * 0.5f)
-            {
-                // ?? PROBAR CON DIFERENTES ALTURAS PARA DETECTAR
-                float[] heights = { 0.2f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f };
-                bool foundPlayer = false;
+        Vector3 directionToPlayer = (player.position - transform.position).normalized;
+        float angle = Vector3.Angle(transform.forward, directionToPlayer);
 
-                foreach (float height in heights)
-                {
-                    Vector3 start = transform.position + Vector3.up * height + transform.forward * raycastForwardOffset;
-                    Vector3 end = player.position;
-
-                    if (showRaycastDebug)
-                    {
-                        Debug.DrawLine(start, end, Color.yellow, 1.0f);
-                    }
-
-                    RaycastHit hit;
-                    if (Physics.Linecast(start, end, out hit))
-                    {
-                        if (showRaycastDebug)
-                        {
-                            Debug.DrawLine(start, hit.point, Color.red, 1.0f);
-                        }
-
-                        Debug.Log($"?? LineCast altura {height}m: Impactó en '{hit.collider.gameObject.name}' | Tag: '{hit.collider.tag}'");
-
-                        if (hit.collider.CompareTag("Player"))
-                        {
-                            isPlayerVisible = true;
-                            lastKnownPlayerPosition = player.position;
-                            lastDirection = directionToPlayer;
-                            foundPlayer = true;
-                            Debug.Log($"? ? ? JUGADOR DETECTADO desde altura {height}m");
-                            break;
-                        }
-                        else
-                        {
-                            // Si impactó en un obstáculo, probar con otra altura
-                            Debug.Log($"? LineCast altura {height}m: Impactó en '{hit.collider.name}' (OBSTÁCULO)");
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        Debug.Log($"? LineCast altura {height}m: No impactó en nada (esto es raro)");
-                    }
-                }
-
-                if (!foundPlayer)
-                {
-                    // ?? ULTIMO RECURSO: Linecast desde la cabeza del enemigo
-                    Vector3 start = transform.position + Vector3.up * 1.5f;
-                    Vector3 end = player.position + Vector3.up * 0.5f; // Centro del jugador
-
-                    if (showRaycastDebug)
-                    {
-                        Debug.DrawLine(start, end, Color.cyan, 1.0f);
-                    }
-
-                    RaycastHit hit;
-                    if (Physics.Linecast(start, end, out hit))
-                    {
-                        if (showRaycastDebug)
-                        {
-                            Debug.DrawLine(start, hit.point, Color.magenta, 1.0f);
-                        }
-
-                        Debug.Log($"?? LineCast FINAL: Impactó en '{hit.collider.gameObject.name}' | Tag: '{hit.collider.tag}'");
-
-                        if (hit.collider.CompareTag("Player"))
-                        {
-                            isPlayerVisible = true;
-                            lastKnownPlayerPosition = player.position;
-                            lastDirection = directionToPlayer;
-                            Debug.Log($"? ? ? JUGADOR DETECTADO por LineCast FINAL");
-                        }
-                        else
-                        {
-                            Debug.Log($"? LineCast FINAL: Impactó en '{hit.collider.name}' (OBSTÁCULO)");
-                        }
-                    }
-                }
-            }
-            else
-            {
-                if (showDebugLogs && Time.frameCount % 30 == 0)
-                    Debug.Log($"? Jugador fuera del ángulo de visión: {angle:F1}° (máx: {visionAngle * 0.5f:F1}°)");
-            }
-        }
-        else
+        // FUERA DE ÁNGULO
+        if (angle > visionAngle * 0.5f)
         {
             if (showDebugLogs && Time.frameCount % 30 == 0)
-                Debug.Log($"? Jugador fuera del rango de visión: {distanceToPlayer:F1}m (máx: {visionRange:F1}m)");
+                Debug.Log($"? Jugador fuera del ángulo: {angle:F1}°");
+            return;
+        }
+
+        // ============================================
+        // SOLO USAR ALTURAS ALTAS (1.5, 2.0, 2.5)
+        // ============================================
+        float[] validHeights = { 1.5f, 2.0f, 2.5f };
+        bool foundPlayer = false;
+
+        foreach (float height in validHeights)
+        {
+            Vector3 start = transform.position + Vector3.up * height + transform.forward * raycastForwardOffset;
+            Vector3 end = player.position + Vector3.up * 0.5f;
+
+            if (showRaycastDebug)
+            {
+                Debug.DrawLine(start, end, Color.yellow, 0.5f);
+            }
+
+            RaycastHit hit;
+
+            // VERIFICAR OBSTÁCULO
+            if (Physics.Linecast(start, end, out hit, obstacleMask))
+            {
+                if (!hit.collider.CompareTag("Player"))
+                {
+                    if (showRaycastDebug)
+                    {
+                        Debug.DrawLine(start, hit.point, Color.red, 0.5f);
+                    }
+                    continue;
+                }
+            }
+
+            // VERIFICAR JUGADOR
+            if (Physics.Linecast(start, end, out RaycastHit playerHit, playerLayerMask))
+            {
+                if (playerHit.collider.CompareTag("Player"))
+                {
+                    isPlayerVisible = true;
+                    lastKnownPlayerPosition = player.position;
+                    lastDirection = directionToPlayer;
+                    foundPlayer = true;
+                    Debug.Log($"? JUGADOR DETECTADO desde altura {height}m");
+                    break;
+                }
+            }
+        }
+
+        if (!foundPlayer && showDebugLogs && Time.frameCount % 30 == 0)
+        {
+            Debug.Log("? No se detectó al jugador");
         }
     }
 
     // ============================================
-    // DETECTAR SI EL JUGADOR ESTÁ QUIETO
+    // ?? HAS LINE OF SIGHT - CON INVISIBILIDAD
     // ============================================
+    bool HasLineOfSightToPlayer()
+    {
+        if (player == null) return false;
+        if (isPlayerInvisible) return false;
+
+        float[] validHeights = { 1.5f, 2.0f, 2.5f };
+
+        foreach (float height in validHeights)
+        {
+            Vector3 start = transform.position + Vector3.up * height + transform.forward * raycastForwardOffset;
+            Vector3 end = player.position + Vector3.up * 0.5f;
+
+            if (Physics.Linecast(start, end, out RaycastHit hit, obstacleMask))
+            {
+                if (!hit.collider.CompareTag("Player"))
+                {
+                    continue;
+                }
+            }
+
+            if (Physics.Linecast(start, end, out RaycastHit playerHit, playerLayerMask))
+            {
+                if (playerHit.collider.CompareTag("Player"))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     void CheckPlayerIdle()
     {
         if (player == null) return;
@@ -854,49 +811,36 @@ public class EnemyIA : MonoBehaviour
         }
     }
 
-    // ============================================
-    // ?? UPDATE IDLE (MODIFICADO)
-    // ============================================
     void UpdateIdle()
     {
-        // Si estamos esperando después de que el jugador se haya escondido
         if (isWaitingAfterHide)
         {
             hideWaitTimer -= Time.deltaTime;
 
             if (hideWaitTimer <= 0)
             {
-                // ?? TIEMPO DE ESPERA TERMINADO - VOLVER A PATRULLAJE NORMAL
                 isWaitingAfterHide = false;
                 ReactivateAmbientSound();
 
-                // ?? VERIFICAR SI EL JUGADOR SIGUE ESCONDIDO
                 if (lockerSystem != null && !detectionDisabled)
                 {
                     isPlayerHiding = lockerSystem.IsHiding();
                 }
 
-                // ?? SI EL JUGADOR SIGUE ESCONDIDO, PERO YA ESPERAMOS LO SUFICIENTE
-                // VOLVEMOS A PATRULLAR NORMALMENTE (pero sin poder detectarlo)
                 if (isPlayerHiding || detectionDisabled)
                 {
-                    if (showDebugLogs) Debug.Log($"?? El jugador sigue escondido, pero volviendo a patrullar normalmente");
-
-                    // ?? IMPORTANTE: NO llamamos a OnPlayerHid() de nuevo
-                    // Solo volvemos a patrullar
+                    if (showDebugLogs) Debug.Log($"?? El jugador sigue escondido, volviendo a patrullar");
                     SelectNewWaypoint();
                     ChangeState(EnemyState.Walking);
                     return;
                 }
 
-                // Si ya no está escondido y es visible, perseguir
                 if (isPlayerVisible && !isPlayerHiding && !detectionDisabled)
                 {
                     ChangeState(EnemyState.Running);
                 }
                 else
                 {
-                    // Si no está visible, patrullar normalmente
                     SelectNewWaypoint();
                     ChangeState(EnemyState.Walking);
                 }
@@ -904,7 +848,6 @@ public class EnemyIA : MonoBehaviour
             return;
         }
 
-        // Comportamiento normal de Idle (cuando NO está esperando después de esconderse)
         if (isPlayerVisible && !isPlayerHiding && !detectionDisabled)
         {
             ChangeState(EnemyState.Running);
@@ -926,14 +869,11 @@ public class EnemyIA : MonoBehaviour
         }
     }
 
-    // ============================================
-    // ?? UPDATE WALKING
-    // ============================================
     void UpdateWalking()
     {
         if (isWaitingAfterHide) return;
 
-        if (isPlayerVisible && !isPlayerHiding && !detectionDisabled)
+        if (isPlayerVisible && !isPlayerHiding && !detectionDisabled && !isPlayerInvisible)
         {
             ChangeState(EnemyState.Running);
             return;
@@ -956,20 +896,31 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? UPDATE RUNNING (MODIFICADO)
+    // ?? UPDATE RUNNING - CON INVISIBILIDAD
     // ============================================
     void UpdateRunning()
     {
-        // ?? ACTUALIZAR isPlayerHiding DESDE EL SISTEMA DE TAQUILLA
+        // SI EL JUGADOR ES INVISIBLE, PERDERLO INMEDIATAMENTE
+        if (isPlayerInvisible)
+        {
+            if (showDebugLogs) Debug.Log($"?? Jugador invisible - Perdiendo persecución");
+            playerLostTimer = lostPlayerTime;
+            isPlayerVisible = false;
+            isPlayerInRange = false;
+            ReactivateAmbientSound();
+            SelectNewWaypoint();
+            ChangeState(EnemyState.Walking);
+            return;
+        }
+
         if (lockerSystem != null && !detectionDisabled)
         {
             isPlayerHiding = lockerSystem.IsHiding();
         }
 
-        // ?? SI LA DETECCIÓN ESTÁ DESACTIVADA O EL JUGADOR ESTÁ ESCONDIDO
         if (detectionDisabled || isPlayerHiding)
         {
-            if (showDebugLogs) Debug.Log($"?? Jugador escondido en taquilla, esperando {hideWaitTime}s antes de volver a patrullar");
+            if (showDebugLogs) Debug.Log($"?? Jugador escondido, esperando {hideWaitTime}s");
 
             lastKnownHidingPosition = player.position;
             isWaitingAfterHide = true;
@@ -979,8 +930,6 @@ public class EnemyIA : MonoBehaviour
             isPlayerInRange = false;
 
             StopAgentImmediately();
-
-            // ?? IMPORTANTE: Nos vamos a Idle pero con isWaitingAfterHide = true
             ChangeState(EnemyState.Idle);
 
             Vector3 directionToHide = (lastKnownHidingPosition - transform.position).normalized;
@@ -994,7 +943,6 @@ public class EnemyIA : MonoBehaviour
             return;
         }
 
-        // Resto del código de persecución...
         if (isPlayerVisible || isPlayerInRange)
         {
             playerLostTimer = 0f;
@@ -1005,7 +953,6 @@ public class EnemyIA : MonoBehaviour
             {
                 agent.speed = runSpeed;
                 agent.isStopped = false;
-
                 UpdateDirectMovement();
             }
 
@@ -1055,9 +1002,6 @@ public class EnemyIA : MonoBehaviour
         CheckIfStuck();
     }
 
-    // ============================================
-    // ?? MOVIMIENTO DIRECTO MEJORADO
-    // ============================================
     void UpdateDirectMovement()
     {
         if (agent == null || player == null) return;
@@ -1145,9 +1089,6 @@ public class EnemyIA : MonoBehaviour
         }
     }
 
-    // ============================================
-    // FORZAR DETENCIÓN
-    // ============================================
     void StopAgentImmediately()
     {
         if (agent == null) return;
@@ -1159,51 +1100,6 @@ public class EnemyIA : MonoBehaviour
         agent.updateRotation = true;
 
         if (showDebugLogs) Debug.Log($"?? Agente detenido inmediatamente");
-    }
-
-
-    bool HasLineOfSightToPlayer()
-    {
-        if (player == null) return false;
-
-        // ?? Probar con diferentes alturas
-        float[] heights = { 0.2f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f };
-
-        foreach (float height in heights)
-        {
-            Vector3 start = transform.position + Vector3.up * height + transform.forward * raycastForwardOffset;
-            Vector3 end = player.position;
-
-            RaycastHit hit;
-            if (Physics.Linecast(start, end, out hit))
-            {
-                // Si impacta en el jugador, tiene línea de visión
-                if (hit.collider.CompareTag("Player"))
-                {
-                    return true;
-                }
-                // Si impacta en un obstáculo, probar con otra altura
-                else
-                {
-                    continue;
-                }
-            }
-        }
-
-        // ?? ULTIMO RECURSO: Desde la cabeza del enemigo al centro del jugador
-        Vector3 startFinal = transform.position + Vector3.up * 1.5f;
-        Vector3 endFinal = player.position + Vector3.up * 0.5f;
-
-        RaycastHit hitFinal;
-        if (Physics.Linecast(startFinal, endFinal, out hitFinal))
-        {
-            if (hitFinal.collider.CompareTag("Player"))
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     bool CanReachDestination(Vector3 destination)
@@ -1270,14 +1166,10 @@ public class EnemyIA : MonoBehaviour
         }
     }
 
-    // ============================================
-    // ?? ON PLAYER HID (MODIFICADO)
-    // ============================================
     public void OnPlayerHid()
     {
         if (showDebugLogs) Debug.Log($"?? El jugador se ha escondido en una taquilla - {gameObject.name}");
 
-        // ?? FORZAR isPlayerHiding a TRUE
         isPlayerHiding = true;
         isPlayerVisible = false;
         isPlayerInRange = false;
@@ -1288,7 +1180,6 @@ public class EnemyIA : MonoBehaviour
             lastKnownHidingPosition = player.position;
         }
 
-        // ?? INICIAR LA ESPERA PARA VOLVER A PATRULLAR
         isWaitingAfterHide = true;
         hideWaitTimer = hideWaitTime;
 
@@ -1307,9 +1198,6 @@ public class EnemyIA : MonoBehaviour
         }
     }
 
-    // ============================================
-    // ?? CAMBIAR ESTADO (MODIFICADO)
-    // ============================================
     void ChangeState(EnemyState newState)
     {
         if (currentState == newState) return;
@@ -1330,7 +1218,6 @@ public class EnemyIA : MonoBehaviour
                 }
                 if (showDebugLogs) Debug.Log($"?? IDLE por {(isWaitingAfterHide ? hideWaitTimer : idleTimer):F1}s");
 
-                // ?? Detener sonido de persecución
                 StopChaseSound();
                 break;
 
@@ -1346,7 +1233,6 @@ public class EnemyIA : MonoBehaviour
                 }
                 if (showDebugLogs) Debug.Log($"?? WALKING a {currentWaypoint?.name}");
 
-                // ?? DETENER SONIDO DE PERSECUCIÓN AL VOLVER A PATRULLAR
                 StopChaseSound();
                 break;
 
@@ -1428,10 +1314,6 @@ public class EnemyIA : MonoBehaviour
         animator.SetInteger("State", (int)currentState);
     }
 
-    // ============================================
-    // SISTEMA DE SONIDOS
-    // ============================================
-
     void PlayRandomAmbientSound()
     {
         if (ambientSounds == null || ambientSounds.Length == 0)
@@ -1465,9 +1347,6 @@ public class EnemyIA : MonoBehaviour
             Debug.Log($"?? Ambiente: {currentAmbientClip.name} | Duración: {clipDuration:F1}s | Pausa: {pauseBetweenSounds:F1}s | Total: {ambientTimer:F1}s");
     }
 
-    // ============================================
-    // ?? REACTIVAR SONIDO AMBIENTE (MODIFICADO)
-    // ============================================
     void ReactivateAmbientSound()
     {
         if (showDebugLogs) Debug.Log($"?? Reactivando sonidos ambientales...");
@@ -1579,9 +1458,6 @@ public class EnemyIA : MonoBehaviour
         }
     }
 
-    // ============================================
-    // ACTUALIZAR AUDIO
-    // ============================================
     void UpdateAudio()
     {
         if (currentState != EnemyState.Running)
@@ -1730,9 +1606,6 @@ public class EnemyIA : MonoBehaviour
         playerCamera = null;
     }
 
-    // ============================================
-    // ?? MÉTODO PARA DEBUGGEAR CAPAS
-    // ============================================
     void DebugLayerInfo()
     {
         if (player == null) return;
@@ -1749,9 +1622,6 @@ public class EnemyIA : MonoBehaviour
         Debug.Log($"=============================");
     }
 
-    // ============================================
-    // ?? DEBUG: VERIFICAR COMPONENTES
-    // ============================================
     void DebugComponents()
     {
         Debug.Log($"=== COMPONENTES DE {gameObject.name} ===");
