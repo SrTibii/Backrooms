@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
 using System.Collections.Generic;
 
 public class PanelColores : MonoBehaviour
@@ -16,6 +17,17 @@ public class PanelColores : MonoBehaviour
     public GameObject puerta;
     public string triggerAbrir = "Abrir";
 
+    [Header("Cubos de Retroalimentación")]
+    [Tooltip("Cubos que se pintarán con los colores pulsados")]
+    public GameObject[] cubosRetroalimentacion;
+
+    // ============================================
+    // ?? NUEVO: DELAY AL FALLAR
+    // ============================================
+    [Header("Delay al Fallar")]
+    [Tooltip("Tiempo que espera antes de reiniciar el panel al fallar")]
+    public float delayAlFallar = 1.5f;
+
     [Header("Audio")]
     public AudioClip sonidoPulsarBoton;
     public AudioClip sonidoCombinacionCorrecta;
@@ -24,11 +36,17 @@ public class PanelColores : MonoBehaviour
 
     private List<string> pulsaciones = new List<string>();
     private bool puzzleCompletado = false;
+    private bool esperandoReinicio = false; // Para evitar interacciones durante el delay
     private AudioSource audioSource;
     private InteractionSystem interactionSystem;
 
+    private Dictionary<string, Color> coloresMap = new Dictionary<string, Color>();
+    private Color[] coloresOriginalesCubos;
+
     void Start()
     {
+        InicializarDiccionarioColores();
+
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.loop = false;
         audioSource.playOnAwake = false;
@@ -48,13 +66,79 @@ public class PanelColores : MonoBehaviour
             }
         }
 
-        // Asignar tag a la puerta
         if (puerta != null)
         {
             puerta.tag = "PuertaColoresTV";
         }
 
+        GuardarColoresOriginales();
+
         Debug.Log("?? Panel de colores inicializado");
+    }
+
+    private void GuardarColoresOriginales()
+    {
+        coloresOriginalesCubos = new Color[cubosRetroalimentacion.Length];
+
+        for (int i = 0; i < cubosRetroalimentacion.Length; i++)
+        {
+            if (cubosRetroalimentacion[i] != null)
+            {
+                Renderer renderer = cubosRetroalimentacion[i].GetComponent<Renderer>();
+                if (renderer != null)
+                {
+                    coloresOriginalesCubos[i] = renderer.material.color;
+                }
+                else
+                {
+                    coloresOriginalesCubos[i] = Color.black;
+                }
+            }
+            else
+            {
+                coloresOriginalesCubos[i] = Color.black;
+            }
+        }
+    }
+
+    private void InicializarDiccionarioColores()
+    {
+        coloresMap.Clear();
+        coloresMap.Add("Rojo", Color.red);
+        coloresMap.Add("Azul", Color.blue);
+        coloresMap.Add("Verde", Color.green);
+        coloresMap.Add("Amarillo", Color.yellow);
+        coloresMap.Add("Naranja", new Color(1f, 0.5f, 0f));
+        coloresMap.Add("Rosa", new Color(1f, 0.41f, 0.71f));
+        coloresMap.Add("Morado", new Color(0.5f, 0f, 0.5f));
+        coloresMap.Add("Cian", Color.cyan);
+        coloresMap.Add("Blanco", Color.white);
+        coloresMap.Add("Negro", Color.black);
+        coloresMap.Add("Gris", Color.gray);
+        coloresMap.Add("Marron", new Color(0.5f, 0.25f, 0f));
+    }
+
+    private void SetCuboColor(GameObject cubo, Color color)
+    {
+        if (cubo == null) return;
+
+        Renderer renderer = cubo.GetComponent<Renderer>();
+        if (renderer != null)
+        {
+            renderer.material.color = color;
+        }
+    }
+
+    private void RestaurarCubosOriginales()
+    {
+        for (int i = 0; i < cubosRetroalimentacion.Length; i++)
+        {
+            if (cubosRetroalimentacion[i] != null && i < coloresOriginalesCubos.Length)
+            {
+                SetCuboColor(cubosRetroalimentacion[i], coloresOriginalesCubos[i]);
+            }
+        }
+        Debug.Log("?? Cubos restaurados a su color original");
     }
 
     private void OnEnable()
@@ -77,7 +161,8 @@ public class PanelColores : MonoBehaviour
 
     private void OnInteractPerformed(InputAction.CallbackContext context)
     {
-        if (puzzleCompletado) return;
+        // Si el puzzle está completado o estamos esperando reinicio, ignorar
+        if (puzzleCompletado || esperandoReinicio) return;
 
         GameObject target = GetTargetObject();
         if (target == null) return;
@@ -126,7 +211,7 @@ public class PanelColores : MonoBehaviour
         if (boton.name.Contains("Blanco")) return "Blanco";
 
         BotonColorColor botonScript = boton.GetComponent<BotonColorColor>();
-        if (botonScript != null)
+        if (botonScript != null && !string.IsNullOrEmpty(botonScript.color))
         {
             return botonScript.color;
         }
@@ -140,6 +225,17 @@ public class PanelColores : MonoBehaviour
 
         pulsaciones.Add(color);
         Debug.Log($"?? Botón pulsado: {color} ({pulsaciones.Count}/{maxPulsaciones})");
+
+        int index = pulsaciones.Count - 1;
+        if (index < cubosRetroalimentacion.Length && cubosRetroalimentacion[index] != null)
+        {
+            Color unityColor = Color.black;
+            if (coloresMap.TryGetValue(color, out unityColor))
+            {
+                SetCuboColor(cubosRetroalimentacion[index], unityColor);
+                Debug.Log($"?? Cubo {index + 1} pintado de {color}");
+            }
+        }
 
         ReproducirSonido(sonidoPulsarBoton);
 
@@ -172,9 +268,31 @@ public class PanelColores : MonoBehaviour
         else
         {
             ReproducirSonido(sonidoCombinacionIncorrecta);
-            Debug.Log("? Combinación incorrecta. Reiniciando...");
-            ReiniciarPanel();
+            Debug.Log($"? Combinación incorrecta. Esperando {delayAlFallar}s antes de reiniciar...");
+
+            // ============================================
+            // ?? INICIAR DELAY ANTES DE REINICIAR
+            // ============================================
+            StartCoroutine(ReiniciarConDelay());
         }
+    }
+
+    // ============================================
+    // ?? CORRUTINA CON DELAY PARA REINICIAR
+    // ============================================
+    private IEnumerator ReiniciarConDelay()
+    {
+        esperandoReinicio = true;
+
+        // Esperar el tiempo configurado
+        yield return new WaitForSeconds(delayAlFallar);
+
+        // Ahora sí reiniciamos
+        pulsaciones.Clear();
+        RestaurarCubosOriginales();
+        esperandoReinicio = false;
+
+        Debug.Log("?? Panel reiniciado. Vuelve a intentarlo.");
     }
 
     private void AbrirPuerta()
@@ -185,7 +303,6 @@ public class PanelColores : MonoBehaviour
             return;
         }
 
-        // ?? CAMBIAR EL TAG DE LA PUERTA A "Usado"
         puerta.tag = "Usado";
         Debug.Log("??? Tag de la puerta cambiado a 'Usado'");
 
@@ -201,12 +318,6 @@ public class PanelColores : MonoBehaviour
         }
     }
 
-    private void ReiniciarPanel()
-    {
-        pulsaciones.Clear();
-        Debug.Log("?? Panel reiniciado. Vuelve a intentarlo.");
-    }
-
     private void ReproducirSonido(AudioClip clip)
     {
         if (clip == null) return;
@@ -214,11 +325,20 @@ public class PanelColores : MonoBehaviour
         audioSource.PlayOneShot(clip);
     }
 
+    // ============================================
+    // ?? MÉTODOS PÚBLICOS
+    // ============================================
+
     public void ResetearPuzzle()
     {
+        // Cancelar cualquier delay pendiente
+        StopAllCoroutines();
+        esperandoReinicio = false;
+
         puzzleCompletado = false;
         pulsaciones.Clear();
-        Debug.Log("?? Puzzle reseteado");
+        RestaurarCubosOriginales();
+        Debug.Log("?? Puzzle reseteado manualmente");
     }
 
     public bool EstaCompletado()
@@ -226,9 +346,18 @@ public class PanelColores : MonoBehaviour
         return puzzleCompletado;
     }
 
-    // Método para saber si la puerta está abierta (para PuertaBloqueada)
     public bool IsOpen()
     {
         return puzzleCompletado;
+    }
+
+    public void MostrarCombinacionCorrecta()
+    {
+        string combinacion = "";
+        foreach (string color in combinacionCorrecta)
+        {
+            combinacion += color + " ";
+        }
+        Debug.Log($"?? Combinación correcta: {combinacion}");
     }
 }
