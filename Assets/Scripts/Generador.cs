@@ -21,6 +21,13 @@ public class Generador : MonoBehaviour
     public AudioClip sonidoActivacion;
     [Range(0f, 1f)] public float volumenSonido = 0.7f;
 
+    // ============================================
+    // ?? NUEVA VARIABLE PARA DISTANCIA DE INTERACCIÓN
+    // ============================================
+    [Header("Interacción")]
+    [Tooltip("Distancia máxima a la que el jugador puede interactuar con el generador")]
+    public float interactionDistance = 3f;
+
     // Input System
     public InputActionReference interactAction;
 
@@ -75,9 +82,15 @@ public class Generador : MonoBehaviour
         // Verificar que está mirando este generador
         if (target != gameObject) return;
 
-        // Verificar distancia
+        // ============================================
+        // ?? USAR LA VARIABLE interactionDistance
+        // ============================================
         float distance = Vector3.Distance(Camera.main.transform.position, transform.position);
-        if (distance > 3f) return;
+        if (distance > interactionDistance)
+        {
+            Debug.Log($"? Demasiado lejos para interactuar (necesitas {interactionDistance}m, estás a {distance:F1}m)");
+            return;
+        }
 
         // ?? ACTIVAR GENERADOR
         ActivarGenerador();
@@ -97,7 +110,10 @@ public class Generador : MonoBehaviour
         Ray ray = cam.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit, 3f))
+        // ============================================
+        // ?? TAMBIÉN USAR interactionDistance AQUÍ
+        // ============================================
+        if (Physics.Raycast(ray, out hit, interactionDistance))
         {
             return hit.collider.gameObject;
         }
