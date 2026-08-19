@@ -44,6 +44,11 @@ public class VHSCameraEffects : MonoBehaviour
 
     private Vector3 targetWeavePosition;
 
+    // ============================================
+    // REFERENCIA AL MENÚ DE PAUSA
+    // ============================================
+    private MenuPausa menuPausa;
+
     void Start()
     {
         initialLocalPosition = transform.localPosition;
@@ -57,10 +62,28 @@ public class VHSCameraEffects : MonoBehaviour
                 Debug.LogWarning("VHSCameraEffects: No se encontró FirstPersonController en el padre.");
             }
         }
+
+        // Buscar el menú de pausa
+        menuPausa = FindObjectOfType<MenuPausa>();
+        if (menuPausa == null)
+        {
+            Debug.LogWarning("VHSCameraEffects: No se encontró MenuPausa en la escena.");
+        }
     }
 
     void Update()
     {
+        // ============================================
+        // SI EL JUEGO ESTÁ PAUSADO, NO EJECUTAR EFECTOS
+        // ============================================
+        if (menuPausa != null && menuPausa.EstaPausado())
+        {
+            // Restaurar posición y rotación a la inicial cuando está pausado
+            transform.localPosition = initialLocalPosition;
+            transform.localRotation = initialLocalRotation;
+            return;
+        }
+
         if (playerController == null) return;
 
         float intensity = CalculateIntensity();
@@ -80,7 +103,6 @@ public class VHSCameraEffects : MonoBehaviour
     {
         float intensity = idleMultiplier;
 
-        // Usar los nuevos métodos públicos
         if (playerController.IsMovingFast())
         {
             intensity = sprintMultiplier;

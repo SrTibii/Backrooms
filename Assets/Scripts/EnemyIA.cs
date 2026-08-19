@@ -1655,4 +1655,12 @@ public class EnemyIA : MonoBehaviour
         }
         Debug.Log($"=============================");
     }
+
+    // ============================================
+    // ?? MÉTODO PARA SABER SI ESTÁ EN JUMPSCARE
+    // ============================================
+    public bool EstaEnJumpscare()
+    {
+        return isJumpscareActive;
+    }
 }

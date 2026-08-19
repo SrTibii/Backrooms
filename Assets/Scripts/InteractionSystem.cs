@@ -5,12 +5,12 @@ public class InteractionSystem : MonoBehaviour
 {
     [Header("Configuración Raycast")]
     public float interactionRange = 3f;
-    public string[] targetTags = { "Object" }; // ?? MÚLTIPLES TAGS
+    public string[] targetTags = { "Object" };
 
     [Header("Crosshair")]
     public RectTransform crosshair;
-    public float normalSize = 20f;
-    public float expandedSize = 35f;
+    public float normalSize = 50f;  // Tamaño más grande 
+    public float expandedSize = 70f; // Tamaño expandido
     public float sizeTransitionSpeed = 8f;
 
     [Header("Feedback Visual")]
@@ -34,15 +34,59 @@ public class InteractionSystem : MonoBehaviour
 
         if (crosshair != null)
         {
+            if (!crosshair.gameObject.activeSelf)
+            {
+                crosshair.gameObject.SetActive(true);
+                Debug.Log("?? Crosshair forzado a activo en Start()");
+            }
+
+            // ============================================
+            // ?? FIJAR ANCLAS EN CENTRO PARA EVITAR DEFORMACIÓN
+            // ============================================
+            crosshair.anchorMin = new Vector2(0.5f, 0.5f);
+            crosshair.anchorMax = new Vector2(0.5f, 0.5f);
+            crosshair.pivot = new Vector2(0.5f, 0.5f);
+
             currentSize = normalSize;
-            crosshair.sizeDelta = new Vector2(currentSize, currentSize);
-            crosshair.GetComponent<Image>().color = normalColor;
-            currentColor = normalColor;
+            // Usar SetSizeWithCurrentAnchors en lugar de sizeDelta
+            crosshair.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, currentSize);
+            crosshair.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, currentSize);
+
+            Image crosshairImage = crosshair.GetComponent<Image>();
+            if (crosshairImage != null)
+            {
+                Color color = crosshairImage.color;
+                if (color.a < 0.1f)
+                {
+                    color.a = 1f;
+                    crosshairImage.color = color;
+                    Debug.Log("?? Crosshair alpha corregido a 1");
+                }
+
+                crosshairImage.color = normalColor;
+                currentColor = normalColor;
+            }
+            else
+            {
+                Debug.LogWarning("?? El crosshair no tiene componente Image");
+            }
+
+            Debug.Log($"?? Crosshair inicializado: active={crosshair.gameObject.activeSelf}, size={currentSize}");
+        }
+        else
+        {
+            Debug.LogError("?? Crosshair NO ASIGNADO en InteractionSystem");
         }
     }
 
     void Update()
     {
+        if (crosshair != null && !crosshair.gameObject.activeSelf)
+        {
+            crosshair.gameObject.SetActive(true);
+            Debug.Log("?? Crosshair reactivado en Update()");
+        }
+
         PerformRaycast();
         UpdateCrosshair();
     }
@@ -58,7 +102,6 @@ public class InteractionSystem : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit, interactionRange))
         {
-            // ?? Comprobar si el objeto tiene ALGUNO de los tags
             bool hasValidTag = false;
             foreach (string tag in targetTags)
             {
@@ -93,10 +136,16 @@ public class InteractionSystem : MonoBehaviour
     void UpdateCrosshair()
     {
         if (crosshair == null) return;
+        if (!crosshair.gameObject.activeInHierarchy) return;
 
         float targetSize = isLookingAtObject ? expandedSize : normalSize;
         currentSize = Mathf.Lerp(currentSize, targetSize, Time.deltaTime * sizeTransitionSpeed);
-        crosshair.sizeDelta = new Vector2(currentSize, currentSize);
+
+        // ============================================
+        // ?? USAR SetSizeWithCurrentAnchors EN VEZ DE sizeDelta
+        // ============================================
+        crosshair.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, currentSize);
+        crosshair.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, currentSize);
 
         Image crosshairImage = crosshair.GetComponent<Image>();
         if (crosshairImage != null)
@@ -107,12 +156,14 @@ public class InteractionSystem : MonoBehaviour
 
     public bool IsLookingAtInteractable()
     {
+        if (crosshair != null && !crosshair.gameObject.activeInHierarchy) return false;
         return isLookingAtObject;
     }
 
     public GameObject GetTargetObject()
     {
         if (!isLookingAtObject || playerCamera == null) return null;
+        if (crosshair != null && !crosshair.gameObject.activeInHierarchy) return null;
 
         Ray ray = playerCamera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
         RaycastHit hit;
@@ -134,6 +185,7 @@ public class InteractionSystem : MonoBehaviour
     public float GetTargetDistance()
     {
         if (!isLookingAtObject || playerCamera == null) return -1f;
+        if (crosshair != null && !crosshair.gameObject.activeInHierarchy) return -1f;
 
         Ray ray = playerCamera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
         RaycastHit hit;
