@@ -11741,32 +11741,31 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'DAY 8 (I think).
 
-    
+
 
     3 keys. 1 door. The exit.
 
-    
 
-    I''m
-    not alone.
 
-    There''s something here. BLACK.
+    I''m not alone.
+
+    There''s
+    something here. BLACK.
 
     It moves in the dark.
 
-    It
-    follows.
+    It follows.
 
-    
 
-    Find the keys.
+
+    Find
+    the keys.
 
     Don''t stop moving.
 
-    
 
-    It''s
-    the only way out.'
+
+    It''s the only way out.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 63cbe02269271a84b95e213464d36356, type: 2}
   m_sharedMaterial: {fileID: -5873243334949427307, guid: 63cbe02269271a84b95e213464d36356, type: 2}
@@ -11793,8 +11792,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 3
-  m_fontSizeBase: 3
+  m_fontSize: 2.5
+  m_fontSizeBase: 2.5
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
