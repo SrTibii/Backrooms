@@ -5,13 +5,15 @@ public class MenuOpciones : MonoBehaviour
 {
     [Header("Sliders")]
     public Slider sliderSensibilidad;
+    public Slider sliderBrillo;
 
     [Header("Valores por Defecto")]
-    [Tooltip("Sensibilidad por defecto (0.5 = 50%)")]
     public float sensibilidadPorDefecto = 0.5f;
+    public float brilloPorDefecto = 0f;
 
     [Header("Referencias")]
     public FirstPersonController playerController;
+    public ControlBrillo controlBrillo;
 
     private const string SENSIBILIDAD_KEY = "SensibilidadRaton";
 
@@ -22,51 +24,73 @@ public class MenuOpciones : MonoBehaviour
             playerController = FindObjectOfType<FirstPersonController>();
         }
 
+        if (controlBrillo == null)
+        {
+            controlBrillo = FindObjectOfType<ControlBrillo>();
+            if (controlBrillo == null)
+            {
+                Debug.LogError("?? No se encontró ControlBrillo en la escena");
+            }
+        }
+
         // ============================================
         // CONFIGURAR SLIDER DE SENSIBILIDAD
         // ============================================
         if (sliderSensibilidad != null)
         {
-            // Cargar valor guardado o usar el por defecto (0.5)
             float sensibilidadGuardada = PlayerPrefs.GetFloat(SENSIBILIDAD_KEY, sensibilidadPorDefecto);
             sliderSensibilidad.value = sensibilidadGuardada;
-
-            // Añadir listener para cuando cambie el slider
             sliderSensibilidad.onValueChanged.AddListener(OnSensibilidadChanged);
-
-            // Aplicar la sensibilidad guardada
             AplicarSensibilidad(sensibilidadGuardada);
+        }
+
+        // ============================================
+        // CONFIGURAR SLIDER DE BRILLO
+        // ============================================
+        if (sliderBrillo != null && controlBrillo != null)
+        {
+            float brilloGuardado = PlayerPrefs.GetFloat("Brillo", brilloPorDefecto);
+            sliderBrillo.value = brilloGuardado;
+            sliderBrillo.onValueChanged.AddListener(OnBrilloChanged);
+            controlBrillo.SetBrillo(brilloGuardado);
         }
     }
 
+    // ============================================
+    // MÉTODO PARA SENSIBILIDAD
+    // ============================================
+
     public void OnSensibilidadChanged(float value)
     {
-        // Guardar en PlayerPrefs
         PlayerPrefs.SetFloat(SENSIBILIDAD_KEY, value);
         PlayerPrefs.Save();
-
-        // Aplicar sensibilidad
         AplicarSensibilidad(value);
-
-        Debug.Log($"?? Sensibilidad cambiada a: {value}");
     }
 
     private void AplicarSensibilidad(float sensibilidad)
     {
         if (playerController != null)
         {
-            // ============================================
-            // RANGO DE SENSIBILIDAD:
-            // - Slider a 0 (0%) ? sensibilidad = 0 (ratón no se mueve)
-            // - Slider a 0.5 (50%) ? sensibilidad = 1 (normal)
-            // - Slider a 1 (100%) ? sensibilidad = 2 (rápido)
-            // ============================================
-            float sensibilidadAjustada = sensibilidad * 2f; // 0 a 2
+            float sensibilidadAjustada = sensibilidad * 2f;
             playerController.SetMouseSensitivity(sensibilidadAjustada);
-
-            Debug.Log($"?? Sensibilidad aplicada: slider={sensibilidad}, ajustada={sensibilidadAjustada}");
         }
     }
+
+    // ============================================
+    // MÉTODO PARA BRILLO
+    // ============================================
+
+    public void OnBrilloChanged(float value)
+    {
+        if (controlBrillo != null)
+        {
+            controlBrillo.SetBrillo(value);
+        }
+    }
+
+    // ============================================
+    // RESTAURAR VALORES POR DEFECTO
+    // ============================================
 
     public void RestaurarValoresPorDefecto()
     {
@@ -74,6 +98,13 @@ public class MenuOpciones : MonoBehaviour
         {
             sliderSensibilidad.value = sensibilidadPorDefecto;
         }
-        Debug.Log("?? Sensibilidad restaurada a por defecto (0.5)");
+
+        if (sliderBrillo != null && controlBrillo != null)
+        {
+            sliderBrillo.value = brilloPorDefecto;
+            controlBrillo.SetBrillo(brilloPorDefecto);
+        }
+
+        Debug.Log("?? Valores restaurados a por defecto");
     }
 }
