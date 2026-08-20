@@ -1278,4 +1278,10 @@ public class FirstPersonController : MonoBehaviour
         verticalVelocity = 0f;
         isMoving = false;
     }
+
+    public void SetMouseSensitivity(float newSensitivity)
+    {
+        mouseSensitivity = newSensitivity;
+        Debug.Log($"?? Sensibilidad del ratón cambiada a: {newSensitivity}");
+    }
 }
