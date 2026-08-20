@@ -45,7 +45,7 @@ public class MenuInicial : MonoBehaviour
     public void Jugar()
     {
         if (isLoading) return;
-        StartCoroutine(CargarConDelay("Lvl0_Backrooms"));
+        StartCoroutine(CargarConDelay("VHSPlay")); //Lvl0_Backrooms
     }
 
     public void Salir()
