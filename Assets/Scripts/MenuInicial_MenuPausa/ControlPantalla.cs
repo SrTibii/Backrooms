@@ -8,6 +8,10 @@ public class ControlPantalla : MonoBehaviour
     [Header("Configuración")]
     public bool pantallaCompletaPorDefecto = true;
 
+    [Header("Tamaño de Ventana (cuando no está en Fullscreen)")]
+    public int anchoVentana = 1280;
+    public int altoVentana = 720;
+
     [Header("VSync - Selector de Frecuencia")]
     public int vsyncIndexPorDefecto = 0;
 
@@ -17,28 +21,8 @@ public class ControlPantalla : MonoBehaviour
     [Header("Debug")]
     public bool mostrarLogs = true;
 
-    // ============================================
-    // FRECUENCIAS DISPONIBLES (ACTUALIZADO)
-    // ============================================
     private int[] frecuenciasVSync = {
-        0,      // VSync OFF (Sin límite)
-        30,     // Muy bajo (PCs muy lentos)
-        60,     // Estándar
-        75,     // Básico
-        90,     // Móviles / Tablets
-        100,    // Gaming básico
-        120,    // Consolas (PS5/Xbox)
-        144,    // Gaming popular
-        165,    // Gaming medio
-        180,    // Gaming medio-alto
-        200,    // Gaming alto
-        240,    // Gaming competitivo
-        280,    // Gaming competitivo alto
-        300,    // Gaming competitivo alto
-        360,    // Gaming profesional
-        390,    // Gaming profesional
-        480,    // Gaming premium
-        500     // Gaming premium
+        0, 30, 60, 75, 90, 100, 120, 144, 165, 180, 200, 240, 280, 300, 360, 390, 480, 500
     };
 
     private const string PANTALLA_KEY = "PantallaCompleta";
@@ -51,9 +35,15 @@ public class ControlPantalla : MonoBehaviour
     {
         ConfigurarDropdownVSync();
 
+        // ============================================
+        // CARGAR PANTALLA COMPLETA
+        // ============================================
         pantallaCompletaActual = PlayerPrefs.GetInt(PANTALLA_KEY, pantallaCompletaPorDefecto ? 1 : 0) == 1;
         AplicarPantallaCompleta(pantallaCompletaActual);
 
+        // ============================================
+        // CARGAR VSYNC
+        // ============================================
         vsyncIndexActual = PlayerPrefs.GetInt(VSYNC_INDEX_KEY, vsyncIndexPorDefecto);
         vsyncIndexActual = Mathf.Clamp(vsyncIndexActual, 0, frecuenciasVSync.Length - 1);
 
@@ -126,6 +116,9 @@ public class ControlPantalla : MonoBehaviour
             QualitySettings.vSyncCount = 1;
             Application.targetFrameRate = freq;
 
+            // ============================================
+            // FORZAR SOLO LA FRECUENCIA, NO EL MONITOR
+            // ============================================
             Screen.SetResolution(Screen.width, Screen.height, Screen.fullScreen, freq);
 
             if (mostrarLogs)
@@ -134,6 +127,10 @@ public class ControlPantalla : MonoBehaviour
             }
         }
     }
+
+    // ============================================
+    // MÉTODO PARA PANTALLA COMPLETA (CORREGIDO)
+    // ============================================
 
     public void SetPantallaCompleta(bool activar)
     {
@@ -155,7 +152,60 @@ public class ControlPantalla : MonoBehaviour
 
     private void AplicarPantallaCompleta(bool activar)
     {
-        Screen.fullScreen = activar;
+        // ============================================
+        // OBTENER LA RESOLUCIÓN DEL MONITOR PRINCIPAL
+        // ============================================
+        int ancho = Screen.currentResolution.width;
+        int alto = Screen.currentResolution.height;
+        int refresco = Screen.currentResolution.refreshRate;
+
+        if (activar)
+        {
+            // ============================================
+            // PANTALLA COMPLETA - Usar resolución nativa
+            // ============================================
+            Screen.fullScreen = true;
+            // Forzar resolución nativa en el monitor principal
+            Screen.SetResolution(ancho, alto, true, refresco);
+        }
+        else
+        {
+            // ============================================
+            // MODO VENTANA - Tamaño configurable
+            // ============================================
+            Screen.fullScreen = false;
+            // Usar el tamaño configurado en modo ventana
+            Screen.SetResolution(anchoVentana, altoVentana, false, refresco);
+        }
+
+        if (mostrarLogs)
+        {
+            Debug.Log($"?? Modo ventana: {(activar ? $"Fullscreen ({ancho}x{alto}@{refresco}Hz)" : $"Windowed ({anchoVentana}x{altoVentana})")}");
+        }
+    }
+
+    // ============================================
+    // MÉTODO PARA CAMBIAR EL TAMAÑO DE LA VENTANA
+    // ============================================
+
+    public void SetTamañoVentana(int ancho, int alto)
+    {
+        anchoVentana = ancho;
+        altoVentana = alto;
+        PlayerPrefs.SetInt("AnchoVentana", ancho);
+        PlayerPrefs.SetInt("AltoVentana", alto);
+        PlayerPrefs.Save();
+
+        if (!pantallaCompletaActual)
+        {
+            int refresco = Screen.currentResolution.refreshRate;
+            Screen.SetResolution(ancho, alto, false, refresco);
+        }
+
+        if (mostrarLogs)
+        {
+            Debug.Log($"?? Tamaño de ventana cambiado a: {ancho}x{alto}");
+        }
     }
 
     public int GetFrecuenciaActual()
