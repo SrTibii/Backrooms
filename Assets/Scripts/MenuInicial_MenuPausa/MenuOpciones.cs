@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +12,10 @@ public class MenuOpciones : MonoBehaviour
     [Header("Toggles")]
     public Toggle toggleFPS;
     public Toggle toggleSombras;
+    public Toggle togglePantallaCompleta;
+
+    [Header("Dropdowns")]
+    public TMP_Dropdown dropdownVSync;
 
     [Header("Valores por Defecto")]
     public float sensibilidadPorDefecto = 0.5f;
@@ -23,11 +28,16 @@ public class MenuOpciones : MonoBehaviour
     public MostrarFPS mostrarFPS;
     public ControlSombras controlSombras;
     public ControlFOV controlFOV;
+    public ControlPantalla controlPantalla;
 
     private const string SENSIBILIDAD_KEY = "SensibilidadRaton";
 
     void Start()
     {
+        // ============================================
+        // OBTENER REFERENCIAS
+        // ============================================
+
         if (playerController == null)
         {
             playerController = FindObjectOfType<FirstPersonController>();
@@ -53,9 +63,15 @@ public class MenuOpciones : MonoBehaviour
             controlFOV = FindObjectOfType<ControlFOV>();
         }
 
+        if (controlPantalla == null)
+        {
+            controlPantalla = FindObjectOfType<ControlPantalla>();
+        }
+
         // ============================================
         // CONFIGURAR SLIDER DE SENSIBILIDAD
         // ============================================
+
         if (sliderSensibilidad != null)
         {
             float sensibilidadGuardada = PlayerPrefs.GetFloat(SENSIBILIDAD_KEY, sensibilidadPorDefecto);
@@ -67,6 +83,7 @@ public class MenuOpciones : MonoBehaviour
         // ============================================
         // CONFIGURAR SLIDER DE BRILLO
         // ============================================
+
         if (sliderBrillo != null && controlBrillo != null)
         {
             float brilloGuardado = PlayerPrefs.GetFloat("Brillo", brilloPorDefecto);
@@ -78,6 +95,7 @@ public class MenuOpciones : MonoBehaviour
         // ============================================
         // CONFIGURAR SLIDER DE FOV
         // ============================================
+
         if (sliderFOV != null && controlFOV != null)
         {
             float fovGuardado = PlayerPrefs.GetFloat("PaniniDistance", fovPorDefecto);
@@ -89,6 +107,7 @@ public class MenuOpciones : MonoBehaviour
         // ============================================
         // CONFIGURAR TOGGLE DE FPS
         // ============================================
+
         if (toggleFPS != null && mostrarFPS != null)
         {
             bool fpsActivo = PlayerPrefs.GetInt("MostrarFPS", 1) == 1;
@@ -100,6 +119,7 @@ public class MenuOpciones : MonoBehaviour
         // ============================================
         // CONFIGURAR TOGGLE DE SOMBRAS
         // ============================================
+
         if (toggleSombras != null && controlSombras != null)
         {
             bool sombrasActivas = PlayerPrefs.GetInt("SombrasActivadas", 1) == 1;
@@ -107,6 +127,35 @@ public class MenuOpciones : MonoBehaviour
             toggleSombras.onValueChanged.AddListener(OnSombrasChanged);
             controlSombras.SetSombras(sombrasActivas);
         }
+
+        // ============================================
+        // CONFIGURAR TOGGLE DE PANTALLA COMPLETA
+        // ============================================
+
+        if (togglePantallaCompleta != null && controlPantalla != null)
+        {
+            bool pantallaCompleta = PlayerPrefs.GetInt("PantallaCompleta", 1) == 1;
+            togglePantallaCompleta.isOn = pantallaCompleta;
+            togglePantallaCompleta.onValueChanged.AddListener(OnPantallaCompletaChanged);
+            controlPantalla.SetPantallaCompleta(pantallaCompleta);
+        }
+
+        // ============================================
+        // CONFIGURAR DROPDOWN DE VSYNC
+        // ============================================
+
+        if (dropdownVSync != null && controlPantalla != null)
+        {
+            // Asignar el dropdown al ControlPantalla
+            controlPantalla.dropdownVSync = dropdownVSync;
+
+            // El dropdown se configura automáticamente en ControlPantalla
+            // Solo aseguramos que el valor guardado se aplique
+            int vsyncIndex = PlayerPrefs.GetInt("VSyncIndex", 0);
+            dropdownVSync.value = vsyncIndex;
+        }
+
+        Debug.Log("?? MenuOpciones inicializado correctamente");
     }
 
     // ============================================
@@ -178,40 +227,78 @@ public class MenuOpciones : MonoBehaviour
     }
 
     // ============================================
+    // MÉTODO PARA PANTALLA COMPLETA
+    // ============================================
+
+    public void OnPantallaCompletaChanged(bool value)
+    {
+        if (controlPantalla != null)
+        {
+            controlPantalla.SetPantallaCompleta(value);
+        }
+    }
+
+    // ============================================
+    // MÉTODO PARA VSYNC (Dropdown)
+    // ============================================
+
+    // Este método se llama automáticamente desde el Dropdown
+    // El ControlPantalla ya tiene su propio listener
+
+    // ============================================
     // RESTAURAR VALORES POR DEFECTO
     // ============================================
 
     public void RestaurarValoresPorDefecto()
     {
+        // Restaurar Sensibilidad
         if (sliderSensibilidad != null)
         {
             sliderSensibilidad.value = sensibilidadPorDefecto;
         }
 
+        // Restaurar Brillo
         if (sliderBrillo != null && controlBrillo != null)
         {
             sliderBrillo.value = brilloPorDefecto;
             controlBrillo.SetBrillo(brilloPorDefecto);
         }
 
+        // Restaurar FOV
         if (sliderFOV != null && controlFOV != null)
         {
             sliderFOV.value = fovPorDefecto;
             controlFOV.SetFOV(fovPorDefecto);
         }
 
+        // Restaurar FPS
         if (toggleFPS != null && mostrarFPS != null)
         {
             toggleFPS.isOn = true;
             mostrarFPS.ToggleMostrarFPS(true);
         }
 
+        // Restaurar Sombras
         if (toggleSombras != null && controlSombras != null)
         {
             toggleSombras.isOn = true;
             controlSombras.SetSombras(true);
         }
 
-        Debug.Log("?? Valores restaurados a por defecto");
+        // Restaurar Pantalla Completa
+        if (togglePantallaCompleta != null && controlPantalla != null)
+        {
+            togglePantallaCompleta.isOn = true;
+            controlPantalla.SetPantallaCompleta(true);
+        }
+
+        // Restaurar VSync
+        if (dropdownVSync != null && controlPantalla != null)
+        {
+            dropdownVSync.value = 0; // VSync OFF por defecto
+            controlPantalla.RestaurarPorDefecto();
+        }
+
+        Debug.Log("?? Todos los valores restaurados a por defecto");
     }
 }
