@@ -7,6 +7,9 @@ public class MenuOpciones : MonoBehaviour
     public Slider sliderSensibilidad;
     public Slider sliderBrillo;
 
+    [Header("Toggles")]
+    public Toggle toggleFPS;
+
     [Header("Valores por Defecto")]
     public float sensibilidadPorDefecto = 0.5f;
     public float brilloPorDefecto = 0f;
@@ -14,6 +17,7 @@ public class MenuOpciones : MonoBehaviour
     [Header("Referencias")]
     public FirstPersonController playerController;
     public ControlBrillo controlBrillo;
+    public MostrarFPS mostrarFPS;
 
     private const string SENSIBILIDAD_KEY = "SensibilidadRaton";
 
@@ -27,10 +31,11 @@ public class MenuOpciones : MonoBehaviour
         if (controlBrillo == null)
         {
             controlBrillo = FindObjectOfType<ControlBrillo>();
-            if (controlBrillo == null)
-            {
-                Debug.LogError("?? No se encontró ControlBrillo en la escena");
-            }
+        }
+
+        if (mostrarFPS == null)
+        {
+            mostrarFPS = FindObjectOfType<MostrarFPS>();
         }
 
         // ============================================
@@ -53,6 +58,17 @@ public class MenuOpciones : MonoBehaviour
             sliderBrillo.value = brilloGuardado;
             sliderBrillo.onValueChanged.AddListener(OnBrilloChanged);
             controlBrillo.SetBrillo(brilloGuardado);
+        }
+
+        // ============================================
+        // CONFIGURAR TOGGLE DE FPS
+        // ============================================
+        if (toggleFPS != null && mostrarFPS != null)
+        {
+            bool fpsActivo = PlayerPrefs.GetInt("MostrarFPS", 1) == 1;
+            toggleFPS.isOn = fpsActivo;
+            toggleFPS.onValueChanged.AddListener(OnFPSChanged);
+            mostrarFPS.ToggleMostrarFPS(fpsActivo);
         }
     }
 
@@ -89,6 +105,18 @@ public class MenuOpciones : MonoBehaviour
     }
 
     // ============================================
+    // MÉTODO PARA FPS
+    // ============================================
+
+    public void OnFPSChanged(bool value)
+    {
+        if (mostrarFPS != null)
+        {
+            mostrarFPS.ToggleMostrarFPS(value);
+        }
+    }
+
+    // ============================================
     // RESTAURAR VALORES POR DEFECTO
     // ============================================
 
@@ -103,6 +131,12 @@ public class MenuOpciones : MonoBehaviour
         {
             sliderBrillo.value = brilloPorDefecto;
             controlBrillo.SetBrillo(brilloPorDefecto);
+        }
+
+        if (toggleFPS != null && mostrarFPS != null)
+        {
+            toggleFPS.isOn = true;
+            mostrarFPS.ToggleMostrarFPS(true);
         }
 
         Debug.Log("?? Valores restaurados a por defecto");
