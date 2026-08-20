@@ -13,14 +13,14 @@ public class MenuOpciones : MonoBehaviour
     public Toggle toggleFPS;
     public Toggle toggleSombras;
     public Toggle togglePantallaCompleta;
-    public Toggle toggleMotionBlur; // ?? NUEVO
+    public Toggle toggleMotionBlur; 
 
     [Header("Dropdowns")]
     public TMP_Dropdown dropdownVSync;
 
     [Header("Valores por Defecto")]
     public float sensibilidadPorDefecto = 0.5f;
-    public float brilloPorDefecto = 0f;
+    public float brilloPorDefecto = 0.3f;
     public float fovPorDefecto = 0.5f;
 
     [Header("Referencias")]
@@ -30,7 +30,7 @@ public class MenuOpciones : MonoBehaviour
     public ControlSombras controlSombras;
     public ControlFOV controlFOV;
     public ControlPantalla controlPantalla;
-    public ControlMotionBlur controlMotionBlur; // ?? NUEVO
+    public ControlMotionBlur controlMotionBlur;
 
     private const string SENSIBILIDAD_KEY = "SensibilidadRaton";
 
