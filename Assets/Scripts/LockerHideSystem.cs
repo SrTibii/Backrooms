@@ -4,6 +4,11 @@ using UnityEngine.UI;
 
 public class LockerHideSystem : MonoBehaviour
 {
+    // ============================================
+    // FLAG GLOBAL ESTÁTICO PARA QUE TODOS PUEDAN VER SI ESTÁ ESCONDIDO
+    // ============================================
+    public static bool IsPlayerHidingGlobal = false;
+
     [Header("Referencias")]
     public InteractionSystem interactionSystem;
     public Camera playerCamera;
@@ -48,6 +53,11 @@ public class LockerHideSystem : MonoBehaviour
 
     public bool IsPlayerHiding() => isHiding;
 
+    public bool IsHidingOrTransitioning()
+    {
+        return isHiding || (doorTransparentObject != null && doorTransparentObject.activeSelf);
+    }
+
     private void OnEnable()
     {
         if (interactAction != null)
@@ -81,7 +91,7 @@ public class LockerHideSystem : MonoBehaviour
 
         if (doorTransparentObject == null)
         {
-            Debug.LogWarning($"?? {gameObject.name}: No se ha asignado la puerta transparente. Se usará el mismo método antiguo.");
+            Debug.LogWarning($"?? {gameObject.name}: No se ha asignado la puerta transparente.");
         }
 
         if (interactionSystem == null)
@@ -155,13 +165,15 @@ public class LockerHideSystem : MonoBehaviour
             wasCrosshairActive = crosshairImage.gameObject.activeSelf;
         }
 
-        // ============================================
-        // ASEGURAR QUE LA PUERTA TRANSPARENTE EMPIEZA DESACTIVADA
-        // ============================================
         if (doorTransparentObject != null)
         {
             doorTransparentObject.SetActive(false);
         }
+
+        // ============================================
+        // INICIALIZAR FLAG GLOBAL
+        // ============================================
+        IsPlayerHidingGlobal = false;
 
         Debug.Log($"? {gameObject.name} inicializado correctamente. Puerta: {doorObject?.name}");
     }
@@ -218,10 +230,8 @@ public class LockerHideSystem : MonoBehaviour
         }
 
         isHiding = true;
+        IsPlayerHidingGlobal = true; // ?? ACTIVAR FLAG GLOBAL
 
-        // ============================================
-        // INTERCAMBIAR PUERTAS: OCULTAR ORIGINAL, MOSTRAR TRANSPARENTE
-        // ============================================
         if (doorObject != null)
         {
             doorObject.SetActive(false);
@@ -232,7 +242,6 @@ public class LockerHideSystem : MonoBehaviour
             doorTransparentObject.SetActive(true);
         }
 
-        // Guardar estado actual de las cámaras
         wasPlayerCameraActive = playerCamera.gameObject.activeSelf;
         wasLockerCameraActive = lockerCamera.gameObject.activeSelf;
 
@@ -295,16 +304,13 @@ public class LockerHideSystem : MonoBehaviour
         PlayEnterSound();
         NotifyEnemiesPlayerHid(true);
 
-        Debug.Log($"? {gameObject.name}: Entrando a la taquilla");
+        Debug.Log($"? {gameObject.name}: Entrando a la taquilla - Flag Global = {IsPlayerHidingGlobal}");
     }
 
     void ExitLocker()
     {
         if (!isHiding) return;
 
-        // ============================================
-        // INTERCAMBIAR PUERTAS: MOSTRAR ORIGINAL, OCULTAR TRANSPARENTE
-        // ============================================
         if (doorTransparentObject != null)
         {
             doorTransparentObject.SetActive(false);
@@ -364,11 +370,12 @@ public class LockerHideSystem : MonoBehaviour
         }
 
         isHiding = false;
+        IsPlayerHidingGlobal = false; // ?? DESACTIVAR FLAG GLOBAL
 
         PlayExitSound();
         NotifyEnemiesPlayerHid(false);
 
-        Debug.Log($"? {gameObject.name}: Saliendo de la taquilla");
+        Debug.Log($"? {gameObject.name}: Saliendo de la taquilla - Flag Global = {IsPlayerHidingGlobal}");
     }
 
     void NotifyEnemiesPlayerHid(bool isHidden)

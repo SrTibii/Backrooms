@@ -39,12 +39,18 @@ public class MenuPausa : MonoBehaviour
     // ============================================
     private EnemyIA enemyIA;
 
+    // ============================================
+    // REFERENCIA A LA TAQUILLA
+    // ============================================
+    private LockerHideSystem lockerSystem;
+
     void Start()
     {
         // Buscar referencias
         playerController = FindObjectOfType<FirstPersonController>();
         vhsEffects = FindObjectOfType<VHSCameraEffects>();
         enemyIA = FindObjectOfType<EnemyIA>();
+        lockerSystem = FindObjectOfType<LockerHideSystem>();
 
         // Crear AudioSource
         audioSource = gameObject.AddComponent<AudioSource>();
@@ -89,9 +95,21 @@ public class MenuPausa : MonoBehaviour
 
     private void OnPausePerformed(InputAction.CallbackContext context)
     {
+        // ============================================
+        // NO PAUSAR SI HAY JUMPSCARE
+        // ============================================
         if (enemyIA != null && enemyIA.EstaEnJumpscare())
         {
             Debug.Log("?? No se puede pausar durante un jumpscare");
+            return;
+        }
+
+        // ============================================
+        // NO PAUSAR SI ESTÁS DENTRO DE LA TAQUILLA (USANDO FLAG GLOBAL)
+        // ============================================
+        if (LockerHideSystem.IsPlayerHidingGlobal)
+        {
+            Debug.Log("?? No se puede pausar mientras estás escondido en la taquilla (Flag Global)");
             return;
         }
 
@@ -108,7 +126,20 @@ public class MenuPausa : MonoBehaviour
     public void PausarJuego()
     {
         if (isPaused) return;
+
+        // ============================================
+        // NO PAUSAR SI HAY JUMPSCARE
+        // ============================================
         if (enemyIA != null && enemyIA.EstaEnJumpscare()) return;
+
+        // ============================================
+        // NO PAUSAR SI ESTÁS DENTRO DE LA TAQUILLA (USANDO FLAG GLOBAL)
+        // ============================================
+        if (LockerHideSystem.IsPlayerHidingGlobal)
+        {
+            Debug.Log("?? No se puede pausar mientras estás escondido en la taquilla (Flag Global)");
+            return;
+        }
 
         isPaused = true;
 
@@ -152,7 +183,13 @@ public class MenuPausa : MonoBehaviour
         isPaused = false;
 
         // Mostrar UI del juego, ocultar pausa
-        if (uiIngame != null) uiIngame.SetActive(true);
+        if (uiIngame != null)
+        {
+            uiIngame.SetActive(true);
+            // Forzar activación del crosshair
+            Transform crosshair = uiIngame.transform.Find("Crosshair");
+            if (crosshair != null) crosshair.gameObject.SetActive(true);
+        }
         if (uiPausa != null) uiPausa.SetActive(false);
 
         // Reanudar el juego
@@ -276,6 +313,10 @@ public class MenuPausa : MonoBehaviour
         Debug.Log("?? Abrir menú de opciones (pendiente de implementar)");
     }
 
+    // ============================================
+    // MÉTODOS PARA EVENT TRIGGER (Pointer Enter)
+    // ============================================
+
     public void SonidoHover()
     {
         if (audioSource != null && sonidoHover != null)
@@ -283,6 +324,10 @@ public class MenuPausa : MonoBehaviour
             audioSource.PlayOneShot(sonidoHover, volumenSonidos);
         }
     }
+
+    // ============================================
+    // MÉTODO PARA REPRODUCIR SONIDOS
+    // ============================================
 
     private void ReproducirSonido(AudioClip clip)
     {
@@ -292,10 +337,18 @@ public class MenuPausa : MonoBehaviour
         }
     }
 
+    // ============================================
+    // MÉTODO PARA SABER SI ESTÁ PAUSADO
+    // ============================================
+
     public bool EstaPausado()
     {
         return isPaused;
     }
+
+    // ============================================
+    // LIMPIEZA AL DESTRUIR
+    // ============================================
 
     private void OnDestroy()
     {
