@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Video;
+using UnityEngine.InputSystem;
 using System.Collections;
 
 public class VHSIntroScene : MonoBehaviour
@@ -15,6 +16,9 @@ public class VHSIntroScene : MonoBehaviour
     [Tooltip("Si es true, espera a que el VideoPlayer termine de reproducir")]
     public bool esperarVideoPlayer = true;
 
+    [Header("Input Actions")]
+    public InputActionReference skipAction; // Asignar "UI/Submit" o crear una nueva
+
     [Header("Referencias")]
     public VideoPlayer videoPlayer;
 
@@ -23,6 +27,7 @@ public class VHSIntroScene : MonoBehaviour
 
     private bool introTerminada = false;
     private bool videoTerminado = false;
+    private bool puedeSaltar = false; // Para evitar saltar antes de que empiece el video
 
     void Start()
     {
@@ -62,6 +67,32 @@ public class VHSIntroScene : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        if (skipAction != null)
+        {
+            skipAction.action.performed += OnSkipPerformed;
+            skipAction.action.Enable();
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (skipAction != null)
+        {
+            skipAction.action.performed -= OnSkipPerformed;
+            skipAction.action.Disable();
+        }
+    }
+
+    private void OnSkipPerformed(InputAction.CallbackContext context)
+    {
+        if (puedeSaltar && !introTerminada)
+        {
+            SaltarIntro();
+        }
+    }
+
     // ============================================
     // CORRUTINA PRINCIPAL
     // ============================================
@@ -76,6 +107,10 @@ public class VHSIntroScene : MonoBehaviour
             {
                 Debug.Log("?? Reproduciendo video...");
             }
+
+            // Permitir saltar después de un pequeño delay (para evitar saltos accidentales)
+            yield return new WaitForSeconds(0.3f);
+            puedeSaltar = true;
 
             if (esperarVideoPlayer)
             {
@@ -153,6 +188,8 @@ public class VHSIntroScene : MonoBehaviour
         if (introTerminada) return;
 
         introTerminada = true;
+        puedeSaltar = false;
+
         if (mostrarLogs)
         {
             Debug.Log($"?? Intro terminada. Cargando escena: {nombreEscenaJuego}");
@@ -169,15 +206,24 @@ public class VHSIntroScene : MonoBehaviour
     }
 
     // ============================================
-    // MÉTODO PARA SALTAR LA INTRO (OPCIONAL)
+    // MÉTODO PARA SALTAR LA INTRO
     // ============================================
 
     public void SaltarIntro()
     {
+        if (introTerminada) return;
+
         if (mostrarLogs)
         {
             Debug.Log("?? Intro saltada por el jugador");
         }
+
+        // Detener el video si está reproduciendo
+        if (videoPlayer != null && videoPlayer.isPlaying)
+        {
+            videoPlayer.Stop();
+        }
+
         TerminarIntro();
     }
 

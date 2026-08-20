@@ -683,6 +683,7 @@ MonoBehaviour:
   duracionIntro: 0
   nombreEscenaJuego: Lvl0_Backrooms
   esperarVideoPlayer: 1
+  skipAction: {fileID: -739459715974736530, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
   videoPlayer: {fileID: 72062205}
   mostrarLogs: 0
 --- !u!4 &1915710564
