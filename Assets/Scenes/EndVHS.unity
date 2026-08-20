@@ -695,7 +695,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57a0f2edb058b7449b5a268c1d1fdfa7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VHSDeathTransition
-  escenaDestino: Lvl0_Backrooms
+  escenaDestino: MenuInicial
   tiempoExtra: 0.5
   videoPlayer: {fileID: 72062205}
   mostrarLogs: 0

@@ -26,6 +26,12 @@ public class VHSIntroScene : MonoBehaviour
 
     void Start()
     {
+        // ============================================
+        // OCULTAR CURSOR
+        // ============================================
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
         // Buscar VideoPlayer si no está asignado
         if (videoPlayer == null)
         {
@@ -151,6 +157,12 @@ public class VHSIntroScene : MonoBehaviour
         {
             Debug.Log($"?? Intro terminada. Cargando escena: {nombreEscenaJuego}");
         }
+
+        // ============================================
+        // RESTAURAR CURSOR (opcional, se bloqueará en el juego)
+        // ============================================
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
 
         // Cargar la escena del juego
         SceneManager.LoadScene(nombreEscenaJuego);

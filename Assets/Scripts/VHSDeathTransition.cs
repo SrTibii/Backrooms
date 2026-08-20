@@ -7,7 +7,7 @@ public class VHSDeathTransition : MonoBehaviour
 {
     [Header("Configuración")]
     [Tooltip("Nombre de la escena a la que ir después del video")]
-    public string escenaDestino = "Lvl0_Backrooms";
+    public string escenaDestino = "MenuInicial";
 
     [Tooltip("Tiempo extra de espera después del video (por si quieres delay)")]
     public float tiempoExtra = 0.5f;
@@ -23,6 +23,12 @@ public class VHSDeathTransition : MonoBehaviour
 
     void Start()
     {
+        // ============================================
+        // OCULTAR CURSOR
+        // ============================================
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
         // Buscar VideoPlayer si no está asignado
         if (videoPlayer == null)
         {
@@ -93,6 +99,12 @@ public class VHSDeathTransition : MonoBehaviour
             Debug.Log($"?? Cargando escena: {escenaDestino}");
         }
 
+        // ============================================
+        // RESTAURAR CURSOR (opcional)
+        // ============================================
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
         SceneManager.LoadScene(escenaDestino);
     }
 
@@ -110,6 +122,10 @@ public class VHSDeathTransition : MonoBehaviour
             }
             transicionCompletada = true;
             StopAllCoroutines();
+
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+
             SceneManager.LoadScene(escenaDestino);
         }
     }
