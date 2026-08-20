@@ -9,6 +9,7 @@ public class MenuOpciones : MonoBehaviour
 
     [Header("Toggles")]
     public Toggle toggleFPS;
+    public Toggle toggleSombras;
 
     [Header("Valores por Defecto")]
     public float sensibilidadPorDefecto = 0.5f;
@@ -18,6 +19,7 @@ public class MenuOpciones : MonoBehaviour
     public FirstPersonController playerController;
     public ControlBrillo controlBrillo;
     public MostrarFPS mostrarFPS;
+    public ControlSombras controlSombras;
 
     private const string SENSIBILIDAD_KEY = "SensibilidadRaton";
 
@@ -36,6 +38,11 @@ public class MenuOpciones : MonoBehaviour
         if (mostrarFPS == null)
         {
             mostrarFPS = FindObjectOfType<MostrarFPS>();
+        }
+
+        if (controlSombras == null)
+        {
+            controlSombras = FindObjectOfType<ControlSombras>();
         }
 
         // ============================================
@@ -69,6 +76,17 @@ public class MenuOpciones : MonoBehaviour
             toggleFPS.isOn = fpsActivo;
             toggleFPS.onValueChanged.AddListener(OnFPSChanged);
             mostrarFPS.ToggleMostrarFPS(fpsActivo);
+        }
+
+        // ============================================
+        // CONFIGURAR TOGGLE DE SOMBRAS
+        // ============================================
+        if (toggleSombras != null && controlSombras != null)
+        {
+            bool sombrasActivas = PlayerPrefs.GetInt("SombrasActivadas", 1) == 1;
+            toggleSombras.isOn = sombrasActivas;
+            toggleSombras.onValueChanged.AddListener(OnSombrasChanged);
+            controlSombras.SetSombras(sombrasActivas);
         }
     }
 
@@ -117,6 +135,18 @@ public class MenuOpciones : MonoBehaviour
     }
 
     // ============================================
+    // MÉTODO PARA SOMBRAS
+    // ============================================
+
+    public void OnSombrasChanged(bool value)
+    {
+        if (controlSombras != null)
+        {
+            controlSombras.SetSombras(value);
+        }
+    }
+
+    // ============================================
     // RESTAURAR VALORES POR DEFECTO
     // ============================================
 
@@ -137,6 +167,12 @@ public class MenuOpciones : MonoBehaviour
         {
             toggleFPS.isOn = true;
             mostrarFPS.ToggleMostrarFPS(true);
+        }
+
+        if (toggleSombras != null && controlSombras != null)
+        {
+            toggleSombras.isOn = true;
+            controlSombras.SetSombras(true);
         }
 
         Debug.Log("?? Valores restaurados a por defecto");
