@@ -13,7 +13,8 @@ public class MenuOpciones : MonoBehaviour
     public Toggle toggleFPS;
     public Toggle toggleSombras;
     public Toggle togglePantallaCompleta;
-    public Toggle toggleMotionBlur; 
+    public Toggle toggleMotionBlur;
+    public Toggle toggleGlitchEffect; // ?? NUEVO
 
     [Header("Dropdowns")]
     public TMP_Dropdown dropdownVSync;
@@ -31,6 +32,7 @@ public class MenuOpciones : MonoBehaviour
     public ControlFOV controlFOV;
     public ControlPantalla controlPantalla;
     public ControlMotionBlur controlMotionBlur;
+    public ControlGlitchEffect controlGlitchEffect; // ?? NUEVO
 
     private const string SENSIBILIDAD_KEY = "SensibilidadRaton";
 
@@ -73,6 +75,11 @@ public class MenuOpciones : MonoBehaviour
         if (controlMotionBlur == null)
         {
             controlMotionBlur = FindObjectOfType<ControlMotionBlur>();
+        }
+
+        if (controlGlitchEffect == null)
+        {
+            controlGlitchEffect = FindObjectOfType<ControlGlitchEffect>();
         }
 
         // ============================================
@@ -157,6 +164,18 @@ public class MenuOpciones : MonoBehaviour
             toggleMotionBlur.isOn = motionBlurActivo;
             toggleMotionBlur.onValueChanged.AddListener(OnMotionBlurChanged);
             controlMotionBlur.SetMotionBlur(motionBlurActivo);
+        }
+
+        // ============================================
+        // CONFIGURAR TOGGLE DE GLITCH EFFECT
+        // ============================================
+
+        if (toggleGlitchEffect != null && controlGlitchEffect != null)
+        {
+            bool glitchActivo = PlayerPrefs.GetInt("GlitchEffect", 1) == 1;
+            toggleGlitchEffect.isOn = glitchActivo;
+            toggleGlitchEffect.onValueChanged.AddListener(OnGlitchEffectChanged);
+            controlGlitchEffect.SetGlitchEffect(glitchActivo);
         }
 
         // ============================================
@@ -266,6 +285,18 @@ public class MenuOpciones : MonoBehaviour
     }
 
     // ============================================
+    // MÉTODO PARA GLITCH EFFECT
+    // ============================================
+
+    public void OnGlitchEffectChanged(bool value)
+    {
+        if (controlGlitchEffect != null)
+        {
+            controlGlitchEffect.SetGlitchEffect(value);
+        }
+    }
+
+    // ============================================
     // RESTAURAR VALORES POR DEFECTO
     // ============================================
 
@@ -317,6 +348,13 @@ public class MenuOpciones : MonoBehaviour
         {
             toggleMotionBlur.isOn = true;
             controlMotionBlur.SetMotionBlur(true);
+        }
+
+        // Restaurar Glitch Effect
+        if (toggleGlitchEffect != null && controlGlitchEffect != null)
+        {
+            toggleGlitchEffect.isOn = true;
+            controlGlitchEffect.SetGlitchEffect(true);
         }
 
         // Restaurar VSync
