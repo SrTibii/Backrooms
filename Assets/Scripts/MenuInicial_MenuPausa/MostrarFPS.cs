@@ -4,18 +4,16 @@ using TMPro;
 public class MostrarFPS : MonoBehaviour
 {
     [Header("Referencias")]
-    public TextMeshProUGUI textoFPS; // Texto donde se mostrarán los FPS
+    public TextMeshProUGUI textoFPS;
 
     [Header("Configuración")]
     [Tooltip("Si está activado, muestra los FPS")]
     public bool mostrarFPS = true;
 
     [Header("Posición en Pantalla")]
-    [Tooltip("Posición horizontal (0 = izquierda, 0.5 = centro, 1 = derecha)")]
     [Range(0f, 1f)]
     public float posicionX = 0.02f;
 
-    [Tooltip("Posición vertical (0 = abajo, 0.5 = centro, 1 = arriba)")]
     [Range(0f, 1f)]
     public float posicionY = 0.98f;
 
@@ -32,7 +30,6 @@ public class MostrarFPS : MonoBehaviour
     public int fpsBueno = 60;
     public int fpsMedio = 30;
 
-    // Variables internas
     private float tiempoActual = 0f;
     private int frames = 0;
     private int fpsActual = 0;
@@ -42,16 +39,21 @@ public class MostrarFPS : MonoBehaviour
     {
         if (textoFPS == null)
         {
-            // Si no hay texto asignado, crear uno automáticamente
             CrearTextoFPS();
         }
 
         rectTransform = textoFPS.GetComponent<RectTransform>();
         ActualizarPosicion();
 
-        // Cargar estado guardado
-        mostrarFPS = PlayerPrefs.GetInt("MostrarFPS", 1) == 1;
-        textoFPS.gameObject.SetActive(mostrarFPS);
+        // ============================================
+        // NO CARGAR PlayerPrefs AQUÍ
+        // El estado lo controla MenuOpciones
+        // Solo aplicar el estado actual de mostrarFPS
+        // ============================================
+        if (textoFPS != null)
+        {
+            textoFPS.gameObject.SetActive(mostrarFPS);
+        }
 
         Debug.Log($"?? MostrarFPS inicializado. Visible: {mostrarFPS}");
     }
@@ -96,50 +98,41 @@ public class MostrarFPS : MonoBehaviour
     {
         if (rectTransform == null) return;
 
-        // Obtener el Canvas
         Canvas canvas = GetComponentInParent<Canvas>();
         if (canvas == null) return;
 
-        // Convertir coordenadas de 0-1 a píxeles
         Vector2 tamanioCanvas = canvas.GetComponent<RectTransform>().rect.size;
 
         float x = posicionX * tamanioCanvas.x;
         float y = posicionY * tamanioCanvas.y;
 
-        // Ajustar anclas para que la posición sea relativa
         rectTransform.anchorMin = new Vector2(0, 0);
         rectTransform.anchorMax = new Vector2(0, 0);
-        rectTransform.pivot = new Vector2(0, 1); // Pivot arriba-izquierda
+        rectTransform.pivot = new Vector2(0, 1);
 
         rectTransform.anchoredPosition = new Vector2(x, y);
 
-        // Aplicar tamaño de fuente
         textoFPS.fontSize = tamañoFuente;
         textoFPS.color = colorFPS;
     }
 
     void CrearTextoFPS()
     {
-        // Crear un GameObject para el texto
         GameObject go = new GameObject("FPS_Text");
         go.transform.SetParent(transform);
 
-        // Añadir RectTransform
         rectTransform = go.AddComponent<RectTransform>();
         rectTransform.sizeDelta = new Vector2(200, 50);
 
-        // Añadir TextMeshProUGUI
         textoFPS = go.AddComponent<TextMeshProUGUI>();
         textoFPS.fontSize = tamañoFuente;
         textoFPS.color = colorFPS;
         textoFPS.alignment = TextAlignmentOptions.Left;
         textoFPS.text = "FPS: 0";
-
-        // Añadir CanvasRenderer (se añade automáticamente)
     }
 
     // ============================================
-    // MÉTODOS PÚBLICOS PARA TOGGLE
+    // MÉTODOS PÚBLICOS
     // ============================================
 
     public void ToggleMostrarFPS(bool activar)
@@ -170,10 +163,6 @@ public class MostrarFPS : MonoBehaviour
     {
         return fpsActual;
     }
-
-    // ============================================
-    // MÉTODOS PARA CAMBIAR POSICIÓN DESDE CÓDIGO
-    // ============================================
 
     public void SetPosicion(float x, float y)
     {

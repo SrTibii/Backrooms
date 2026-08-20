@@ -56716,7 +56716,7 @@ MonoBehaviour:
   togglePantallaCompleta: {fileID: 2025987945}
   dropdownVSync: {fileID: 646436770}
   sensibilidadPorDefecto: 0.5
-  brilloPorDefecto: 0.5
+  brilloPorDefecto: 0.3
   fovPorDefecto: 0.5
   playerController: {fileID: 295396585169099348}
   controlBrillo: {fileID: 1153459882}
@@ -63006,6 +63006,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ControlPantalla
   pantallaCompletaPorDefecto: 1
+  anchoVentana: 1280
+  altoVentana: 720
   vsyncIndexPorDefecto: 0
   dropdownVSync: {fileID: 646436770}
   mostrarLogs: 0
