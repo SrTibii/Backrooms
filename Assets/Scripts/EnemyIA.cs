@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class EnemyIA : MonoBehaviour
 {
@@ -653,9 +654,7 @@ public class EnemyIA : MonoBehaviour
 
         Debug.Log($"?? Reiniciando escena después de {jumpscareDuration} segundos...");
 
-        UnityEngine.SceneManagement.SceneManager.LoadScene(
-            UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex
-        );
+        SceneManager.LoadScene("EndVHS");
     }
 
     // ============================================

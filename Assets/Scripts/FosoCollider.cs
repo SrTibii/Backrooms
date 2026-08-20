@@ -99,8 +99,7 @@ public class FosoCollider : MonoBehaviour
 
     private void ReiniciarEscena()
     {
-        Debug.Log("?? Reiniciando escena...");
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        SceneManager.LoadScene("EndVHS");
     }
 
     public void ReiniciarManual()
