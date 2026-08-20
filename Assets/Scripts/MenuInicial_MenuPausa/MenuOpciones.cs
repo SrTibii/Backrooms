@@ -13,6 +13,7 @@ public class MenuOpciones : MonoBehaviour
     public Toggle toggleFPS;
     public Toggle toggleSombras;
     public Toggle togglePantallaCompleta;
+    public Toggle toggleMotionBlur; // ?? NUEVO
 
     [Header("Dropdowns")]
     public TMP_Dropdown dropdownVSync;
@@ -29,6 +30,7 @@ public class MenuOpciones : MonoBehaviour
     public ControlSombras controlSombras;
     public ControlFOV controlFOV;
     public ControlPantalla controlPantalla;
+    public ControlMotionBlur controlMotionBlur; // ?? NUEVO
 
     private const string SENSIBILIDAD_KEY = "SensibilidadRaton";
 
@@ -66,6 +68,11 @@ public class MenuOpciones : MonoBehaviour
         if (controlPantalla == null)
         {
             controlPantalla = FindObjectOfType<ControlPantalla>();
+        }
+
+        if (controlMotionBlur == null)
+        {
+            controlMotionBlur = FindObjectOfType<ControlMotionBlur>();
         }
 
         // ============================================
@@ -141,16 +148,24 @@ public class MenuOpciones : MonoBehaviour
         }
 
         // ============================================
+        // CONFIGURAR TOGGLE DE MOTION BLUR
+        // ============================================
+
+        if (toggleMotionBlur != null && controlMotionBlur != null)
+        {
+            bool motionBlurActivo = PlayerPrefs.GetInt("MotionBlur", 1) == 1;
+            toggleMotionBlur.isOn = motionBlurActivo;
+            toggleMotionBlur.onValueChanged.AddListener(OnMotionBlurChanged);
+            controlMotionBlur.SetMotionBlur(motionBlurActivo);
+        }
+
+        // ============================================
         // CONFIGURAR DROPDOWN DE VSYNC
         // ============================================
 
         if (dropdownVSync != null && controlPantalla != null)
         {
-            // Asignar el dropdown al ControlPantalla
             controlPantalla.dropdownVSync = dropdownVSync;
-
-            // El dropdown se configura automáticamente en ControlPantalla
-            // Solo aseguramos que el valor guardado se aplique
             int vsyncIndex = PlayerPrefs.GetInt("VSyncIndex", 0);
             dropdownVSync.value = vsyncIndex;
         }
@@ -239,11 +254,16 @@ public class MenuOpciones : MonoBehaviour
     }
 
     // ============================================
-    // MÉTODO PARA VSYNC (Dropdown)
+    // MÉTODO PARA MOTION BLUR
     // ============================================
 
-    // Este método se llama automáticamente desde el Dropdown
-    // El ControlPantalla ya tiene su propio listener
+    public void OnMotionBlurChanged(bool value)
+    {
+        if (controlMotionBlur != null)
+        {
+            controlMotionBlur.SetMotionBlur(value);
+        }
+    }
 
     // ============================================
     // RESTAURAR VALORES POR DEFECTO
@@ -292,10 +312,17 @@ public class MenuOpciones : MonoBehaviour
             controlPantalla.SetPantallaCompleta(true);
         }
 
+        // Restaurar Motion Blur
+        if (toggleMotionBlur != null && controlMotionBlur != null)
+        {
+            toggleMotionBlur.isOn = true;
+            controlMotionBlur.SetMotionBlur(true);
+        }
+
         // Restaurar VSync
         if (dropdownVSync != null && controlPantalla != null)
         {
-            dropdownVSync.value = 0; // VSync OFF por defecto
+            dropdownVSync.value = 0;
             controlPantalla.RestaurarPorDefecto();
         }
 
