@@ -6,6 +6,7 @@ public class MenuOpciones : MonoBehaviour
     [Header("Sliders")]
     public Slider sliderSensibilidad;
     public Slider sliderBrillo;
+    public Slider sliderFOV;
 
     [Header("Toggles")]
     public Toggle toggleFPS;
@@ -14,12 +15,14 @@ public class MenuOpciones : MonoBehaviour
     [Header("Valores por Defecto")]
     public float sensibilidadPorDefecto = 0.5f;
     public float brilloPorDefecto = 0f;
+    public float fovPorDefecto = 0.5f;
 
     [Header("Referencias")]
     public FirstPersonController playerController;
     public ControlBrillo controlBrillo;
     public MostrarFPS mostrarFPS;
     public ControlSombras controlSombras;
+    public ControlFOV controlFOV;
 
     private const string SENSIBILIDAD_KEY = "SensibilidadRaton";
 
@@ -45,6 +48,11 @@ public class MenuOpciones : MonoBehaviour
             controlSombras = FindObjectOfType<ControlSombras>();
         }
 
+        if (controlFOV == null)
+        {
+            controlFOV = FindObjectOfType<ControlFOV>();
+        }
+
         // ============================================
         // CONFIGURAR SLIDER DE SENSIBILIDAD
         // ============================================
@@ -65,6 +73,17 @@ public class MenuOpciones : MonoBehaviour
             sliderBrillo.value = brilloGuardado;
             sliderBrillo.onValueChanged.AddListener(OnBrilloChanged);
             controlBrillo.SetBrillo(brilloGuardado);
+        }
+
+        // ============================================
+        // CONFIGURAR SLIDER DE FOV
+        // ============================================
+        if (sliderFOV != null && controlFOV != null)
+        {
+            float fovGuardado = PlayerPrefs.GetFloat("PaniniDistance", fovPorDefecto);
+            sliderFOV.value = fovGuardado;
+            sliderFOV.onValueChanged.AddListener(OnFOVChanged);
+            controlFOV.SetFOV(fovGuardado);
         }
 
         // ============================================
@@ -123,6 +142,18 @@ public class MenuOpciones : MonoBehaviour
     }
 
     // ============================================
+    // MÉTODO PARA FOV
+    // ============================================
+
+    public void OnFOVChanged(float value)
+    {
+        if (controlFOV != null)
+        {
+            controlFOV.SetFOV(value);
+        }
+    }
+
+    // ============================================
     // MÉTODO PARA FPS
     // ============================================
 
@@ -161,6 +192,12 @@ public class MenuOpciones : MonoBehaviour
         {
             sliderBrillo.value = brilloPorDefecto;
             controlBrillo.SetBrillo(brilloPorDefecto);
+        }
+
+        if (sliderFOV != null && controlFOV != null)
+        {
+            sliderFOV.value = fovPorDefecto;
+            controlFOV.SetFOV(fovPorDefecto);
         }
 
         if (toggleFPS != null && mostrarFPS != null)
