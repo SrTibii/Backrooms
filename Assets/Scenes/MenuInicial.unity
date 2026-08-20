@@ -108197,6 +108197,64 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
+--- !u!1 &1238663524
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1238663526}
+  - component: {fileID: 1238663525}
+  m_Layer: 0
+  m_Name: VHSTextEffectManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1238663525
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1238663524}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdd8f65ccb58a8e4892f58bcadef6e0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TextFlicker
+  texts:
+  - {fileID: 87818530}
+  - {fileID: 1896401009}
+  - {fileID: 453573574}
+  minAlpha: 1
+  maxAlpha: 1
+  flickerSpeed: 5
+  glitchChance: 0.0001
+  staticChance: 0.1
+  randomOffset: 1
+  chromaticDisplacement: 4
+  chromaticSpeed: 2
+  enableChromatic: 0
+  rgbIntensity: 1.2
+--- !u!4 &1238663526
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1238663524}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 93.8516, y: -0.00002, z: 40852.39}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1247866590
 GameObject:
   m_ObjectHideFlags: 0
@@ -188611,6 +188669,7 @@ SceneRoots:
   m_Roots:
   - {fileID: 258618616725351469}
   - {fileID: 100326860}
+  - {fileID: 1238663526}
   - {fileID: 4914115800531380055}
   - {fileID: 1570190008}
   - {fileID: 552398838}

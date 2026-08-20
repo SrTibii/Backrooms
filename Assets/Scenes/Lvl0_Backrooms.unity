@@ -223171,8 +223171,8 @@ MonoBehaviour:
   randomOffset: 1
   chromaticDisplacement: 4
   chromaticSpeed: 2
-  enableChromatic: 0
-  rgbIntensity: 1.2
+  enableChromatic: 1
+  rgbIntensity: 2
 --- !u!4 &1972117394
 Transform:
   m_ObjectHideFlags: 0
