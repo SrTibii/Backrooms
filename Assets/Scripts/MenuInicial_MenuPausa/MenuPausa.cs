@@ -168,6 +168,18 @@ public class MenuPausa : MonoBehaviour
         // ============================================
         DesactivarAudioSources();
 
+        // ============================================
+        // OCULTAR INDICADORES DEL MENÚ DE PAUSA
+        // ============================================
+        BotonConIndicadorPausa[] indicadores = FindObjectsOfType<BotonConIndicadorPausa>(true);
+        foreach (var indicador in indicadores)
+        {
+            if (indicador != null)
+            {
+                indicador.MostrarInstantaneo(false);
+            }
+        }
+
         // Desbloquear cursor para el menú
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
