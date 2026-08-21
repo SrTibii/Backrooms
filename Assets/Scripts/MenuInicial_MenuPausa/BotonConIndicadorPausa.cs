@@ -5,19 +5,12 @@ using UnityEngine.EventSystems;
 public class BotonConIndicadorPausa : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("Referencias")]
-    public RawImage indicador; // El cuadrado blanco que aparece a la izquierda
+    public RawImage indicador;
 
     [Header("Configuración")]
-    [Tooltip("Offset desde el botón hacia la izquierda")]
     public float offsetX = -40f;
-
-    [Tooltip("Offset vertical (0 = centrado)")]
     public float offsetY = 0f;
-
-    [Tooltip("Tamaño del cuadrado")]
     public float tamañoIndicador = 20f;
-
-    [Tooltip("Velocidad de aparición/desaparición (0 = instantáneo)")]
     public float velocidadAnimacion = 0.1f;
 
     private RectTransform rectTransform;
@@ -35,7 +28,6 @@ public class BotonConIndicadorPausa : MonoBehaviour, IPointerEnterHandler, IPoin
 
     void OnEnable()
     {
-        // Cuando el menú de pausa se activa, reposicionar el indicador
         if (isInitialized)
         {
             ReposicionarIndicador();
@@ -50,7 +42,6 @@ public class BotonConIndicadorPausa : MonoBehaviour, IPointerEnterHandler, IPoin
             return;
         }
 
-        // Obtener referencias
         rectTransform = indicador.GetComponent<RectTransform>();
         botonRect = GetComponent<RectTransform>();
         canvas = GetComponentInParent<Canvas>();
@@ -61,29 +52,23 @@ public class BotonConIndicadorPausa : MonoBehaviour, IPointerEnterHandler, IPoin
             return;
         }
 
-        // Configurar el indicador
         indicador.gameObject.SetActive(true);
         indicador.raycastTarget = false;
 
-        // Hacer que el indicador sea hijo del mismo padre que el botón
         rectTransform.SetParent(botonRect.parent, false);
 
-        // Configurar el color inicial (invisible)
         colorActual = indicador.color;
         colorActual.a = 0f;
         indicador.color = colorActual;
         alphaActual = 0f;
         alphaTarget = 0f;
 
-        // Configurar tamaño
         rectTransform.sizeDelta = new Vector2(tamañoIndicador, tamañoIndicador);
 
-        // Anclas relativas al padre
         rectTransform.anchorMin = new Vector2(0f, 0.5f);
         rectTransform.anchorMax = new Vector2(0f, 0.5f);
         rectTransform.pivot = new Vector2(0.5f, 0.5f);
 
-        // Posicionar
         ReposicionarIndicador();
 
         isInitialized = true;
@@ -93,7 +78,6 @@ public class BotonConIndicadorPausa : MonoBehaviour, IPointerEnterHandler, IPoin
     {
         if (!isInitialized || indicador == null) return;
 
-        // Animación de alpha (fade)
         if (Mathf.Abs(alphaActual - alphaTarget) > 0.01f)
         {
             alphaActual = Mathf.Lerp(alphaActual, alphaTarget, Time.unscaledDeltaTime * (1f / Mathf.Max(velocidadAnimacion, 0.01f)));
@@ -115,12 +99,8 @@ public class BotonConIndicadorPausa : MonoBehaviour, IPointerEnterHandler, IPoin
     {
         if (rectTransform == null || botonRect == null) return;
 
-        // Obtener la posición del botón en el Canvas
         Vector2 botonPos = botonRect.anchoredPosition;
-
-        // Calcular posición del indicador
         Vector2 pos = new Vector2(botonPos.x + offsetX, botonPos.y + offsetY);
-
         rectTransform.anchoredPosition = pos;
     }
 
@@ -157,5 +137,21 @@ public class BotonConIndicadorPausa : MonoBehaviour, IPointerEnterHandler, IPoin
         Color c = indicador.color;
         c.a = alphaActual;
         indicador.color = c;
+    }
+
+    // ============================================
+    // NUEVO: OCULTAR TODOS LOS INDICADORES
+    // ============================================
+
+    public static void OcultarTodosLosIndicadores()
+    {
+        BotonConIndicadorPausa[] todosLosIndicadores = FindObjectsOfType<BotonConIndicadorPausa>(true);
+        foreach (var indicador in todosLosIndicadores)
+        {
+            if (indicador != null)
+            {
+                indicador.MostrarInstantaneo(false);
+            }
+        }
     }
 }

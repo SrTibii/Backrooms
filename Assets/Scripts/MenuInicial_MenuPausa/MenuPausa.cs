@@ -9,6 +9,7 @@ public class MenuPausa : MonoBehaviour
     [Header("Referencias UI")]
     public GameObject uiIngame;
     public GameObject uiPausa;
+    public GameObject uiOpciones; // ? NUEVO: referencia al panel de opciones
 
     [Header("Input Actions")]
     public InputActionReference pauseAction;
@@ -28,46 +29,31 @@ public class MenuPausa : MonoBehaviour
     private AudioSource audioSource;
     private bool isPaused = false;
 
-    // ============================================
-    // REFERENCIAS PARA CONGELAR LA CÁMARA
-    // ============================================
     private FirstPersonController playerController;
     private VHSCameraEffects vhsEffects;
-
-    // ============================================
-    // REFERENCIA AL ENEMIGO PARA SABER SI HAY JUMPSCARE
-    // ============================================
     private EnemyIA enemyIA;
-
-    // ============================================
-    // REFERENCIA A LA TAQUILLA
-    // ============================================
     private LockerHideSystem lockerSystem;
 
     void Start()
     {
-        // Buscar referencias
         playerController = FindObjectOfType<FirstPersonController>();
         vhsEffects = FindObjectOfType<VHSCameraEffects>();
         enemyIA = FindObjectOfType<EnemyIA>();
         lockerSystem = FindObjectOfType<LockerHideSystem>();
 
-        // Crear AudioSource
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.loop = false;
         audioSource.playOnAwake = false;
         audioSource.spatialBlend = 0f;
         audioSource.volume = volumenSonidos;
 
-        // Asegurar UI correcta
         if (uiIngame != null) uiIngame.SetActive(true);
         if (uiPausa != null) uiPausa.SetActive(false);
+        if (uiOpciones != null) uiOpciones.SetActive(false);
 
-        // Asegurar que el juego no está pausado al inicio
         Time.timeScale = 1f;
         isPaused = false;
 
-        // Asegurar cursor bloqueado
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         Debug.Log("?? Cursor bloqueado al inicio");
@@ -95,18 +81,12 @@ public class MenuPausa : MonoBehaviour
 
     private void OnPausePerformed(InputAction.CallbackContext context)
     {
-        // ============================================
-        // NO PAUSAR SI HAY JUMPSCARE
-        // ============================================
         if (enemyIA != null && enemyIA.EstaEnJumpscare())
         {
             Debug.Log("?? No se puede pausar durante un jumpscare");
             return;
         }
 
-        // ============================================
-        // NO PAUSAR SI ESTÁS DENTRO DE LA TAQUILLA (USANDO FLAG GLOBAL)
-        // ============================================
         if (LockerHideSystem.IsPlayerHidingGlobal)
         {
             Debug.Log("?? No se puede pausar mientras estás escondido en la taquilla (Flag Global)");
@@ -127,14 +107,8 @@ public class MenuPausa : MonoBehaviour
     {
         if (isPaused) return;
 
-        // ============================================
-        // NO PAUSAR SI HAY JUMPSCARE
-        // ============================================
         if (enemyIA != null && enemyIA.EstaEnJumpscare()) return;
 
-        // ============================================
-        // NO PAUSAR SI ESTÁS DENTRO DE LA TAQUILLA (USANDO FLAG GLOBAL)
-        // ============================================
         if (LockerHideSystem.IsPlayerHidingGlobal)
         {
             Debug.Log("?? No se puede pausar mientras estás escondido en la taquilla (Flag Global)");
@@ -143,47 +117,31 @@ public class MenuPausa : MonoBehaviour
 
         isPaused = true;
 
-        // Ocultar UI del juego, mostrar pausa
         if (uiIngame != null) uiIngame.SetActive(false);
         if (uiPausa != null) uiPausa.SetActive(true);
+        if (uiOpciones != null) uiOpciones.SetActive(false);
 
-        // Congelar el juego
+        // ============================================
+        // OCULTAR INDICADORES AL ABRIR PAUSA
+        // ============================================
+        BotonConIndicadorPausa.OcultarTodosLosIndicadores();
+
         Time.timeScale = 0f;
 
-        // Desactivar scripts de movimiento y cámara
         if (playerController != null)
         {
             playerController.enabled = false;
-            Debug.Log("?? FirstPersonController desactivado");
         }
 
         if (vhsEffects != null)
         {
             vhsEffects.enabled = false;
-            Debug.Log("?? VHSCameraEffects desactivado");
         }
 
-        // ============================================
-        // DESACTIVAR TODOS LOS AUDIOSOURCES DEL JUEGO
-        // ============================================
         DesactivarAudioSources();
 
-        // ============================================
-        // OCULTAR INDICADORES DEL MENÚ DE PAUSA
-        // ============================================
-        BotonConIndicadorPausa[] indicadores = FindObjectsOfType<BotonConIndicadorPausa>(true);
-        foreach (var indicador in indicadores)
-        {
-            if (indicador != null)
-            {
-                indicador.MostrarInstantaneo(false);
-            }
-        }
-
-        // Desbloquear cursor para el menú
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
-        Debug.Log("?? Cursor desbloqueado para pausa");
 
         Debug.Log("?? Juego PAUSADO - Todo congelado");
     }
@@ -194,97 +152,68 @@ public class MenuPausa : MonoBehaviour
 
         isPaused = false;
 
-        // Mostrar UI del juego, ocultar pausa
         if (uiIngame != null)
         {
             uiIngame.SetActive(true);
-            // Forzar activación del crosshair
             Transform crosshair = uiIngame.transform.Find("Crosshair");
             if (crosshair != null) crosshair.gameObject.SetActive(true);
         }
         if (uiPausa != null) uiPausa.SetActive(false);
+        if (uiOpciones != null) uiOpciones.SetActive(false);
 
-        // Reanudar el juego
+        // ============================================
+        // OCULTAR INDICADORES AL REANUDAR
+        // ============================================
+        BotonConIndicadorPausa.OcultarTodosLosIndicadores();
+
         Time.timeScale = 1f;
 
-        // Reactivar scripts de movimiento y cámara
         if (playerController != null)
         {
             playerController.enabled = true;
-            Debug.Log("?? FirstPersonController reactivado");
         }
 
         if (vhsEffects != null)
         {
             vhsEffects.enabled = true;
-            Debug.Log("?? VHSCameraEffects reactivado");
         }
 
-        // ============================================
-        // REACTIVAR TODOS LOS AUDIOSOURCES DEL JUEGO
-        // ============================================
         ReactivarAudioSources();
 
-        // Bloquear cursor
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        Debug.Log("?? Cursor bloqueado al reanudar");
 
         Debug.Log("?? Juego REANUDADO - Todo descongelado");
     }
 
     // ============================================
-    // MÉTODOS PARA CONTROLAR AUDIOSOURCES
+    // MÉTODOS PARA NAVEGAR ENTRE MENÚS
     // ============================================
 
-    private void DesactivarAudioSources()
+    public void AbrirOpciones()
     {
-        // Buscar TODOS los AudioSources
-        AudioSource[] allAudioSources = FindObjectsOfType<AudioSource>();
-        audioSourcesJuego.Clear();
-        estadosAudioSources.Clear();
-        estadosLoop.Clear();
+        ReproducirSonido(sonidoClick);
 
-        foreach (var src in allAudioSources)
-        {
-            // Excluir el AudioSource del menú de pausa
-            if (src != audioSource)
-            {
-                audioSourcesJuego.Add(src);
-                estadosAudioSources.Add(src.isPlaying);
-                estadosLoop.Add(src.loop);
+        // ============================================
+        // OCULTAR INDICADORES AL ABRIR OPCIONES
+        // ============================================
+        BotonConIndicadorPausa.OcultarTodosLosIndicadores();
 
-                // DESACTIVAR el AudioSource completamente
-                if (src.isPlaying)
-                {
-                    src.Stop(); // Para detener bucles
-                }
-                src.enabled = false;
-            }
-        }
-
-        Debug.Log($"?? {audioSourcesJuego.Count} AudioSources desactivados");
+        if (uiPausa != null) uiPausa.SetActive(false);
+        if (uiOpciones != null) uiOpciones.SetActive(true);
     }
 
-    private void ReactivarAudioSources()
+    public void CerrarOpciones()
     {
-        for (int i = 0; i < audioSourcesJuego.Count; i++)
-        {
-            if (audioSourcesJuego[i] != null)
-            {
-                // Reactivar el AudioSource
-                audioSourcesJuego[i].enabled = true;
-                audioSourcesJuego[i].loop = estadosLoop[i];
+        ReproducirSonido(sonidoClick);
 
-                // Reanudar solo si estaba sonando antes
-                if (estadosAudioSources[i])
-                {
-                    audioSourcesJuego[i].Play();
-                }
-            }
-        }
+        // ============================================
+        // OCULTAR INDICADORES AL CERRAR OPCIONES
+        // ============================================
+        BotonConIndicadorPausa.OcultarTodosLosIndicadores();
 
-        Debug.Log($"?? {audioSourcesJuego.Count} AudioSources reactivados");
+        if (uiOpciones != null) uiOpciones.SetActive(false);
+        if (uiPausa != null) uiPausa.SetActive(true);
     }
 
     // ============================================
@@ -313,16 +242,64 @@ public class MenuPausa : MonoBehaviour
         if (playerController != null) playerController.enabled = true;
         if (vhsEffects != null) vhsEffects.enabled = true;
 
+        // ============================================
+        // OCULTAR INDICADORES AL SALIR
+        // ============================================
+        BotonConIndicadorPausa.OcultarTodosLosIndicadores();
+
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
         SceneManager.LoadScene("MenuInicial");
     }
 
-    public void BotonOpciones()
+    // ============================================
+    // MÉTODOS PARA CONTROLAR AUDIOSOURCES
+    // ============================================
+
+    private void DesactivarAudioSources()
     {
-        ReproducirSonido(sonidoClick);
-        Debug.Log("?? Abrir menú de opciones (pendiente de implementar)");
+        AudioSource[] allAudioSources = FindObjectsOfType<AudioSource>();
+        audioSourcesJuego.Clear();
+        estadosAudioSources.Clear();
+        estadosLoop.Clear();
+
+        foreach (var src in allAudioSources)
+        {
+            if (src != audioSource)
+            {
+                audioSourcesJuego.Add(src);
+                estadosAudioSources.Add(src.isPlaying);
+                estadosLoop.Add(src.loop);
+
+                if (src.isPlaying)
+                {
+                    src.Stop();
+                }
+                src.enabled = false;
+            }
+        }
+
+        Debug.Log($"?? {audioSourcesJuego.Count} AudioSources desactivados");
+    }
+
+    private void ReactivarAudioSources()
+    {
+        for (int i = 0; i < audioSourcesJuego.Count; i++)
+        {
+            if (audioSourcesJuego[i] != null)
+            {
+                audioSourcesJuego[i].enabled = true;
+                audioSourcesJuego[i].loop = estadosLoop[i];
+
+                if (estadosAudioSources[i])
+                {
+                    audioSourcesJuego[i].Play();
+                }
+            }
+        }
+
+        Debug.Log($"?? {audioSourcesJuego.Count} AudioSources reactivados");
     }
 
     // ============================================
@@ -337,10 +314,6 @@ public class MenuPausa : MonoBehaviour
         }
     }
 
-    // ============================================
-    // MÉTODO PARA REPRODUCIR SONIDOS
-    // ============================================
-
     private void ReproducirSonido(AudioClip clip)
     {
         if (audioSource != null && clip != null)
@@ -349,18 +322,10 @@ public class MenuPausa : MonoBehaviour
         }
     }
 
-    // ============================================
-    // MÉTODO PARA SABER SI ESTÁ PAUSADO
-    // ============================================
-
     public bool EstaPausado()
     {
         return isPaused;
     }
-
-    // ============================================
-    // LIMPIEZA AL DESTRUIR
-    // ============================================
 
     private void OnDestroy()
     {
