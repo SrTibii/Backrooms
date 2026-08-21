@@ -166,7 +166,7 @@ VideoPlayer:
   m_EnabledAudioTracks: 01
   m_DirectAudioMutes: 00
   m_ControlledAudioTrackCount: 1
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_SkipOnDrop: 1
   m_Looping: 0
   m_WaitForFirstFrame: 1
@@ -685,6 +685,8 @@ MonoBehaviour:
   esperarVideoPlayer: 1
   skipAction: {fileID: -739459715974736530, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
   videoPlayer: {fileID: 72062205}
+  renderTexture: {fileID: 0}
+  rawImageObject: {fileID: 0}
   mostrarLogs: 0
 --- !u!4 &1915710564
 Transform:

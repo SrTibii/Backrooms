@@ -17,17 +17,21 @@ public class VHSIntroScene : MonoBehaviour
     public bool esperarVideoPlayer = true;
 
     [Header("Input Actions")]
-    public InputActionReference skipAction; // Asignar "UI/Submit" o crear una nueva
+    public InputActionReference skipAction;
 
     [Header("Referencias")]
     public VideoPlayer videoPlayer;
+    public RenderTexture renderTexture; // Arrastra el Render Texture aquí
+
+    [Header("UI")]
+    public GameObject rawImageObject; // La RawImage que muestra el video
 
     [Header("Debug")]
     public bool mostrarLogs = true;
 
     private bool introTerminada = false;
     private bool videoTerminado = false;
-    private bool puedeSaltar = false; // Para evitar saltar antes de que empiece el video
+    private bool puedeSaltar = false;
 
     void Start()
     {
@@ -45,6 +49,12 @@ public class VHSIntroScene : MonoBehaviour
             {
                 videoPlayer = FindObjectOfType<VideoPlayer>();
             }
+        }
+
+        // Buscar Render Texture si no está asignado
+        if (renderTexture == null && videoPlayer != null)
+        {
+            renderTexture = videoPlayer.targetTexture as RenderTexture;
         }
 
         // Configurar eventos del VideoPlayer
@@ -93,13 +103,8 @@ public class VHSIntroScene : MonoBehaviour
         }
     }
 
-    // ============================================
-    // CORRUTINA PRINCIPAL
-    // ============================================
-
     IEnumerator IntroRutina()
     {
-        // Reproducir el video si existe
         if (videoPlayer != null)
         {
             videoPlayer.Play();
@@ -108,13 +113,11 @@ public class VHSIntroScene : MonoBehaviour
                 Debug.Log("?? Reproduciendo video...");
             }
 
-            // Permitir saltar después de un pequeño delay (para evitar saltos accidentales)
             yield return new WaitForSeconds(0.3f);
             puedeSaltar = true;
 
             if (esperarVideoPlayer)
             {
-                // Esperar a que el video termine
                 while (!videoTerminado)
                 {
                     yield return null;
@@ -122,40 +125,30 @@ public class VHSIntroScene : MonoBehaviour
             }
             else
             {
-                // Esperar un pequeño delay antes de continuar
                 yield return new WaitForSeconds(0.5f);
             }
         }
 
-        // Esperar el tiempo restante (si el video fue más corto)
         if (esperarVideoPlayer && videoPlayer != null && videoPlayer.isPlaying)
         {
-            // Si el video sigue sonando, esperamos a que termine
             while (videoPlayer.isPlaying)
             {
                 yield return null;
             }
         }
 
-        // Esperar el tiempo total de la intro (por si el video es más corto)
         float tiempoInicio = Time.time;
         while (Time.time - tiempoInicio < duracionIntro)
         {
-            // Si la intro ya fue marcada como terminada, salir
             if (introTerminada) break;
             yield return null;
         }
 
-        // Si no se ha terminado antes, forzar el fin
         if (!introTerminada)
         {
             TerminarIntro();
         }
     }
-
-    // ============================================
-    // EVENTOS DEL VIDEOPLAYER
-    // ============================================
 
     private void OnVideoFinished(VideoPlayer vp)
     {
@@ -165,7 +158,6 @@ public class VHSIntroScene : MonoBehaviour
             Debug.Log("?? Video finalizado.");
         }
 
-        // Si no estamos esperando el tiempo total, terminar la intro
         if (duracionIntro <= 0f)
         {
             TerminarIntro();
@@ -175,12 +167,11 @@ public class VHSIntroScene : MonoBehaviour
     private void OnVideoError(VideoPlayer vp, string message)
     {
         Debug.LogError($"?? Error en VideoPlayer: {message}");
-        // Si hay error, terminar la intro igualmente
         TerminarIntro();
     }
 
     // ============================================
-    // MÉTODO PARA TERMINAR LA INTRO
+    // MÉTODO PARA TERMINAR LA INTRO (CON LIMPIEZA)
     // ============================================
 
     public void TerminarIntro()
@@ -196,18 +187,62 @@ public class VHSIntroScene : MonoBehaviour
         }
 
         // ============================================
-        // RESTAURAR CURSOR (opcional, se bloqueará en el juego)
+        // LIMPIAR VIDEOPLAYER, RENDER TEXTURE Y UI
         // ============================================
+        LimpiarTodo();
+
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        // Cargar la escena del juego
         SceneManager.LoadScene(nombreEscenaJuego);
     }
 
     // ============================================
-    // MÉTODO PARA SALTAR LA INTRO
+    // MÉTODO PARA LIMPIAR TODO
     // ============================================
+
+    private void LimpiarTodo()
+    {
+        // 1. Limpiar el Render Texture
+        if (renderTexture != null)
+        {
+            renderTexture.Release(); // Liberar memoria
+            if (mostrarLogs)
+            {
+                Debug.Log("?? Render Texture liberado");
+            }
+        }
+
+        // 2. Ocultar la RawImage
+        if (rawImageObject != null)
+        {
+            rawImageObject.SetActive(false);
+            if (mostrarLogs)
+            {
+                Debug.Log("?? RawImage ocultada");
+            }
+        }
+
+        // 3. Limpiar el VideoPlayer
+        if (videoPlayer != null)
+        {
+            if (videoPlayer.isPlaying)
+            {
+                videoPlayer.Stop();
+            }
+
+            // Limpiar la textura objetivo
+            videoPlayer.targetTexture = null;
+
+            videoPlayer.gameObject.SetActive(false);
+            Destroy(videoPlayer);
+
+            if (mostrarLogs)
+            {
+                Debug.Log("?? VideoPlayer limpiado");
+            }
+        }
+    }
 
     public void SaltarIntro()
     {
@@ -218,7 +253,6 @@ public class VHSIntroScene : MonoBehaviour
             Debug.Log("?? Intro saltada por el jugador");
         }
 
-        // Detener el video si está reproduciendo
         if (videoPlayer != null && videoPlayer.isPlaying)
         {
             videoPlayer.Stop();
@@ -226,10 +260,6 @@ public class VHSIntroScene : MonoBehaviour
 
         TerminarIntro();
     }
-
-    // ============================================
-    // MÉTODO PARA CAMBIAR LA ESCENA DESTINO (OPCIONAL)
-    // ============================================
 
     public void SetEscenaDestino(string nombreEscena)
     {
@@ -241,16 +271,18 @@ public class VHSIntroScene : MonoBehaviour
         duracionIntro = duracion;
     }
 
-    // ============================================
-    // LIMPIEZA
-    // ============================================
-
     void OnDestroy()
     {
         if (videoPlayer != null)
         {
             videoPlayer.loopPointReached -= OnVideoFinished;
             videoPlayer.errorReceived -= OnVideoError;
+        }
+
+        // Liberar Render Texture al destruir
+        if (renderTexture != null)
+        {
+            renderTexture.Release();
         }
     }
 }

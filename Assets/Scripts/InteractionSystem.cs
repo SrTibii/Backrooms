@@ -9,16 +9,21 @@ public class InteractionSystem : MonoBehaviour
 
     [Header("Crosshair")]
     public RectTransform crosshair;
-    public float normalSize = 50f;  // Tamaño más grande 
-    public float expandedSize = 70f; // Tamaño expandido
+    public float normalSize = 50f;
+    public float expandedSize = 70f;
     public float sizeTransitionSpeed = 8f;
 
     [Header("Feedback Visual")]
     public Color normalColor = Color.white;
     public Color highlightColor = Color.green;
 
+    // ============================================
+    // REFERENCIA A LA CÁMARA DE JUEGO
+    // ============================================
+    [Header("Cámara de Juego")]
+    public Camera gameCamera; // Arrastra la cámara que renderiza la escena
+
     // Variables internas
-    private Camera playerCamera;
     private float currentSize;
     private Color currentColor;
     private bool isLookingAtObject = false;
@@ -26,10 +31,35 @@ public class InteractionSystem : MonoBehaviour
 
     void Start()
     {
-        playerCamera = Camera.main;
-        if (playerCamera == null)
+        // Buscar la cámara de juego si no está asignada
+        if (gameCamera == null)
         {
-            Debug.LogError("InteractionSystem: No se encontró una cámara con tag 'MainCamera'");
+            // Buscar la cámara que NO es la de UI (layer 5 = UI)
+            Camera[] allCameras = FindObjectsOfType<Camera>();
+            foreach (Camera cam in allCameras)
+            {
+                if (cam.gameObject.layer != 5 && cam.gameObject.tag == "MainCamera")
+                {
+                    gameCamera = cam;
+                    break;
+                }
+            }
+
+            // Si no se encontró, usar Camera.main
+            if (gameCamera == null)
+            {
+                gameCamera = Camera.main;
+                Debug.LogWarning("InteractionSystem: Usando Camera.main como fallback");
+            }
+        }
+
+        if (gameCamera == null)
+        {
+            Debug.LogError("InteractionSystem: No se encontró una cámara de juego");
+        }
+        else
+        {
+            Debug.Log($"?? InteractionSystem: Cámara de juego asignada - {gameCamera.name}");
         }
 
         if (crosshair != null)
@@ -40,15 +70,11 @@ public class InteractionSystem : MonoBehaviour
                 Debug.Log("?? Crosshair forzado a activo en Start()");
             }
 
-            // ============================================
-            // ?? FIJAR ANCLAS EN CENTRO PARA EVITAR DEFORMACIÓN
-            // ============================================
             crosshair.anchorMin = new Vector2(0.5f, 0.5f);
             crosshair.anchorMax = new Vector2(0.5f, 0.5f);
             crosshair.pivot = new Vector2(0.5f, 0.5f);
 
             currentSize = normalSize;
-            // Usar SetSizeWithCurrentAnchors en lugar de sizeDelta
             crosshair.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, currentSize);
             crosshair.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, currentSize);
 
@@ -91,14 +117,25 @@ public class InteractionSystem : MonoBehaviour
         UpdateCrosshair();
     }
 
+    // ============================================
+    // RAYCAST - Usando la cámara de juego
+    // ============================================
+
     void PerformRaycast()
     {
-        if (playerCamera == null) return;
+        if (gameCamera == null) return;
 
-        Ray ray = playerCamera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
-        RaycastHit hit;
+        // ============================================
+        // USAR EL CENTRO DE LA CÁMARA DE JUEGO
+        // ViewportPointToRay(0.5, 0.5) = centro exacto de la cámara
+        // Esto funciona tanto con pantalla normal como con Render Texture
+        // ============================================
+        Vector3 centerPoint = new Vector3(0.5f, 0.5f, 0f);
+        Ray ray = gameCamera.ViewportPointToRay(centerPoint);
 
         Debug.DrawRay(ray.origin, ray.direction * interactionRange, Color.yellow);
+
+        RaycastHit hit;
 
         if (Physics.Raycast(ray, out hit, interactionRange))
         {
@@ -141,9 +178,6 @@ public class InteractionSystem : MonoBehaviour
         float targetSize = isLookingAtObject ? expandedSize : normalSize;
         currentSize = Mathf.Lerp(currentSize, targetSize, Time.deltaTime * sizeTransitionSpeed);
 
-        // ============================================
-        // ?? USAR SetSizeWithCurrentAnchors EN VEZ DE sizeDelta
-        // ============================================
         crosshair.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, currentSize);
         crosshair.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, currentSize);
 
@@ -154,6 +188,10 @@ public class InteractionSystem : MonoBehaviour
         }
     }
 
+    // ============================================
+    // MÉTODOS PÚBLICOS
+    // ============================================
+
     public bool IsLookingAtInteractable()
     {
         if (crosshair != null && !crosshair.gameObject.activeInHierarchy) return false;
@@ -162,10 +200,11 @@ public class InteractionSystem : MonoBehaviour
 
     public GameObject GetTargetObject()
     {
-        if (!isLookingAtObject || playerCamera == null) return null;
+        if (!isLookingAtObject || gameCamera == null) return null;
         if (crosshair != null && !crosshair.gameObject.activeInHierarchy) return null;
 
-        Ray ray = playerCamera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+        Vector3 centerPoint = new Vector3(0.5f, 0.5f, 0f);
+        Ray ray = gameCamera.ViewportPointToRay(centerPoint);
         RaycastHit hit;
 
         if (Physics.Raycast(ray, out hit, interactionRange))
@@ -184,10 +223,11 @@ public class InteractionSystem : MonoBehaviour
 
     public float GetTargetDistance()
     {
-        if (!isLookingAtObject || playerCamera == null) return -1f;
+        if (!isLookingAtObject || gameCamera == null) return -1f;
         if (crosshair != null && !crosshair.gameObject.activeInHierarchy) return -1f;
 
-        Ray ray = playerCamera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+        Vector3 centerPoint = new Vector3(0.5f, 0.5f, 0f);
+        Ray ray = gameCamera.ViewportPointToRay(centerPoint);
         RaycastHit hit;
 
         if (Physics.Raycast(ray, out hit, interactionRange))
