@@ -48,6 +48,12 @@ public class MenuInicial : MonoBehaviour
         StartCoroutine(CargarConDelay("VHSPlay")); //Lvl0_Backrooms
     }
 
+    public void IrAlMenuInicial()
+    {
+        if (isLoading) return;
+        StartCoroutine(CargarConDelay("MenuInicial")); 
+    }
+
     public void Salir()
     {
         if (isLoading) return;

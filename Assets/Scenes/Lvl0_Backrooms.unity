@@ -155674,7 +155674,7 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.1
   m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: 9c851c7ed52f4f44d827d9fbaf79026a, type: 2}
+  m_NavMeshData: {fileID: 23800000, guid: 17959ade412007344a12550b80287e6b, type: 2}
   m_BuildHeightMesh: 0
 --- !u!1 &1336042860
 GameObject:
@@ -172282,7 +172282,7 @@ MonoBehaviour:
   chaseFadeTime: 0.5
   jumpscareDistance: 4
   jumpscareSound: {fileID: 8300000, guid: 3a2dfb1f35bbe5745a2d136b0ac84b67, type: 3}
-  jumpscareVolume: 1
+  jumpscareVolume: 0.5
   jumpscareDuration: 3
   jumpscareCamera: {fileID: 1236680498}
   globalVolume: {fileID: 1570190007}

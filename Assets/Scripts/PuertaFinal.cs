@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class PuertaFinal : MonoBehaviour
 {
@@ -240,6 +241,7 @@ public class PuertaFinal : MonoBehaviour
                 audioSource.PlayOneShot(sonidoPuertaAbierta);
             }
 
+            SceneManager.LoadScene("EscenaWin"); // Cambia a la escena final del juego
             Debug.Log("?? ¡PUERTA FINAL ABIERTA! ¡HAS ESCAPADO!");
             Debug.Log("?? ¡HAS GANADO EL JUEGO!");
         }
