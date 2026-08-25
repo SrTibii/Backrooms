@@ -172270,10 +172270,13 @@ MonoBehaviour:
   chaseVolume: 0.3
   minPauseBetweenAmbient: 2
   maxPauseBetweenAmbient: 5
-  audioMinDistance: 30
-  audioMaxDistance: 50
+  audioMinDistance: 15
+  audioMaxDistance: 40
   rolloffMode: 0
   chaseFadeTime: 0.5
+  ambientAudioRange: 60
+  ambientAudioVerticalRange: 7.5
+  showAudioGizmo: 1
   jumpscareDistance: 4
   jumpscareSound: {fileID: 8300000, guid: 3a2dfb1f35bbe5745a2d136b0ac84b67, type: 3}
   jumpscareVolume: 0.5

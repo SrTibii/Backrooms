@@ -63,6 +63,19 @@ public class EnemyIA : MonoBehaviour
     public AudioRolloffMode rolloffMode = AudioRolloffMode.Logarithmic;
     public float chaseFadeTime = 0.5f;
 
+    // ============================================
+    // ZONA DE AUDIO AMBIENTE (CUBO)
+    // ============================================
+    [Header("Audio - Zona de Escucha (Cubo)")]
+    [Tooltip("Distancia horizontal desde el enemigo (mitad del cubo en X y Z)")]
+    public float ambientAudioRange = 15f;
+
+    [Tooltip("Distancia vertical desde el enemigo (mitad del cubo en Y)")]
+    public float ambientAudioVerticalRange = 8f;
+
+    [Tooltip("Si es true, muestra el gizmo de la zona de audio")]
+    public bool showAudioGizmo = true;
+
     [Header("Jumpscare")]
     public float jumpscareDistance = 2.5f;
     public AudioClip jumpscareSound;
@@ -143,7 +156,7 @@ public class EnemyIA : MonoBehaviour
     private bool playerHidden = false;
 
     // ============================================
-    // ?? CONTROL DE INVISIBILIDAD POR ZONA
+    // CONTROL DE INVISIBILIDAD POR ZONA
     // ============================================
     private bool isPlayerInvisible = false;
 
@@ -349,7 +362,7 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? MÉTODOS PARA CONTROL DE INVISIBILIDAD
+    // MÉTODOS PARA CONTROL DE INVISIBILIDAD
     // ============================================
     public void SetPlayerHidden(bool hidden)
     {
@@ -405,6 +418,15 @@ public class EnemyIA : MonoBehaviour
         if (isJumpscareActive) return;
         isJumpscareActive = true;
 
+        // ============================================
+        // DETENER AMBIENTE Y CHASE, PERO NO EL JUMPSCARE
+        // ============================================
+        if (ambientAudioSource.isPlaying) ambientAudioSource.Stop();
+        if (chaseAudioSource.isPlaying) chaseAudioSource.Stop();
+        isChasePlaying = false;
+        isAmbientPlaying = false;
+        isAmbientStopped = true;
+
         LeerNota leerNota = FindObjectOfType<LeerNota>();
         if (leerNota != null)
         {
@@ -425,11 +447,10 @@ public class EnemyIA : MonoBehaviour
         StopAgentImmediately();
 
         StopAllCoroutines();
-        if (ambientAudioSource.isPlaying) ambientAudioSource.Stop();
-        if (chaseAudioSource.isPlaying) chaseAudioSource.Stop();
-        isChasePlaying = false;
-        isAmbientPlaying = false;
 
+        // ============================================
+        // REPRODUCIR SONIDO DE JUMPSCARE
+        // ============================================
         if (jumpscareSound != null)
         {
             jumpscareAudioSource.volume = jumpscareVolume;
@@ -658,7 +679,7 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? DETECTAR JUGADOR - CON INVISIBILIDAD
+    // DETECTAR JUGADOR - CON INVISIBILIDAD
     // ============================================
     void DetectPlayer()
     {
@@ -759,7 +780,7 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? HAS LINE OF SIGHT - CON INVISIBILIDAD
+    // HAS LINE OF SIGHT - CON INVISIBILIDAD
     // ============================================
     bool HasLineOfSightToPlayer()
     {
@@ -895,7 +916,7 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? UPDATE RUNNING - CON INVISIBILIDAD
+    // UPDATE RUNNING - CON INVISIBILIDAD
     // ============================================
     void UpdateRunning()
     {
@@ -1457,10 +1478,60 @@ public class EnemyIA : MonoBehaviour
         }
     }
 
+    // ============================================
+    // UPDATE AUDIO - CON ZONA DE ESCUCHA (CUBO)
+    // ============================================
     void UpdateAudio()
     {
+        // ============================================
+        // SI ESTÁ EN JUMPSCARE, SOLO DEJAR SONAR EL JUMPSCARE
+        // ============================================
+        if (currentState == EnemyState.Jumpscare)
+        {
+            // Detener ambiente y chase
+            if (ambientAudioSource.isPlaying) ambientAudioSource.Stop();
+            if (chaseAudioSource.isPlaying) chaseAudioSource.Stop();
+
+            // NO detener jumpscareAudioSource - que siga sonando
+            return;
+        }
+
+        // ============================================
+        // VERIFICAR SI EL JUGADOR ESTÁ DENTRO DEL CUBO DE AUDIO
+        // ============================================
+        bool playerInAudioRange = false;
+
+        if (player != null)
+        {
+            // Calcular la distancia en cada eje
+            float deltaX = Mathf.Abs(transform.position.x - player.position.x);
+            float deltaZ = Mathf.Abs(transform.position.z - player.position.z);
+            float deltaY = Mathf.Abs(transform.position.y - player.position.y);
+
+            // El jugador está dentro del cubo si está dentro de los límites en los 3 ejes
+            playerInAudioRange = deltaX <= ambientAudioRange &&
+                                 deltaZ <= ambientAudioRange &&
+                                 deltaY <= ambientAudioVerticalRange;
+        }
+
+        // ============================================
+        // SONIDO AMBIENTE - SOLO SI EL JUGADOR ESTÁ CERCA
+        // ============================================
         if (currentState != EnemyState.Running)
         {
+            if (!playerInAudioRange)
+            {
+                // Si el jugador está lejos, detener el sonido ambiente
+                if (ambientAudioSource.isPlaying)
+                {
+                    ambientAudioSource.Stop();
+                    isAmbientPlaying = false;
+                    isAmbientStopped = true;
+                }
+                return; // Salir, no procesar más audio
+            }
+
+            // Si el jugador está cerca, comportamiento normal
             if (!ambientAudioSource.isPlaying && isAmbientPlaying)
             {
                 isAmbientPlaying = false;
@@ -1483,6 +1554,7 @@ public class EnemyIA : MonoBehaviour
         }
         else
         {
+            // En persecución, el sonido de chase se escucha siempre
             if (ambientAudioSource.isPlaying)
             {
                 ambientAudioSource.Stop();
@@ -1491,6 +1563,9 @@ public class EnemyIA : MonoBehaviour
             }
         }
 
+        // ============================================
+        // SONIDO DE PERSECUCIÓN - SE ESCUCHA SIEMPRE
+        // ============================================
         if (currentState == EnemyState.Running)
         {
             if (!isChasePlaying || !chaseAudioSource.isPlaying)
@@ -1546,6 +1621,9 @@ public class EnemyIA : MonoBehaviour
         }
     }
 
+    // ============================================
+    // GIZMO PARA LA ZONA DE AUDIO AMBIENTE (CUBO)
+    // ============================================
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
@@ -1594,6 +1672,109 @@ public class EnemyIA : MonoBehaviour
                 0.1f,
                 jumpscareCamera.aspect
             );
+        }
+
+        // ============================================
+        // GIZMO PARA LA ZONA DE AUDIO AMBIENTE (CUBO)
+        // ============================================
+        if (showAudioGizmo)
+        {
+            Vector3 center = transform.position + Vector3.up * (ambientAudioVerticalRange / 2f);
+            Vector3 size = new Vector3(ambientAudioRange * 2f, ambientAudioVerticalRange, ambientAudioRange * 2f);
+
+            // Cubo semitransparente (relleno)
+            Gizmos.color = new Color(0f, 1f, 0f, 0.1f);
+            Gizmos.DrawCube(center, size);
+
+            // Borde del cubo (más visible)
+            Gizmos.color = new Color(0f, 1f, 0f, 0.5f);
+            Gizmos.DrawWireCube(center, size);
+
+            // Esquinas del cubo (más visibles)
+            Gizmos.color = new Color(0f, 1f, 0f, 0.3f);
+
+            Vector3 halfSize = size / 2f;
+
+            // Dibujar líneas verticales desde el centro del cubo a las esquinas superiores
+            for (int x = -1; x <= 1; x += 2)
+            {
+                for (int z = -1; z <= 1; z += 2)
+                {
+                    Vector3 corner = new Vector3(x * halfSize.x, 0, z * halfSize.z);
+                    Gizmos.DrawLine(center, center + corner + Vector3.up * halfSize.y);
+                    Gizmos.DrawLine(center, center + corner - Vector3.up * halfSize.y);
+                }
+            }
+
+            // Dibujar líneas horizontales en la parte superior e inferior
+            Vector3 topLeft = new Vector3(-halfSize.x, halfSize.y, -halfSize.z);
+            Vector3 topRight = new Vector3(halfSize.x, halfSize.y, -halfSize.z);
+            Vector3 bottomLeft = new Vector3(-halfSize.x, halfSize.y, halfSize.z);
+            Vector3 bottomRight = new Vector3(halfSize.x, halfSize.y, halfSize.z);
+
+            // Líneas superiores
+            Gizmos.DrawLine(center + topLeft, center + topRight);
+            Gizmos.DrawLine(center + topRight, center + bottomRight);
+            Gizmos.DrawLine(center + bottomRight, center + bottomLeft);
+            Gizmos.DrawLine(center + bottomLeft, center + topLeft);
+
+            // Líneas inferiores
+            Vector3 topLeftB = new Vector3(-halfSize.x, -halfSize.y, -halfSize.z);
+            Vector3 topRightB = new Vector3(halfSize.x, -halfSize.y, -halfSize.z);
+            Vector3 bottomLeftB = new Vector3(-halfSize.x, -halfSize.y, halfSize.z);
+            Vector3 bottomRightB = new Vector3(halfSize.x, -halfSize.y, halfSize.z);
+
+            Gizmos.DrawLine(center + topLeftB, center + topRightB);
+            Gizmos.DrawLine(center + topRightB, center + bottomRightB);
+            Gizmos.DrawLine(center + bottomRightB, center + bottomLeftB);
+            Gizmos.DrawLine(center + bottomLeftB, center + topLeftB);
+
+            // Líneas verticales (conectando superiores e inferiores)
+            Gizmos.DrawLine(center + topLeft, center + topLeftB);
+            Gizmos.DrawLine(center + topRight, center + topRightB);
+            Gizmos.DrawLine(center + bottomLeft, center + bottomLeftB);
+            Gizmos.DrawLine(center + bottomRight, center + bottomRightB);
+
+            // Centro del cubo (punto)
+            Gizmos.color = Color.green;
+            Gizmos.DrawSphere(center, 0.3f);
+
+            // Texto informativo
+#if UNITY_EDITOR
+            UnityEditor.Handles.Label(
+                center + Vector3.up * (halfSize.y + 1.5f),
+                $"Audio Cube: {ambientAudioRange * 2}m (W) x {ambientAudioVerticalRange}m (H)",
+                new GUIStyle()
+                {
+                    normal = new GUIStyleState() { textColor = Color.green },
+                    fontSize = 12,
+                    fontStyle = FontStyle.Bold
+                }
+            );
+
+            // Mostrar dimensiones en las caras del cubo
+            UnityEditor.Handles.Label(
+                center + new Vector3(0, 0, halfSize.z + 1f),
+                $"{ambientAudioRange * 2}m",
+                new GUIStyle()
+                {
+                    normal = new GUIStyleState() { textColor = Color.green },
+                    fontSize = 10,
+                    alignment = TextAnchor.MiddleCenter
+                }
+            );
+
+            UnityEditor.Handles.Label(
+                center + new Vector3(0, halfSize.y + 0.5f, 0),
+                $"{ambientAudioVerticalRange}m",
+                new GUIStyle()
+                {
+                    normal = new GUIStyleState() { textColor = Color.green },
+                    fontSize = 10,
+                    alignment = TextAnchor.MiddleCenter
+                }
+            );
+#endif
         }
     }
 
@@ -1656,7 +1837,7 @@ public class EnemyIA : MonoBehaviour
     }
 
     // ============================================
-    // ?? MÉTODO PARA SABER SI ESTÁ EN JUMPSCARE
+    // MÉTODO PARA SABER SI ESTÁ EN JUMPSCARE
     // ============================================
     public bool EstaEnJumpscare()
     {
