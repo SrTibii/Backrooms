@@ -130064,12 +130064,6 @@ MonoBehaviour:
     exactMatch: 1
     verificarEstado: 0
     estadoEsperado: 1
-  - tagObjeto: PuertaFinal
-    tagNecesario: 
-    mensaje: '"I need to find three keys"'
-    exactMatch: 1
-    verificarEstado: 0
-    estadoEsperado: 1
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
 --- !u!4 &1109366735
 Transform:
