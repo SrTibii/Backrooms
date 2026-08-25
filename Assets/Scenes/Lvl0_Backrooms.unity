@@ -172237,10 +172237,10 @@ MonoBehaviour:
   - {fileID: 143759715}
   idleTimeMin: 2
   idleTimeMax: 5
-  detectionRadius: 20
+  detectionRadius: 25
   visionRange: 40
   visionAngle: 100
-  proximityDetectionRange: 1
+  proximityDetectionRange: 3
   obstacleMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -172258,7 +172258,7 @@ MonoBehaviour:
   raycastColor: {r: 0, g: 1, b: 0, a: 1}
   hitColor: {r: 1, g: 0, b: 0, a: 1}
   runSpeed: 12
-  walkSpeed: 6
+  walkSpeed: 4
   lostPlayerTime: 5
   hideWaitTime: 3
   ambientSounds:
