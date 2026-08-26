@@ -9,14 +9,12 @@ public class MenuPausa : MonoBehaviour
     [Header("Referencias UI")]
     public GameObject uiIngame;
     public GameObject uiPausa;
-    public GameObject uiOpciones; // ? NUEVO: referencia al panel de opciones
+    public GameObject uiOpciones;
 
     [Header("Input Actions")]
     public InputActionReference pauseAction;
 
     [Header("Audio")]
-    public AudioClip sonidoClick;
-    public AudioClip sonidoHover;
     [Range(0f, 1f)] public float volumenSonidos = 0.8f;
 
     // ============================================
@@ -41,11 +39,19 @@ public class MenuPausa : MonoBehaviour
         enemyIA = FindObjectOfType<EnemyIA>();
         lockerSystem = FindObjectOfType<LockerHideSystem>();
 
+        // ============================================
+        // CREAR AUDIOSOURCE Y REGISTRAR EN AUDIOMANAGER
+        // ============================================
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.loop = false;
         audioSource.playOnAwake = false;
         audioSource.spatialBlend = 0f;
         audioSource.volume = volumenSonidos;
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.RegistrarAudioSource(audioSource);
+        }
 
         if (uiIngame != null) uiIngame.SetActive(true);
         if (uiPausa != null) uiPausa.SetActive(false);
@@ -56,7 +62,6 @@ public class MenuPausa : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        Debug.Log("?? Cursor bloqueado al inicio");
 
         Debug.Log("?? Menú de Pausa inicializado");
     }
@@ -192,11 +197,18 @@ public class MenuPausa : MonoBehaviour
 
     public void AbrirOpciones()
     {
-        ReproducirSonido(sonidoClick);
+        // ============================================
+        // REPRODUCIR SONIDO CON AUDIOMANAGER
+        // ============================================
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoClick != null)
+        {
+            AudioManager.Instance.PlayOneShot(audioSource, AudioManager.Instance.sonidoClick, volumenSonidos);
+        }
+        else if (audioSource != null)
+        {
+            audioSource.PlayOneShot(AudioManager.Instance?.sonidoClick, volumenSonidos);
+        }
 
-        // ============================================
-        // OCULTAR INDICADORES AL ABRIR OPCIONES
-        // ============================================
         BotonConIndicadorPausa.OcultarTodosLosIndicadores();
 
         if (uiPausa != null) uiPausa.SetActive(false);
@@ -205,11 +217,18 @@ public class MenuPausa : MonoBehaviour
 
     public void CerrarOpciones()
     {
-        ReproducirSonido(sonidoClick);
+        // ============================================
+        // REPRODUCIR SONIDO CON AUDIOMANAGER
+        // ============================================
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoClick != null)
+        {
+            AudioManager.Instance.PlayOneShot(audioSource, AudioManager.Instance.sonidoClick, volumenSonidos);
+        }
+        else if (audioSource != null)
+        {
+            audioSource.PlayOneShot(AudioManager.Instance?.sonidoClick, volumenSonidos);
+        }
 
-        // ============================================
-        // OCULTAR INDICADORES AL CERRAR OPCIONES
-        // ============================================
         BotonConIndicadorPausa.OcultarTodosLosIndicadores();
 
         if (uiOpciones != null) uiOpciones.SetActive(false);
@@ -222,7 +241,18 @@ public class MenuPausa : MonoBehaviour
 
     public void BotonReanudar()
     {
-        ReproducirSonido(sonidoClick);
+        // ============================================
+        // REPRODUCIR SONIDO CON AUDIOMANAGER
+        // ============================================
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoClick != null)
+        {
+            AudioManager.Instance.PlayOneShot(audioSource, AudioManager.Instance.sonidoClick, volumenSonidos);
+        }
+        else if (audioSource != null)
+        {
+            audioSource.PlayOneShot(AudioManager.Instance?.sonidoClick, volumenSonidos);
+        }
+
         StartCoroutine(ReanudarConDelay());
     }
 
@@ -234,7 +264,17 @@ public class MenuPausa : MonoBehaviour
 
     public void BotonSalir()
     {
-        ReproducirSonido(sonidoClick);
+        // ============================================
+        // REPRODUCIR SONIDO CON AUDIOMANAGER
+        // ============================================
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoClick != null)
+        {
+            AudioManager.Instance.PlayOneShot(audioSource, AudioManager.Instance.sonidoClick, volumenSonidos);
+        }
+        else if (audioSource != null)
+        {
+            audioSource.PlayOneShot(AudioManager.Instance?.sonidoClick, volumenSonidos);
+        }
 
         Time.timeScale = 1f;
         ReactivarAudioSources();
@@ -242,9 +282,6 @@ public class MenuPausa : MonoBehaviour
         if (playerController != null) playerController.enabled = true;
         if (vhsEffects != null) vhsEffects.enabled = true;
 
-        // ============================================
-        // OCULTAR INDICADORES AL SALIR
-        // ============================================
         BotonConIndicadorPausa.OcultarTodosLosIndicadores();
 
         Cursor.lockState = CursorLockMode.None;
@@ -308,17 +345,16 @@ public class MenuPausa : MonoBehaviour
 
     public void SonidoHover()
     {
-        if (audioSource != null && sonidoHover != null)
+        // ============================================
+        // REPRODUCIR SONIDO HOVER CON AUDIOMANAGER
+        // ============================================
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoHover != null)
         {
-            audioSource.PlayOneShot(sonidoHover, volumenSonidos);
+            AudioManager.Instance.PlayOneShot(audioSource, AudioManager.Instance.sonidoHover, volumenSonidos);
         }
-    }
-
-    private void ReproducirSonido(AudioClip clip)
-    {
-        if (audioSource != null && clip != null)
+        else if (audioSource != null)
         {
-            audioSource.PlayOneShot(clip, volumenSonidos);
+            audioSource.PlayOneShot(AudioManager.Instance?.sonidoHover, volumenSonidos);
         }
     }
 

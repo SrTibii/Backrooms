@@ -13,11 +13,7 @@ public class RecogerObjeto : MonoBehaviour
     public float smoothSpeed = 15f;
     public string[] tagsValidos = { "Object" };
 
-    [Header("Sonidos por Tag")]
-    public SonidoPorTag[] sonidosPorTag;
-
-    [Header("Sonido por defecto")]
-    public AudioClip sonidoPorDefecto;
+    [Header("Volumen")]
     [Range(0f, 1f)] public float volumenPorDefecto = 0.7f;
 
     private GameObject currentObject = null;
@@ -31,16 +27,7 @@ public class RecogerObjeto : MonoBehaviour
     private RigidbodyConstraints originalConstraints;
 
     private ManosManager manosManager;
-    private AudioSource audioSource;
     private Material alwaysOnTopMat;
-
-    [System.Serializable]
-    public class SonidoPorTag
-    {
-        public string tag;
-        public AudioClip sonido;
-        [Range(0f, 1f)] public float volumen = 0.7f;
-    }
 
     void Start()
     {
@@ -62,11 +49,6 @@ public class RecogerObjeto : MonoBehaviour
             alwaysOnTopMat = new Material(shader);
             alwaysOnTopMat.renderQueue = 4000;
         }
-
-        audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.loop = false;
-        audioSource.playOnAwake = false;
-        audioSource.spatialBlend = 0f;
 
         manosManager = FindObjectOfType<ManosManager>();
         if (manosManager == null)
@@ -102,7 +84,6 @@ public class RecogerObjeto : MonoBehaviour
     {
         if (isHolding && currentObject != null)
         {
-            // 🔥 El objeto sigue la mano
             currentObject.transform.position = Vector3.Lerp(
                 currentObject.transform.position,
                 holdPosition.position,
@@ -195,7 +176,6 @@ public class RecogerObjeto : MonoBehaviour
             currentCollider.enabled = false;
         }
 
-        // 🔥 APLICAR SHADER
         Renderer renderer = target.GetComponent<Renderer>();
         if (renderer != null && alwaysOnTopMat != null)
         {
@@ -228,28 +208,46 @@ public class RecogerObjeto : MonoBehaviour
         Debug.Log($"✅ Recogido: {target.name} (tag: {target.tag})");
     }
 
+    // ============================================
+    // REPRODUCIR SONIDO USANDO AUDIOMANAGER
+    // ============================================
     private void ReproducirSonidoPorTag(string tag)
     {
-        AudioClip clip = null;
-        float volumen = volumenPorDefecto;
-
-        foreach (SonidoPorTag item in sonidosPorTag)
+        // Verificar que AudioManager existe
+        if (AudioManager.Instance == null)
         {
-            if (item.tag == tag)
-            {
-                clip = item.sonido;
-                volumen = item.volumen;
-                break;
-            }
+            Debug.LogWarning("⚠️ AudioManager no encontrado, no se puede reproducir sonido");
+            return;
         }
 
-        if (clip == null) clip = sonidoPorDefecto;
+        AudioClip clip = null;
+
+        // Determinar qué clip reproducir según el tag
+        switch (tag)
+        {
+            case "Object":
+                // Para objetos genéricos, usamos sonidoRecogerObjeto
+                clip = AudioManager.Instance.sonidoRecogerObjeto;
+                break;
+            // Si hay más tags específicos, se pueden añadir aquí
+            // case "Llave":
+            //     clip = AudioManager.Instance.sonidoRecogerLlave;
+            //     break;
+            default:
+                // Por defecto, usar sonidoRecogerObjeto
+                clip = AudioManager.Instance.sonidoRecogerObjeto;
+                break;
+        }
 
         if (clip != null)
         {
-            audioSource.volume = volumen;
-            audioSource.PlayOneShot(clip);
-            Debug.Log($"🔊 Sonido reproducido para tag '{tag}'");
+            // Reproducir usando AudioManager (no necesitamos AudioSource local)
+            AudioManager.Instance.PlayOneShotAtPosition(clip, transform.position, volumenPorDefecto);
+            Debug.Log($"🔊 Sonido recoger reproducido para tag '{tag}'");
+        }
+        else
+        {
+            Debug.LogWarning($"⚠️ No hay clip definido para el tag '{tag}' en AudioManager");
         }
     }
 
@@ -266,7 +264,6 @@ public class RecogerObjeto : MonoBehaviour
             manosManager.LiberarManoIzquierda();
         }
 
-        // 🔥 RESTAURAR MATERIALES
         Renderer renderer = currentObject.GetComponent<Renderer>();
         if (renderer != null && originalMaterials != null)
         {
@@ -274,7 +271,6 @@ public class RecogerObjeto : MonoBehaviour
             originalMaterials = null;
         }
 
-        // 🔥 CALCULAR POSICIÓN SEGURA (DELANTE DE LA PARED)
         Camera cam = Camera.main;
         Vector3 posicionFinal;
         Quaternion rotacionFinal = holdPosition.rotation;

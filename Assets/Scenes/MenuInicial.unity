@@ -9594,8 +9594,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc16a1e90205f7d41a5dff784a6327d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MenuInicial
-  sonidoClick: {fileID: 8300000, guid: 1e1006d02c5512b41b23173ee36a7aa8, type: 3}
-  sonidoHover: {fileID: 8300000, guid: 0c5e464e37670044e980441209c00293, type: 3}
   volumenSonidos: 0.4
   delayAntesDeCargar: 0.3
 --- !u!4 &100326860
@@ -180960,6 +180958,98 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2028184226}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &2032681353
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2032681355}
+  - component: {fileID: 2032681354}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2032681354
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2032681353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bad49c3f4bc53f4e98ec5e00e00daf1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AudioManager
+  volumenGlobal: 0.8
+  sonidoClick: {fileID: 8300000, guid: f1003f578eed7f54b811046ff54e485e, type: 3}
+  sonidoHover: {fileID: 8300000, guid: 0c5e464e37670044e980441209c00293, type: 3}
+  sonidoAbrirNota: {fileID: 8300000, guid: 4d61a1b986a34fc409afc952352c9d66, type: 3}
+  sonidoCerrarNota: {fileID: 8300000, guid: 4d61a1b986a34fc409afc952352c9d66, type: 3}
+  ambientSounds:
+  - {fileID: 8300000, guid: d614f9e878de0cf41815e369e17e6f22, type: 3}
+  chaseSounds:
+  - {fileID: 8300000, guid: c774e7fe4d3f78f499b3b5964a42f3d9, type: 3}
+  - {fileID: 8300000, guid: 2b9cc0f57f5a550439f3f3c077ec9a40, type: 3}
+  jumpscareSound: {fileID: 8300000, guid: 3a2dfb1f35bbe5745a2d136b0ac84b67, type: 3}
+  sonidoPuertaAbierta: {fileID: 8300000, guid: 697f0f96ef0e8fd4ea7d978c1a6839b1, type: 3}
+  sonidosPuertaBloqueada:
+  - {fileID: 8300000, guid: 8f84fdc67ed75f440a4f1b28d55b467c, type: 3}
+  sonidoRecogerObjeto: {fileID: 8300000, guid: a18dc60d8363d2e41967a11d6e8f641f, type: 3}
+  sonidoRecogerLinterna: {fileID: 8300000, guid: 98390a7420e6c3c42a092316b0d2df3f, type: 3}
+  sonidoRecogerMartillo: {fileID: 8300000, guid: 0c80b7cf7294d71459a1e051989f32e3, type: 3}
+  sonidoSoltarObjeto: {fileID: 0}
+  sonidoSoltarLinterna: {fileID: 0}
+  sonidoSoltarMartillo: {fileID: 0}
+  sonidoPulsarBoton: {fileID: 8300000, guid: c2ae10cbb81b3494d864e86fadb2ffc0, type: 3}
+  sonidoCombinacionCorrecta: {fileID: 8300000, guid: 67710b508e8fd9b4994bc44df10e277c, type: 3}
+  sonidoCombinacionIncorrecta: {fileID: 8300000, guid: 5ac0b56526a42614cbe1dfea067181e9, type: 3}
+  sonidoCandadoAbierto: {fileID: 8300000, guid: 9ecd590b572156e46aa99baa856e9596, type: 3}
+  sonidoLlaveIncorrecta: {fileID: 8300000, guid: 8c6b7084bee814d49b6dfa7183978f65, type: 3}
+  sonidoCajaAcierto: {fileID: 8300000, guid: 67710b508e8fd9b4994bc44df10e277c, type: 3}
+  sonidoCajaError: {fileID: 8300000, guid: 5ac0b56526a42614cbe1dfea067181e9, type: 3}
+  sonidoCajaBoton: {fileID: 8300000, guid: c2ae10cbb81b3494d864e86fadb2ffc0, type: 3}
+  sonidoActivacionGenerador: {fileID: 8300000, guid: 0c5e464e37670044e980441209c00293, type: 3}
+  sonidoInsertarMoneda: {fileID: 8300000, guid: bf62cd15ae565d9488b8d34d90d6e2af, type: 3}
+  sonidoCaerLlave: {fileID: 8300000, guid: 36a43d4c42d87e945bd910a2ed3c56b8, type: 3}
+  sonidoRomperTabla: {fileID: 8300000, guid: e616d28ccdc297445b3b995e977c65fe, type: 3}
+  sonidoEnterLocker: {fileID: 8300000, guid: f397117500a20f246a7bd229291ec4b4, type: 3}
+  sonidoExitLocker: {fileID: 8300000, guid: 18315a6f9fb56964d90b24a49ba1a9b8, type: 3}
+  footstepSounds:
+  - {fileID: 8300000, guid: de43834cee953b74689395a57f773fdb, type: 3}
+  sprintFootstepSounds:
+  - {fileID: 8300000, guid: de43834cee953b74689395a57f773fdb, type: 3}
+  breathingClip: {fileID: 8300000, guid: 0cec3a1758ef0f84e96af3e0bd2e8834, type: 3}
+  staminaDepletedSound: {fileID: 8300000, guid: c3d6e4cca8fc4bd4191734a6c1fc0d45, type: 3}
+  staminaRecoveredSound: {fileID: 0}
+  crouchSound: {fileID: 8300000, guid: a8132134e614f9f4887250f0e1e32a4b, type: 3}
+  standSound: {fileID: 8300000, guid: f59938ad9c9d72647a35030db13f969d, type: 3}
+  zoomInSound: {fileID: 8300000, guid: 2d92561a2146d984eb687957390e5ac2, type: 3}
+  zoomOutSound: {fileID: 8300000, guid: 234b1fba211478747a993ce952d5fd0e, type: 3}
+  sonidoEncenderLinterna: {fileID: 8300000, guid: 0c9a2f31bc1846243907d12d15fda025, type: 3}
+  sonidoApagarLinterna: {fileID: 8300000, guid: 0c9a2f31bc1846243907d12d15fda025, type: 3}
+  glitchSound: {fileID: 8300000, guid: ca6513a7427d4564ea8e13844a533c73, type: 3}
+--- !u!4 &2032681355
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2032681353}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 853.951, y: 125.35822, z: 1220.3093}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &2039969039
 Mesh:
   m_ObjectHideFlags: 0
@@ -189211,3 +189301,4 @@ SceneRoots:
   - {fileID: 889783903}
   - {fileID: 1410909106}
   - {fileID: 108659302}
+  - {fileID: 2032681355}

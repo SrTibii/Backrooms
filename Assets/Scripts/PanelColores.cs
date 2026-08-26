@@ -22,22 +22,18 @@ public class PanelColores : MonoBehaviour
     public GameObject[] cubosRetroalimentacion;
 
     // ============================================
-    // ?? NUEVO: DELAY AL FALLAR
+    // DELAY AL FALLAR
     // ============================================
     [Header("Delay al Fallar")]
     [Tooltip("Tiempo que espera antes de reiniciar el panel al fallar")]
     public float delayAlFallar = 1.5f;
 
-    [Header("Audio")]
-    public AudioClip sonidoPulsarBoton;
-    public AudioClip sonidoCombinacionCorrecta;
-    public AudioClip sonidoCombinacionIncorrecta;
+    [Header("Volumen")]
     [Range(0f, 1f)] public float volumenSonidos = 0.7f;
 
     private List<string> pulsaciones = new List<string>();
     private bool puzzleCompletado = false;
-    private bool esperandoReinicio = false; // Para evitar interacciones durante el delay
-    private AudioSource audioSource;
+    private bool esperandoReinicio = false;
     private InteractionSystem interactionSystem;
 
     private Dictionary<string, Color> coloresMap = new Dictionary<string, Color>();
@@ -46,11 +42,6 @@ public class PanelColores : MonoBehaviour
     void Start()
     {
         InicializarDiccionarioColores();
-
-        audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.loop = false;
-        audioSource.playOnAwake = false;
-        audioSource.spatialBlend = 0f;
 
         interactionSystem = FindObjectOfType<InteractionSystem>();
         if (interactionSystem == null)
@@ -73,7 +64,7 @@ public class PanelColores : MonoBehaviour
 
         GuardarColoresOriginales();
 
-        Debug.Log("?? Panel de colores inicializado");
+        Debug.Log("? Panel de colores inicializado");
     }
 
     private void GuardarColoresOriginales()
@@ -237,7 +228,22 @@ public class PanelColores : MonoBehaviour
             }
         }
 
-        ReproducirSonido(sonidoPulsarBoton);
+        // ============================================
+        // REPRODUCIR SONIDO DE PULSAR BOTÓN
+        // ============================================
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoPulsarBoton != null)
+        {
+            AudioManager.Instance.PlayOneShotAtPosition(
+                AudioManager.Instance.sonidoPulsarBoton,
+                transform.position,
+                volumenSonidos,
+                8f
+            );
+        }
+        else
+        {
+            Debug.LogWarning("?? AudioManager o sonidoPulsarBoton no disponible");
+        }
 
         if (pulsaciones.Count >= maxPulsaciones)
         {
@@ -261,24 +267,55 @@ public class PanelColores : MonoBehaviour
         if (esCorrecta)
         {
             puzzleCompletado = true;
-            ReproducirSonido(sonidoCombinacionCorrecta);
-            Debug.Log("? ? ? ¡COMBINACIÓN CORRECTA!");
+
+            // ============================================
+            // REPRODUCIR SONIDO DE COMBINACIÓN CORRECTA
+            // ============================================
+            if (AudioManager.Instance != null && AudioManager.Instance.sonidoCombinacionCorrecta != null)
+            {
+                AudioManager.Instance.PlayOneShotAtPosition(
+                    AudioManager.Instance.sonidoCombinacionCorrecta,
+                    transform.position,
+                    volumenSonidos,
+                    15f
+                );
+            }
+            else
+            {
+                Debug.LogWarning("?? AudioManager o sonidoCombinacionCorrecta no disponible");
+            }
+
+            Debug.Log("?? ¡COMBINACIÓN CORRECTA!");
             AbrirPuerta();
         }
         else
         {
-            ReproducirSonido(sonidoCombinacionIncorrecta);
+            // ============================================
+            // REPRODUCIR SONIDO DE COMBINACIÓN INCORRECTA
+            // ============================================
+            if (AudioManager.Instance != null && AudioManager.Instance.sonidoCombinacionIncorrecta != null)
+            {
+                AudioManager.Instance.PlayOneShotAtPosition(
+                    AudioManager.Instance.sonidoCombinacionIncorrecta,
+                    transform.position,
+                    volumenSonidos,
+                    10f
+                );
+            }
+            else
+            {
+                Debug.LogWarning("?? AudioManager o sonidoCombinacionIncorrecta no disponible");
+            }
+
             Debug.Log($"? Combinación incorrecta. Esperando {delayAlFallar}s antes de reiniciar...");
 
-            // ============================================
-            // ?? INICIAR DELAY ANTES DE REINICIAR
-            // ============================================
+            // INICIAR DELAY ANTES DE REINICIAR
             StartCoroutine(ReiniciarConDelay());
         }
     }
 
     // ============================================
-    // ?? CORRUTINA CON DELAY PARA REINICIAR
+    // CORRUTINA CON DELAY PARA REINICIAR
     // ============================================
     private IEnumerator ReiniciarConDelay()
     {
@@ -318,15 +355,8 @@ public class PanelColores : MonoBehaviour
         }
     }
 
-    private void ReproducirSonido(AudioClip clip)
-    {
-        if (clip == null) return;
-        audioSource.volume = volumenSonidos;
-        audioSource.PlayOneShot(clip);
-    }
-
     // ============================================
-    // ?? MÉTODOS PÚBLICOS
+    // MÉTODOS PÚBLICOS
     // ============================================
 
     public void ResetearPuzzle()

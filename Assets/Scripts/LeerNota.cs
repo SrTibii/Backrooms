@@ -16,9 +16,7 @@ public class LeerNota : MonoBehaviour
     [Header("Input")]
     public InputActionReference interactAction;
 
-    [Header("Audio")]
-    public AudioClip sonidoAbrirNota;
-    public AudioClip sonidoCerrarNota;
+    [Header("Volumen")]
     [Range(0f, 1f)] public float volumenSonido = 0.7f;
 
     [Header("Manos")]
@@ -37,7 +35,6 @@ public class LeerNota : MonoBehaviour
 
     private bool notaAbierta = false;
     private GameObject notaActual = null;
-    private AudioSource audioSource;
 
     void Start()
     {
@@ -53,18 +50,12 @@ public class LeerNota : MonoBehaviour
             vhsCameraEffects = FindObjectOfType<VHSCameraEffects>();
         }
 
-        audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.loop = false;
-        audioSource.playOnAwake = false;
-        audioSource.spatialBlend = 0f;
-        audioSource.volume = volumenSonido;
-
         if (panelNota != null)
         {
             panelNota.SetActive(false);
         }
 
-        Debug.Log("?? Sistema de lectura de notas inicializado");
+        Debug.Log("? Sistema de lectura de notas inicializado");
     }
 
     private void OnEnable()
@@ -134,24 +125,38 @@ public class LeerNota : MonoBehaviour
             panelNota.SetActive(true);
         }
 
-        if (sonidoAbrirNota != null)
+        // ============================================
+        // REPRODUCIR SONIDO DE ABRIR NOTA CON AUDIOMANAGER
+        // ============================================
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoAbrirNota != null)
         {
-            audioSource.PlayOneShot(sonidoAbrirNota);
+            // Sonido 2D (UI) sin posición específica
+            AudioManager.Instance.PlayOneShotAtPosition(
+                AudioManager.Instance.sonidoAbrirNota,
+                Camera.main != null ? Camera.main.transform.position : transform.position,
+                volumenSonido,
+                2f
+            );
+            Debug.Log($"?? Sonido de abrir nota reproducido");
+        }
+        else
+        {
+            Debug.LogWarning("?? AudioManager o sonidoAbrirNota no disponible");
         }
 
-        // ?? DESACTIVAR MOVIMIENTO DEL JUGADOR
+        // DESACTIVAR MOVIMIENTO DEL JUGADOR
         if (playerController != null)
         {
             playerController.enabled = false;
         }
 
-        // ?? DESACTIVAR INTERACTION SYSTEM (para no poder interactuar con nada)
+        // DESACTIVAR INTERACTION SYSTEM
         if (interactionSystem != null)
         {
             interactionSystem.enabled = false;
         }
 
-        // ?? DESACTIVAR SCRIPTS DE RECOGIDA (para no poder soltar objetos)
+        // DESACTIVAR SCRIPTS DE RECOGIDA
         if (recogerObjeto != null)
         {
             recogerObjeto.enabled = false;
@@ -165,19 +170,19 @@ public class LeerNota : MonoBehaviour
             recogerMartillo.enabled = false;
         }
 
-        // ?? DESACTIVAR EFECTOS DE CÁMARA VHS
+        // DESACTIVAR EFECTOS DE CÁMARA VHS
         if (vhsCameraEffects != null)
         {
             vhsCameraEffects.enabled = false;
         }
 
-        // ?? PAUSAR GLITCHES
+        // PAUSAR GLITCHES
         if (vhsGlitchManager != null)
         {
             vhsGlitchManager.PausarGlitches();
         }
 
-        // ?? OCULTAR MANOS
+        // OCULTAR MANOS
         if (holdPositionObject != null)
         {
             holdPositionObject.SetActive(false);
@@ -207,24 +212,37 @@ public class LeerNota : MonoBehaviour
             textoNotaUI.text = "";
         }
 
-        if (sonidoCerrarNota != null)
+        // ============================================
+        // REPRODUCIR SONIDO DE CERRAR NOTA CON AUDIOMANAGER
+        // ============================================
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoCerrarNota != null)
         {
-            audioSource.PlayOneShot(sonidoCerrarNota);
+            AudioManager.Instance.PlayOneShotAtPosition(
+                AudioManager.Instance.sonidoCerrarNota,
+                Camera.main != null ? Camera.main.transform.position : transform.position,
+                volumenSonido,
+                2f
+            );
+            Debug.Log($"?? Sonido de cerrar nota reproducido");
+        }
+        else
+        {
+            Debug.LogWarning("?? AudioManager o sonidoCerrarNota no disponible");
         }
 
-        // ?? REACTIVAR MOVIMIENTO DEL JUGADOR
+        // REACTIVAR MOVIMIENTO DEL JUGADOR
         if (playerController != null)
         {
             playerController.enabled = true;
         }
 
-        // ?? REACTIVAR INTERACTION SYSTEM
+        // REACTIVAR INTERACTION SYSTEM
         if (interactionSystem != null)
         {
             interactionSystem.enabled = true;
         }
 
-        // ?? REACTIVAR SCRIPTS DE RECOGIDA
+        // REACTIVAR SCRIPTS DE RECOGIDA
         if (recogerObjeto != null)
         {
             recogerObjeto.enabled = true;
@@ -238,20 +256,20 @@ public class LeerNota : MonoBehaviour
             recogerMartillo.enabled = true;
         }
 
-        // ?? REACTIVAR EFECTOS DE CÁMARA VHS
+        // REACTIVAR EFECTOS DE CÁMARA VHS
         if (vhsCameraEffects != null)
         {
             vhsCameraEffects.enabled = true;
             vhsCameraEffects.ResetEffects();
         }
 
-        // ?? REANUDAR GLITCHES
+        // REANUDAR GLITCHES
         if (vhsGlitchManager != null)
         {
             vhsGlitchManager.ReanudarGlitches();
         }
 
-        // ?? MOSTRAR MANOS
+        // MOSTRAR MANOS
         if (holdPositionObject != null)
         {
             holdPositionObject.SetActive(true);

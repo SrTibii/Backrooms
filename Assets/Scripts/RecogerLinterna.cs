@@ -13,9 +13,7 @@ public class RecogerLinterna : MonoBehaviour
     public float smoothSpeed = 15f;
     public string linternaTag = "Linterna";
 
-    [Header("Sonidos")]
-    public AudioClip sonidoRecogerLinterna;
-    public AudioClip sonidoSoltarLinterna;
+    [Header("Volumen")]
     [Range(0f, 1f)] public float volumenSonidos = 0.7f;
 
     private GameObject currentObject = null;
@@ -30,7 +28,6 @@ public class RecogerLinterna : MonoBehaviour
     private RigidbodyConstraints originalConstraints;
 
     private ManosManager manosManager;
-    private AudioSource audioSource;
     private Material alwaysOnTopMat;
 
     void Start()
@@ -53,11 +50,6 @@ public class RecogerLinterna : MonoBehaviour
             alwaysOnTopMat = new Material(shader);
             alwaysOnTopMat.renderQueue = 4000;
         }
-
-        audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.loop = false;
-        audioSource.playOnAwake = false;
-        audioSource.spatialBlend = 0f;
 
         manosManager = FindObjectOfType<ManosManager>();
         if (manosManager == null)
@@ -212,10 +204,20 @@ public class RecogerLinterna : MonoBehaviour
 
         isHolding = true;
 
-        if (sonidoRecogerLinterna != null)
+        // ============================================
+        // REPRODUCIR SONIDO RECOGER CON AUDIOMANAGER
+        // ============================================
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoRecogerLinterna != null)
         {
-            audioSource.volume = volumenSonidos;
-            audioSource.PlayOneShot(sonidoRecogerLinterna);
+            AudioManager.Instance.PlayOneShotAtPosition(
+                AudioManager.Instance.sonidoRecogerLinterna,
+                transform.position,
+                volumenSonidos
+            );
+        }
+        else
+        {
+            Debug.LogWarning("?? AudioManager o sonidoRecogerLinterna no disponible");
         }
 
         Debug.Log($"? Linterna recogida: {target.name}");
@@ -298,10 +300,20 @@ public class RecogerLinterna : MonoBehaviour
             currentCollider.enabled = true;
         }
 
-        if (sonidoSoltarLinterna != null)
+        // ============================================
+        // REPRODUCIR SONIDO SOLTAR CON AUDIOMANAGER
+        // ============================================
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoSoltarLinterna != null)
         {
-            audioSource.volume = volumenSonidos;
-            audioSource.PlayOneShot(sonidoSoltarLinterna);
+            AudioManager.Instance.PlayOneShotAtPosition(
+                AudioManager.Instance.sonidoSoltarLinterna,
+                posicionFinal,
+                volumenSonidos
+            );
+        }
+        else
+        {
+            Debug.LogWarning("?? AudioManager o sonidoSoltarLinterna no disponible");
         }
 
         string objectName = currentObject.name;

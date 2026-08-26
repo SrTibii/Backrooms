@@ -13,9 +13,7 @@ public class RecogerMartillo : MonoBehaviour
     public float smoothSpeed = 15f;
     public string martilloTag = "Martillo";
 
-    [Header("Sonidos")]
-    public AudioClip sonidoRecogerMartillo;
-    public AudioClip sonidoSoltarMartillo;
+    [Header("Volumen")]
     [Range(0f, 1f)] public float volumenSonidos = 0.7f;
 
     private GameObject currentObject = null;
@@ -29,7 +27,6 @@ public class RecogerMartillo : MonoBehaviour
     private RigidbodyConstraints originalConstraints;
 
     private ManosManager manosManager;
-    private AudioSource audioSource;
     private Material alwaysOnTopMat;
 
     void Start()
@@ -52,11 +49,6 @@ public class RecogerMartillo : MonoBehaviour
             alwaysOnTopMat = new Material(shader);
             alwaysOnTopMat.renderQueue = 4000;
         }
-
-        audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.loop = false;
-        audioSource.playOnAwake = false;
-        audioSource.spatialBlend = 0f;
 
         manosManager = FindObjectOfType<ManosManager>();
         if (manosManager == null)
@@ -211,13 +203,23 @@ public class RecogerMartillo : MonoBehaviour
 
         isHolding = true;
 
-        if (sonidoRecogerMartillo != null)
+        // ============================================
+        // REPRODUCIR SONIDO RECOGER CON AUDIOMANAGER
+        // ============================================
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoRecogerMartillo != null)
         {
-            audioSource.volume = volumenSonidos;
-            audioSource.PlayOneShot(sonidoRecogerMartillo);
+            AudioManager.Instance.PlayOneShotAtPosition(
+                AudioManager.Instance.sonidoRecogerMartillo,
+                transform.position,
+                volumenSonidos
+            );
+        }
+        else
+        {
+            Debug.LogWarning("?? AudioManager o sonidoRecogerMartillo no disponible");
         }
 
-        Debug.Log($"?? Martillo recogido: {target.name}");
+        Debug.Log($"? Martillo recogido: {target.name}");
     }
 
     void DropObject()
@@ -292,10 +294,20 @@ public class RecogerMartillo : MonoBehaviour
             currentCollider.enabled = true;
         }
 
-        if (sonidoSoltarMartillo != null)
+        // ============================================
+        // REPRODUCIR SONIDO SOLTAR CON AUDIOMANAGER
+        // ============================================
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoSoltarMartillo != null)
         {
-            audioSource.volume = volumenSonidos;
-            audioSource.PlayOneShot(sonidoSoltarMartillo);
+            AudioManager.Instance.PlayOneShotAtPosition(
+                AudioManager.Instance.sonidoSoltarMartillo,
+                posicionFinal,
+                volumenSonidos
+            );
+        }
+        else
+        {
+            Debug.LogWarning("?? AudioManager o sonidoSoltarMartillo no disponible");
         }
 
         string objectName = currentObject.name;
@@ -304,7 +316,7 @@ public class RecogerMartillo : MonoBehaviour
         currentCollider = null;
         isHolding = false;
 
-        Debug.Log($"?? Martillo soltado: {objectName}");
+        Debug.Log($"? Martillo soltado: {objectName}");
     }
 
     public bool IsHolding()

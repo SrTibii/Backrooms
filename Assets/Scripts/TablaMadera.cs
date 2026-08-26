@@ -6,36 +6,27 @@ public class TablaMadera : MonoBehaviour
     [Header("Configuración")]
     public float interactionDistance = 3f;
 
-    [Header("Audio")]
-    public AudioClip sonidoRomper;
+    [Header("Volumen")]
     [Range(0f, 1f)] public float volumenSonido = 0.8f;
 
     [Header("Input")]
     public InputActionReference interactAction;
 
-    private AudioSource audioSource;
     private bool isBroken = false;
 
     void Start()
     {
-        audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.loop = false;
-        audioSource.playOnAwake = false;
-        audioSource.spatialBlend = 1f;
-        audioSource.volume = volumenSonido;
-
         gameObject.tag = "Tabla";
+        Debug.Log($"? Tabla {gameObject.name} inicializada");
     }
 
     private void OnEnable()
     {
         if (interactAction != null)
         {
-            // ?? IMPORTANTE: Crear una nueva referencia para cada tabla
-            // o usar el método que evita problemas de duplicados
             interactAction.action.performed += OnInteractPerformed;
             interactAction.action.Enable();
-            Debug.Log($"? Tabla {gameObject.name} suscrita al Input Action");
+            Debug.Log($"?? Tabla {gameObject.name} suscrita al Input Action");
         }
     }
 
@@ -44,22 +35,22 @@ public class TablaMadera : MonoBehaviour
         if (interactAction != null)
         {
             interactAction.action.performed -= OnInteractPerformed;
-            Debug.Log($"? Tabla {gameObject.name} desuscrita del Input Action");
+            Debug.Log($"?? Tabla {gameObject.name} desuscrita del Input Action");
         }
     }
 
     private void OnInteractPerformed(InputAction.CallbackContext context)
     {
-        // ?? Verificar si ya está rota
+        // Verificar si ya está rota
         if (isBroken)
         {
             Debug.Log($"? {gameObject.name} ya está rota");
             return;
         }
 
-        Debug.Log($"?? {gameObject.name} ha recibido interacción");
+        Debug.Log($"??? {gameObject.name} ha recibido interacción");
 
-        // ?? RAYCAST DIRECTO
+        // RAYCAST DIRECTO
         Camera cam = Camera.main;
         if (cam == null) return;
 
@@ -74,14 +65,14 @@ public class TablaMadera : MonoBehaviour
 
         Debug.Log($"?? {gameObject.name}: Raycast impactó en {hit.collider.gameObject.name}");
 
-        // ?? Verificar si está mirando ESTA tabla
+        // Verificar si está mirando ESTA tabla
         if (hit.collider.gameObject != gameObject)
         {
             Debug.Log($"?? {gameObject.name}: No es esta tabla (es {hit.collider.gameObject.name})");
             return;
         }
 
-        // ?? Verificar distancia
+        // Verificar distancia
         float distance = Vector3.Distance(cam.transform.position, transform.position);
         if (distance > interactionDistance)
         {
@@ -89,7 +80,7 @@ public class TablaMadera : MonoBehaviour
             return;
         }
 
-        // ?? Verificar si tiene martillo
+        // Verificar si tiene martillo
         if (!TieneMartilloEnMano())
         {
             Debug.Log($"?? {gameObject.name}: Necesitas martillo");
@@ -117,7 +108,7 @@ public class TablaMadera : MonoBehaviour
 
         if (objetoEnMano == null)
         {
-            Debug.Log("??? No hay objeto en la mano");
+            Debug.Log("? No hay objeto en la mano");
             return false;
         }
 
@@ -133,13 +124,31 @@ public class TablaMadera : MonoBehaviour
 
         Debug.Log($"?? ¡Tabla {gameObject.name} rota!");
 
-        if (sonidoRomper != null)
+        // ============================================
+        // REPRODUCIR SONIDO DE ROMPER TABLA CON AUDIOMANAGER
+        // ============================================
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoRomperTabla != null)
         {
-            audioSource.volume = volumenSonido;
-            audioSource.PlayOneShot(sonidoRomper);
+            AudioManager.Instance.PlayOneShotAtPosition(
+                AudioManager.Instance.sonidoRomperTabla,
+                transform.position,
+                volumenSonido,
+                12f
+            );
+            Debug.Log($"?? Sonido de romper tabla reproducido para {gameObject.name}");
+        }
+        else
+        {
+            Debug.LogWarning($"?? AudioManager o sonidoRomperTabla no disponible para {gameObject.name}");
         }
 
-        float delay = sonidoRomper != null ? sonidoRomper.length : 0.3f;
+        // Obtener la duración del clip para el delay
+        float delay = 0.3f;
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoRomperTabla != null)
+        {
+            delay = AudioManager.Instance.sonidoRomperTabla.length;
+        }
+
         Destroy(gameObject, delay);
     }
 }

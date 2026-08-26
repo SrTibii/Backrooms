@@ -5,8 +5,6 @@ using System.Collections;
 public class MenuInicial : MonoBehaviour
 {
     [Header("Audio")]
-    public AudioClip sonidoClick;
-    public AudioClip sonidoHover;
     [Range(0f, 1f)] public float volumenSonidos = 0.8f;
 
     [Header("Delay")]
@@ -18,12 +16,19 @@ public class MenuInicial : MonoBehaviour
 
     void Start()
     {
-        // Crear AudioSource
+        // ============================================
+        // CREAR AUDIOSOURCE Y REGISTRAR EN AUDIOMANAGER
+        // ============================================
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.loop = false;
         audioSource.playOnAwake = false;
         audioSource.spatialBlend = 0f;
         audioSource.volume = volumenSonidos;
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.RegistrarAudioSource(audioSource);
+        }
     }
 
     // ============================================
@@ -32,9 +37,19 @@ public class MenuInicial : MonoBehaviour
 
     public void SonidoHover()
     {
-        if (audioSource != null && sonidoHover != null && !isLoading)
+        if (audioSource == null || isLoading) return;
+
+        // ============================================
+        // REPRODUCIR SONIDO HOVER CON AUDIOMANAGER
+        // ============================================
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoHover != null)
         {
-            audioSource.PlayOneShot(sonidoHover, volumenSonidos);
+            AudioManager.Instance.PlayOneShot(audioSource, AudioManager.Instance.sonidoHover, volumenSonidos);
+        }
+        else if (audioSource != null)
+        {
+            // Fallback por si no hay AudioManager
+            audioSource.PlayOneShot(AudioManager.Instance?.sonidoHover, volumenSonidos);
         }
     }
 
@@ -45,13 +60,13 @@ public class MenuInicial : MonoBehaviour
     public void Jugar()
     {
         if (isLoading) return;
-        StartCoroutine(CargarConDelay("VHSPlay")); //Lvl0_Backrooms
+        StartCoroutine(CargarConDelay("VHSPlay"));
     }
 
     public void IrAlMenuInicial()
     {
         if (isLoading) return;
-        StartCoroutine(CargarConDelay("MenuInicial")); 
+        StartCoroutine(CargarConDelay("MenuInicial"));
     }
 
     public void Salir()
@@ -68,10 +83,16 @@ public class MenuInicial : MonoBehaviour
     {
         isLoading = true;
 
-        // Reproducir sonido de click
-        if (audioSource != null && sonidoClick != null)
+        // ============================================
+        // REPRODUCIR SONIDO CLICK CON AUDIOMANAGER
+        // ============================================
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoClick != null)
         {
-            audioSource.PlayOneShot(sonidoClick, volumenSonidos);
+            AudioManager.Instance.PlayOneShot(audioSource, AudioManager.Instance.sonidoClick, volumenSonidos);
+        }
+        else if (audioSource != null)
+        {
+            audioSource.PlayOneShot(AudioManager.Instance?.sonidoClick, volumenSonidos);
         }
 
         // Esperar el delay para que se escuche el sonido
@@ -85,10 +106,16 @@ public class MenuInicial : MonoBehaviour
     {
         isLoading = true;
 
-        // Reproducir sonido de click
-        if (audioSource != null && sonidoClick != null)
+        // ============================================
+        // REPRODUCIR SONIDO CLICK CON AUDIOMANAGER
+        // ============================================
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoClick != null)
         {
-            audioSource.PlayOneShot(sonidoClick, volumenSonidos);
+            AudioManager.Instance.PlayOneShot(audioSource, AudioManager.Instance.sonidoClick, volumenSonidos);
+        }
+        else if (audioSource != null)
+        {
+            audioSource.PlayOneShot(AudioManager.Instance?.sonidoClick, volumenSonidos);
         }
 
         // Esperar el delay para que se escuche el sonido

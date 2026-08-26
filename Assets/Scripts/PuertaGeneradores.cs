@@ -15,29 +15,24 @@ public class PuertaGeneradores : MonoBehaviour
     public GameObject puerta;
     public string triggerAbrir = "Abrir";
 
-    [Header("Audio")]
-    public AudioClip sonidoPuertaAbierta;
+    [Header("Volumen")]
     [Range(0f, 1f)] public float volumenSonido = 0.7f;
 
     // Estado interno
     private bool[] generadoresActivados = new bool[3];
     private int contadorActivados = 0;
     private bool puertaAbierta = false;
-    private AudioSource audioSource;
 
     void Start()
     {
-        audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.loop = false;
-        audioSource.playOnAwake = false;
-        audioSource.spatialBlend = 0f;
-
         if (puerta != null)
         {
             puerta.tag = "PuertaGenerador";
         }
 
         ActualizarCubos();
+
+        Debug.Log("? PuertaGeneradores inicializada");
     }
 
     public void GeneradorActivado(int id)
@@ -77,19 +72,32 @@ public class PuertaGeneradores : MonoBehaviour
         puertaAbierta = true;
         Debug.Log("?? ¡PUERTA ABIERTA! Todos los generadores activados.");
 
-        // ?? CAMBIAR EL TAG PARA QUE NO SE MUESTRE EL MENSAJE
+        // CAMBIAR EL TAG PARA QUE NO SE MUESTRE EL MENSAJE
         if (puerta != null)
         {
             puerta.tag = "Usado";
             Debug.Log("??? Tag de la puerta cambiado a 'Usado'");
         }
 
-        if (sonidoPuertaAbierta != null)
+        // ============================================
+        // REPRODUCIR SONIDO DE PUERTA ABIERTA CON AUDIOMANAGER
+        // ============================================
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoPuertaAbierta != null)
         {
-            audioSource.volume = volumenSonido;
-            audioSource.PlayOneShot(sonidoPuertaAbierta);
+            AudioManager.Instance.PlayOneShotAtPosition(
+                AudioManager.Instance.sonidoPuertaAbierta,
+                transform.position,
+                volumenSonido,
+                15f
+            );
+            Debug.Log($"?? Sonido de puerta abierta reproducido");
+        }
+        else
+        {
+            Debug.LogWarning("?? AudioManager o sonidoPuertaAbierta no disponible");
         }
 
+        // Abrir la puerta con animación
         if (puerta != null)
         {
             Animator anim = puerta.GetComponent<Animator>();

@@ -8,13 +8,14 @@ public class MenuOpciones : MonoBehaviour
     public Slider sliderSensibilidad;
     public Slider sliderBrillo;
     public Slider sliderFOV;
+    public Slider sliderVolumen; // ?? NUEVO
 
     [Header("Toggles")]
     public Toggle toggleFPS;
     public Toggle toggleSombras;
     public Toggle togglePantallaCompleta;
     public Toggle toggleMotionBlur;
-    public Toggle toggleGlitchEffect; // ?? NUEVO
+    public Toggle toggleGlitchEffect;
 
     [Header("Dropdowns")]
     public TMP_Dropdown dropdownVSync;
@@ -32,7 +33,7 @@ public class MenuOpciones : MonoBehaviour
     public ControlFOV controlFOV;
     public ControlPantalla controlPantalla;
     public ControlMotionBlur controlMotionBlur;
-    public ControlGlitchEffect controlGlitchEffect; // ?? NUEVO
+    public ControlGlitchEffect controlGlitchEffect;
 
     private const string SENSIBILIDAD_KEY = "SensibilidadRaton";
 
@@ -116,6 +117,17 @@ public class MenuOpciones : MonoBehaviour
             sliderFOV.value = fovGuardado;
             sliderFOV.onValueChanged.AddListener(OnFOVChanged);
             controlFOV.SetFOV(fovGuardado);
+        }
+
+        // ============================================
+        // CONFIGURAR SLIDER DE VOLUMEN
+        // ============================================
+
+        if (sliderVolumen != null && AudioManager.Instance != null)
+        {
+            float volumenGuardado = AudioManager.Instance.GetVolumenGlobal();
+            sliderVolumen.value = volumenGuardado;
+            sliderVolumen.onValueChanged.AddListener(OnVolumenChanged);
         }
 
         // ============================================
@@ -237,6 +249,19 @@ public class MenuOpciones : MonoBehaviour
     }
 
     // ============================================
+    // MÉTODO PARA VOLUMEN
+    // ============================================
+
+    public void OnVolumenChanged(float value)
+    {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.SetVolumenGlobal(value);
+        }
+        Debug.Log($"?? Volumen cambiado a: {value}");
+    }
+
+    // ============================================
     // MÉTODO PARA FPS
     // ============================================
 
@@ -320,6 +345,13 @@ public class MenuOpciones : MonoBehaviour
         {
             sliderFOV.value = fovPorDefecto;
             controlFOV.SetFOV(fovPorDefecto);
+        }
+
+        // Restaurar Volumen
+        if (sliderVolumen != null && AudioManager.Instance != null)
+        {
+            sliderVolumen.value = 0.8f;
+            AudioManager.Instance.SetVolumenGlobal(0.8f);
         }
 
         // Restaurar FPS

@@ -6,46 +6,24 @@ public class PuertaBloqueada : MonoBehaviour
     [Header("Configuración")]
     public float interactionDistance = 3f;
 
-    [Header("Tags y Sonidos")]
-    public SonidoPorTag[] sonidosPorTag;
-
-    [Header("Sonido por defecto")]
-    public AudioClip sonidoPorDefecto;
+    [Header("Volumen")]
     [Range(0f, 1f)] public float volumenPorDefecto = 0.7f;
 
     [Header("Input")]
     public InputActionReference interactAction;
 
     // Referencias
-    private AudioSource audioSource; // AudioSource en este GameObject (para el sonido global)
     private InteractionSystem interactionSystem;
-
-    [System.Serializable]
-    public class SonidoPorTag
-    {
-        public string tag;
-        public AudioClip sonido;
-        [Range(0f, 1f)] public float volumen = 0.7f;
-    }
 
     void Start()
     {
-        // Configurar AudioSource (se queda en este GameObject)
-        audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.loop = false;
-        audioSource.playOnAwake = false;
-        audioSource.spatialBlend = 1f; // ?? Sonido 3D (se escucha en la posición de la fuente)
-        audioSource.rolloffMode = AudioRolloffMode.Logarithmic;
-        audioSource.minDistance = 0.5f;
-        audioSource.maxDistance = 10f;
-
         interactionSystem = FindObjectOfType<InteractionSystem>();
         if (interactionSystem == null)
         {
             Debug.LogError("? No se encontró InteractionSystem en la escena");
         }
 
-        Debug.Log("?? Sistema de puerta bloqueada inicializado");
+        Debug.Log("? Sistema de puerta bloqueada inicializado");
     }
 
     private void OnEnable()
@@ -73,26 +51,23 @@ public class PuertaBloqueada : MonoBehaviour
 
         string tag = target.tag;
 
-        // Verificar si el tag está configurado
-        bool esPuerta = false;
-        SonidoPorTag sonidoConfigurado = null;
-        foreach (SonidoPorTag item in sonidosPorTag)
-        {
-            if (item.tag == tag)
-            {
-                esPuerta = true;
-                sonidoConfigurado = item;
-                break;
-            }
-        }
+        // ============================================
+        // ?? MODIFICADO: AÑADIDO "PuertaGenerador" (singular)
+        // ============================================
+        bool esPuertaBloqueada = tag == "PuertaBloqueada" ||
+                                 tag == "PuertaMadera" ||
+                                 tag == "PuertaMetal" ||
+                                 tag == "PuertaGenerador" ||    // ? Singular (como en tu juego)
+                                 tag == "PuertaGeneradores" ||  // ? Plural (por si acaso)
+                                 tag == "PuertaColoresTV";
 
-        if (!esPuerta) return;
+        if (!esPuertaBloqueada) return;
 
         // Verificar distancia
         float distance = Vector3.Distance(Camera.main.transform.position, target.transform.position);
         if (distance > interactionDistance) return;
 
-        // ?? Verificar si la puerta está abierta
+        // Verificar si la puerta está abierta
         bool estaAbierta = false;
 
         PuertaGeneradores puertaGeneradores = target.GetComponent<PuertaGeneradores>();
@@ -107,10 +82,10 @@ public class PuertaBloqueada : MonoBehaviour
             estaAbierta = panelColores.IsOpen();
         }
 
-        // ?? Si la puerta NO está abierta, reproducir sonido EN LA PUERTA
+        // Si la puerta NO está abierta, reproducir sonido
         if (!estaAbierta)
         {
-            ReproducirSonidoEnPuerta(target, sonidoConfigurado);
+            ReproducirSonidoEnPuerta(target, tag);
             Debug.Log($"?? Puerta bloqueada: {target.name} (tag: {tag})");
         }
         else
@@ -119,37 +94,86 @@ public class PuertaBloqueada : MonoBehaviour
         }
     }
 
-    // ?? NUEVO: Reproducir sonido en la posición de la puerta
-    private void ReproducirSonidoEnPuerta(GameObject puerta, SonidoPorTag sonidoConfigurado)
+    // ============================================
+    // REPRODUCIR SONIDO EN LA POSICIÓN DE LA PUERTA
+    // ============================================
+    private void ReproducirSonidoEnPuerta(GameObject puerta, string tag)
     {
-        // Obtener el clip y el volumen
-        AudioClip clip = sonidoConfigurado != null ? sonidoConfigurado.sonido : sonidoPorDefecto;
-        float volumen = sonidoConfigurado != null ? sonidoConfigurado.volumen : volumenPorDefecto;
-
-        if (clip == null)
+        if (AudioManager.Instance == null)
         {
-            Debug.LogWarning($"?? No hay sonido asignado para la puerta: {puerta.name}");
+            Debug.LogWarning("?? AudioManager no disponible");
             return;
         }
 
-        // ?? Crear un GameObject temporal en la posición de la puerta para reproducir el sonido
-        GameObject sonidoGO = new GameObject($"SonidoPuerta_{puerta.name}");
-        sonidoGO.transform.position = puerta.transform.position;
+        AudioClip clip = null;
+        float volumen = volumenPorDefecto;
 
-        // Añadir AudioSource
-        AudioSource src = sonidoGO.AddComponent<AudioSource>();
-        src.clip = clip;
-        src.volume = volumen;
-        src.spatialBlend = 1f;
-        src.rolloffMode = AudioRolloffMode.Logarithmic;
-        src.minDistance = 0.5f;
-        src.maxDistance = 10f;
-        src.Play();
+        // Determinar qué clip reproducir según el tag
+        switch (tag)
+        {
+            case "PuertaMadera":
+                if (AudioManager.Instance.sonidosPuertaBloqueada != null && AudioManager.Instance.sonidosPuertaBloqueada.Length > 0)
+                {
+                    clip = AudioManager.Instance.sonidosPuertaBloqueada[0];
+                }
+                break;
 
-        // Destruir el GameObject cuando termine el sonido
-        Destroy(sonidoGO, clip.length + 0.1f);
+            case "PuertaMetal":
+                if (AudioManager.Instance.sonidosPuertaBloqueada != null && AudioManager.Instance.sonidosPuertaBloqueada.Length > 1)
+                {
+                    clip = AudioManager.Instance.sonidosPuertaBloqueada[1];
+                }
+                else if (AudioManager.Instance.sonidosPuertaBloqueada != null && AudioManager.Instance.sonidosPuertaBloqueada.Length > 0)
+                {
+                    clip = AudioManager.Instance.sonidosPuertaBloqueada[0];
+                }
+                break;
 
-        Debug.Log($"?? Sonido reproducido en puerta: {puerta.name} (clip: {clip.name})");
+            case "PuertaGenerador":
+            case "PuertaGeneradores":
+                if (AudioManager.Instance.sonidosPuertaBloqueada != null && AudioManager.Instance.sonidosPuertaBloqueada.Length > 2)
+                {
+                    clip = AudioManager.Instance.sonidosPuertaBloqueada[2];
+                }
+                else if (AudioManager.Instance.sonidosPuertaBloqueada != null && AudioManager.Instance.sonidosPuertaBloqueada.Length > 0)
+                {
+                    clip = AudioManager.Instance.sonidosPuertaBloqueada[0];
+                }
+                break;
+
+            case "PuertaColoresTV":
+                if (AudioManager.Instance.sonidosPuertaBloqueada != null && AudioManager.Instance.sonidosPuertaBloqueada.Length > 3)
+                {
+                    clip = AudioManager.Instance.sonidosPuertaBloqueada[3];
+                }
+                else if (AudioManager.Instance.sonidosPuertaBloqueada != null && AudioManager.Instance.sonidosPuertaBloqueada.Length > 0)
+                {
+                    clip = AudioManager.Instance.sonidosPuertaBloqueada[0];
+                }
+                break;
+
+            default:
+                if (AudioManager.Instance.sonidosPuertaBloqueada != null && AudioManager.Instance.sonidosPuertaBloqueada.Length > 0)
+                {
+                    clip = AudioManager.Instance.sonidosPuertaBloqueada[0];
+                }
+                break;
+        }
+
+        if (clip == null)
+        {
+            Debug.LogWarning($"?? No hay sonido asignado para el tag '{tag}' en AudioManager");
+            return;
+        }
+
+        AudioManager.Instance.PlayOneShotAtPosition(
+            clip,
+            puerta.transform.position,
+            volumen,
+            10f
+        );
+
+        Debug.Log($"?? Sonido reproducido en puerta: {puerta.name} (tag: {tag}, clip: {clip.name})");
     }
 
     private GameObject GetTargetObject()

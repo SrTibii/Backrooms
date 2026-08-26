@@ -9,13 +9,8 @@ public class Linterna : MonoBehaviour
     [Header("Input")]
     public InputActionReference flashLightPressed;
 
-    [Header("Sonidos")]
-    public AudioClip sonidoEncender;
-    public AudioClip sonidoApagar;
+    [Header("Volumen")]
     [Range(0f, 1f)] public float volumenSonidos = 0.7f;
-
-    // AudioSource para reproducir sonidos
-    private AudioSource audioSource;
 
     // Referencia al sistema de recogida
     private RecogerLinterna recogerLinterna;
@@ -26,21 +21,7 @@ public class Linterna : MonoBehaviour
         // Buscar el sistema de recogida
         recogerLinterna = FindObjectOfType<RecogerLinterna>();
 
-        // ?? Crear AudioSource si no existe
-        audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-        {
-            audioSource = gameObject.AddComponent<AudioSource>();
-        }
-
-        // Configurar AudioSource
-        audioSource.loop = false;
-        audioSource.playOnAwake = false;
-        audioSource.spatialBlend = 1f; // Sonido 3D
-        audioSource.volume = volumenSonidos;
-        audioSource.rolloffMode = AudioRolloffMode.Logarithmic;
-        audioSource.minDistance = 1f;
-        audioSource.maxDistance = 10f;
+        Debug.Log("? Linterna inicializada");
     }
 
     private void OnEnable()
@@ -69,15 +50,17 @@ public class Linterna : MonoBehaviour
             bool nuevoEstado = !flashLight.enabled;
             flashLight.enabled = nuevoEstado;
 
-            // ?? Reproducir sonido según el estado
+            // ============================================
+            // REPRODUCIR SONIDO CON AUDIOMANAGER
+            // ============================================
             if (nuevoEstado)
             {
-                ReproducirSonido(sonidoEncender);
+                ReproducirSonidoEncender();
                 Debug.Log($"?? Linterna ENCENDIDA");
             }
             else
             {
-                ReproducirSonido(sonidoApagar);
+                ReproducirSonidoApagar();
                 Debug.Log($"?? Linterna APAGADA");
             }
         }
@@ -87,13 +70,65 @@ public class Linterna : MonoBehaviour
         }
     }
 
-    // ?? Método para reproducir sonidos
-    private void ReproducirSonido(AudioClip clip)
+    // ============================================
+    // REPRODUCIR SONIDO DE ENCENDER CON AUDIOMANAGER
+    // ============================================
+    private void ReproducirSonidoEncender()
     {
-        if (clip == null) return;
+        if (AudioManager.Instance == null)
+        {
+            Debug.LogWarning("?? AudioManager no disponible");
+            return;
+        }
 
-        audioSource.volume = volumenSonidos;
-        audioSource.PlayOneShot(clip);
+        // Usar el sonido de zoomInSound como sonido de encender (o crear uno específico)
+        // Si no hay un sonido específico para encender, usamos zoomInSound como placeholder
+        AudioClip clip = AudioManager.Instance.zoomInSound;
+
+        if (clip != null)
+        {
+            AudioManager.Instance.PlayOneShotAtPosition(
+                clip,
+                transform.position,
+                volumenSonidos,
+                5f
+            );
+            Debug.Log($"?? Sonido de encender reproducido");
+        }
+        else
+        {
+            Debug.LogWarning("?? No hay sonido de encender disponible en AudioManager");
+        }
+    }
+
+    // ============================================
+    // REPRODUCIR SONIDO DE APAGAR CON AUDIOMANAGER
+    // ============================================
+    private void ReproducirSonidoApagar()
+    {
+        if (AudioManager.Instance == null)
+        {
+            Debug.LogWarning("?? AudioManager no disponible");
+            return;
+        }
+
+        // Usar el sonido de zoomOutSound como sonido de apagar (o crear uno específico)
+        AudioClip clip = AudioManager.Instance.zoomOutSound;
+
+        if (clip != null)
+        {
+            AudioManager.Instance.PlayOneShotAtPosition(
+                clip,
+                transform.position,
+                volumenSonidos,
+                5f
+            );
+            Debug.Log($"?? Sonido de apagar reproducido");
+        }
+        else
+        {
+            Debug.LogWarning("?? No hay sonido de apagar disponible en AudioManager");
+        }
     }
 
     // Métodos para controlar el estado desde el sistema de recogida
@@ -108,10 +143,9 @@ public class Linterna : MonoBehaviour
         return isInHand;
     }
 
-    // ?? Método para cambiar el volumen desde fuera
+    // Método para cambiar el volumen desde fuera
     public void SetVolume(float newVolume)
     {
         volumenSonidos = Mathf.Clamp01(newVolume);
-        audioSource.volume = volumenSonidos;
     }
 }

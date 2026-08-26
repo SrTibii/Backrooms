@@ -26,18 +26,16 @@ public class LockerHideSystem : MonoBehaviour
     [Header("Input Actions")]
     public InputActionReference interactAction;
 
-    [Header("Sonidos de entrada/salida")]
-    public AudioClip enterSound;
-    public AudioClip exitSound;
+    [Header("Volumen")]
     [Range(0f, 1f)] public float enterSoundVolume = 0.7f;
     [Range(0f, 1f)] public float exitSoundVolume = 0.7f;
-
-    private AudioSource audioSource;
-    private AudioListener lockerAudioListener;
 
     [Header("Debug")]
     public bool showDebugLogs = true;
 
+    // ============================================
+    // VARIABLES PRIVADAS
+    // ============================================
     private bool isLookingAtDoor = false;
     private bool isHiding = false;
 
@@ -50,6 +48,7 @@ public class LockerHideSystem : MonoBehaviour
 
     private EnemyIA[] enemies;
     private bool wasLockerAudioListenerActive;
+    private AudioListener lockerAudioListener; // <--- AÑADIDA ESTA VARIABLE
 
     public bool IsPlayerHiding() => isHiding;
 
@@ -135,11 +134,6 @@ public class LockerHideSystem : MonoBehaviour
         }
 
         enemies = FindObjectsOfType<EnemyIA>();
-
-        audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.loop = false;
-        audioSource.playOnAwake = false;
-        audioSource.spatialBlend = 0f;
 
         if (crosshairImage == null && interactionSystem != null)
         {
@@ -230,7 +224,7 @@ public class LockerHideSystem : MonoBehaviour
         }
 
         isHiding = true;
-        IsPlayerHidingGlobal = true; // ?? ACTIVAR FLAG GLOBAL
+        IsPlayerHidingGlobal = true;
 
         if (doorObject != null)
         {
@@ -301,7 +295,24 @@ public class LockerHideSystem : MonoBehaviour
             Debug.Log("AudioListener del player DESACTIVADO");
         }
 
-        PlayEnterSound();
+        // ============================================
+        // REPRODUCIR SONIDO DE ENTRADA CON AUDIOMANAGER
+        // ============================================
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoEnterLocker != null)
+        {
+            AudioManager.Instance.PlayOneShotAtPosition(
+                AudioManager.Instance.sonidoEnterLocker,
+                transform.position,
+                enterSoundVolume,
+                5f
+            );
+            Debug.Log($"?? Sonido de entrada reproducido (volumen: {enterSoundVolume})");
+        }
+        else
+        {
+            if (showDebugLogs) Debug.LogWarning($"?? {gameObject.name}: AudioManager o sonidoEnterLocker no disponible");
+        }
+
         NotifyEnemiesPlayerHid(true);
 
         Debug.Log($"? {gameObject.name}: Entrando a la taquilla - Flag Global = {IsPlayerHidingGlobal}");
@@ -370,9 +381,26 @@ public class LockerHideSystem : MonoBehaviour
         }
 
         isHiding = false;
-        IsPlayerHidingGlobal = false; // ?? DESACTIVAR FLAG GLOBAL
+        IsPlayerHidingGlobal = false;
 
-        PlayExitSound();
+        // ============================================
+        // REPRODUCIR SONIDO DE SALIDA CON AUDIOMANAGER
+        // ============================================
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoExitLocker != null)
+        {
+            AudioManager.Instance.PlayOneShotAtPosition(
+                AudioManager.Instance.sonidoExitLocker,
+                transform.position,
+                exitSoundVolume,
+                5f
+            );
+            Debug.Log($"?? Sonido de salida reproducido (volumen: {exitSoundVolume})");
+        }
+        else
+        {
+            if (showDebugLogs) Debug.LogWarning($"?? {gameObject.name}: AudioManager o sonidoExitLocker no disponible");
+        }
+
         NotifyEnemiesPlayerHid(false);
 
         Debug.Log($"? {gameObject.name}: Saliendo de la taquilla - Flag Global = {IsPlayerHidingGlobal}");
@@ -418,32 +446,6 @@ public class LockerHideSystem : MonoBehaviour
         playerController.ResetMovementState();
         playerController.enabled = false;
         Debug.Log("Estado del player reseteado correctamente");
-    }
-
-    void PlayEnterSound()
-    {
-        if (enterSound == null)
-        {
-            if (showDebugLogs) Debug.LogWarning($"?? {gameObject.name}: No se ha asignado un sonido de entrada");
-            return;
-        }
-
-        audioSource.volume = enterSoundVolume;
-        audioSource.PlayOneShot(enterSound);
-        Debug.Log($"Sonido de entrada reproducido (volumen: {enterSoundVolume})");
-    }
-
-    void PlayExitSound()
-    {
-        if (exitSound == null)
-        {
-            if (showDebugLogs) Debug.LogWarning($"?? {gameObject.name}: No se ha asignado un sonido de salida");
-            return;
-        }
-
-        audioSource.volume = exitSoundVolume;
-        audioSource.PlayOneShot(exitSound);
-        Debug.Log($"Sonido de salida reproducido (volumen: {exitSoundVolume})");
     }
 
     public bool IsHiding()

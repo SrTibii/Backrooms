@@ -98,9 +98,7 @@ public class FirstPersonController : MonoBehaviour
     public bool enableZoomVignette = true;
     public float zoomVignetteIntensity = 0.8f;
 
-    [Header("Zoom Audio")]
-    public AudioClip zoomInSound;
-    public AudioClip zoomOutSound;
+    [Header("Zoom Audio")] // AHORA USA AUDIOMANAGER
     public float zoomSoundVolume = 0.5f;
 
     [Header("Focus Effect")]
@@ -109,10 +107,9 @@ public class FirstPersonController : MonoBehaviour
     public float focusBlurAmount = 15f;
 
     // ============================================
-    // 10. AUDIO DE PASOS
+    // 10. AUDIO DE PASOS - CONFIGURACIÓN
     // ============================================
     [Header("Footstep Audio")]
-    public AudioClip[] footstepSounds;
     public float footstepVolume = 0.4f;
     public float footstepPitchMin = 0.85f;
     public float footstepPitchMax = 1.15f;
@@ -120,14 +117,12 @@ public class FirstPersonController : MonoBehaviour
     public bool enableFootsteps = true;
 
     [Header("Sprint Footstep Audio")]
-    public AudioClip[] sprintFootstepSounds;
     public float sprintFootstepInterval = 0.35f;
 
     // ============================================
-    // 11. AUDIO DE RESPIRACIÓN
+    // 11. AUDIO DE RESPIRACIÓN - CONFIGURACIÓN
     // ============================================
     [Header("Breathing Audio")]
-    public AudioClip breathingClip;
     public float breathingVolumeWalk = 0.15f;
     public float breathingVolumeSprint = 0.5f;
     public float breathingPitchWalk = 0.9f;
@@ -135,11 +130,9 @@ public class FirstPersonController : MonoBehaviour
     public float breathingTransitionSpeed = 2f;
 
     // ============================================
-    // 11.5. STAMINA AUDIO
+    // 11.5. STAMINA AUDIO - CONFIGURACIÓN
     // ============================================
     [Header("Stamina Audio")]
-    public AudioClip staminaDepletedSound;
-    public AudioClip staminaRecoveredSound;
     public float staminaSoundVolume = 0.5f;
 
     // ============================================
@@ -159,9 +152,7 @@ public class FirstPersonController : MonoBehaviour
     public float ceilingCheckDistance = 0.3f;
     public LayerMask ceilingLayerMask = -1;
 
-    [Header("Crouch Audio")]
-    public AudioClip crouchSound;
-    public AudioClip standSound;
+    [Header("Crouch Audio")] // AHORA USA AUDIOMANAGER
     public float crouchSoundVolume = 0.3f;
 
     // ============================================
@@ -208,7 +199,7 @@ public class FirstPersonController : MonoBehaviour
     private Vector2 moveInput;
     private Vector2 lookInput;
 
-    // Audio
+    // Audio - USANDO AUDIOMANAGER
     private float footstepTimer;
     private AudioSource footstepAudioSource;
     private AudioSource breathingAudioSource;
@@ -253,7 +244,7 @@ public class FirstPersonController : MonoBehaviour
     private float crouchCooldownTimer = 0f;
     private float crouchCooldown = 0.3f;
 
-    // ?? NUEVO: Control de muerte
+    // Control de muerte
     private bool estaMuerto = false;
 
     // ============================================
@@ -432,51 +423,77 @@ public class FirstPersonController : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        // --- AudioSource para pasos ---
+        // --- AudioSource para pasos (registrado en AudioManager) ---
         footstepAudioSource = gameObject.AddComponent<AudioSource>();
         footstepAudioSource.loop = false;
         footstepAudioSource.playOnAwake = false;
         footstepAudioSource.spatialBlend = 0f;
         footstepAudioSource.volume = footstepVolume;
 
-        // --- AudioSource para respiración ---
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.RegistrarAudioSource(footstepAudioSource);
+        }
+
+        // --- AudioSource para respiración (registrado en AudioManager) ---
         breathingAudioSource = gameObject.AddComponent<AudioSource>();
         breathingAudioSource.loop = true;
         breathingAudioSource.playOnAwake = false;
         breathingAudioSource.spatialBlend = 0f;
-        breathingAudioSource.clip = breathingClip;
+
+        // Obtener clip de AudioManager
+        if (AudioManager.Instance != null)
+        {
+            breathingAudioSource.clip = AudioManager.Instance.breathingClip;
+            AudioManager.Instance.RegistrarAudioSource(breathingAudioSource);
+        }
 
         currentBreathingVolume = breathingVolumeWalk;
         currentBreathingPitch = breathingPitchWalk;
         breathingAudioSource.volume = currentBreathingVolume;
         breathingAudioSource.pitch = currentBreathingPitch;
 
-        if (breathingClip != null)
+        if (breathingAudioSource.clip != null)
         {
             breathingAudioSource.Play();
         }
 
-        // --- AudioSource para zoom ---
+        // --- AudioSource para zoom (registrado en AudioManager) ---
         zoomAudioSource = gameObject.AddComponent<AudioSource>();
         zoomAudioSource.loop = false;
         zoomAudioSource.playOnAwake = false;
         zoomAudioSource.spatialBlend = 0f;
         zoomAudioSource.volume = zoomSoundVolume;
 
-        // --- AudioSource para crouch ---
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.RegistrarAudioSource(zoomAudioSource);
+        }
+
+        // --- AudioSource para crouch (registrado en AudioManager) ---
         crouchAudioSource = gameObject.AddComponent<AudioSource>();
         crouchAudioSource.loop = false;
         crouchAudioSource.playOnAwake = false;
         crouchAudioSource.spatialBlend = 0f;
         crouchAudioSource.volume = crouchSoundVolume;
 
-        // --- AudioSource para sonidos de stamina ---
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.RegistrarAudioSource(crouchAudioSource);
+        }
+
+        // --- AudioSource para sonidos de stamina (registrado en AudioManager) ---
         staminaAudioSource = gameObject.AddComponent<AudioSource>();
         staminaAudioSource.loop = true;
         staminaAudioSource.playOnAwake = false;
         staminaAudioSource.spatialBlend = 0f;
         staminaAudioSource.volume = staminaSoundVolume;
-        staminaAudioSource.clip = staminaDepletedSound;
+
+        if (AudioManager.Instance != null)
+        {
+            staminaAudioSource.clip = AudioManager.Instance.staminaDepletedSound;
+            AudioManager.Instance.RegistrarAudioSource(staminaAudioSource);
+        }
 
         // --- Stamina ---
         currentStamina = maxStamina;
@@ -489,10 +506,8 @@ public class FirstPersonController : MonoBehaviour
     // ============================================
     void Update()
     {
-        // ?? SI EL JUGADOR ESTÁ MUERTO, NO EJECUTAR NADA
         if (estaMuerto) return;
 
-        // Reducir cooldown del crouch
         if (crouchCooldownTimer > 0f)
         {
             crouchCooldownTimer -= Time.deltaTime;
@@ -542,8 +557,10 @@ public class FirstPersonController : MonoBehaviour
                 isSprinting = false;
                 staminaRegenTimer = 0f;
 
-                if (staminaDepletedSound != null && !isPlayingStaminaBreath)
+                // USAR AUDIOMANAGER PARA SONIDO DE STAMINA AGOTADA
+                if (AudioManager.Instance != null && AudioManager.Instance.staminaDepletedSound != null && !isPlayingStaminaBreath)
                 {
+                    staminaAudioSource.clip = AudioManager.Instance.staminaDepletedSound;
                     staminaAudioSource.Play();
                     isPlayingStaminaBreath = true;
                 }
@@ -578,6 +595,12 @@ public class FirstPersonController : MonoBehaviour
                         {
                             staminaAudioSource.Stop();
                             isPlayingStaminaBreath = false;
+                        }
+
+                        // USAR AUDIOMANAGER PARA SONIDO DE RECUPERACIÓN
+                        if (AudioManager.Instance != null && AudioManager.Instance.staminaRecoveredSound != null)
+                        {
+                            AudioManager.Instance.PlayOneShot(staminaAudioSource, AudioManager.Instance.staminaRecoveredSound, staminaSoundVolume);
                         }
 
                         Debug.Log("¡Recuperado! Puedes correr de nuevo.");
@@ -781,29 +804,37 @@ public class FirstPersonController : MonoBehaviour
     }
 
     // ============================================
-    // 23. SONIDOS DE PASOS
+    // 23. SONIDOS DE PASOS - USANDO AUDIOMANAGER
     // ============================================
     void HandleFootsteps()
     {
-        if (isMoving && footstepSounds != null && footstepSounds.Length > 0)
+        if (!enableFootsteps || AudioManager.Instance == null) return;
+
+        if (isMoving)
         {
             footstepTimer += Time.deltaTime;
 
-            AudioClip[] currentSounds = footstepSounds;
+            AudioClip[] currentSounds = null;
             float currentInterval = footstepInterval;
 
             if (isCrouching)
             {
+                currentSounds = AudioManager.Instance.footstepSounds;
                 currentInterval = footstepInterval * 1.2f;
             }
             else if (isSprinting && isMoving && currentStamina > 0 && !isExhausted)
             {
-                if (sprintFootstepSounds != null && sprintFootstepSounds.Length > 0)
-                {
-                    currentSounds = sprintFootstepSounds;
-                }
+                currentSounds = AudioManager.Instance.sprintFootstepSounds != null && AudioManager.Instance.sprintFootstepSounds.Length > 0
+                    ? AudioManager.Instance.sprintFootstepSounds
+                    : AudioManager.Instance.footstepSounds;
                 currentInterval = sprintFootstepInterval;
             }
+            else
+            {
+                currentSounds = AudioManager.Instance.footstepSounds;
+            }
+
+            if (currentSounds == null || currentSounds.Length == 0) return;
 
             float randomVariation = Random.Range(0.85f, 1.15f);
             currentInterval *= randomVariation;
@@ -822,7 +853,7 @@ public class FirstPersonController : MonoBehaviour
 
     void PlayFootstepSound(AudioClip[] sounds)
     {
-        if (sounds == null || sounds.Length == 0) return;
+        if (sounds == null || sounds.Length == 0 || AudioManager.Instance == null) return;
 
         AudioClip clip = sounds[Random.Range(0, sounds.Length)];
         float pitch = Random.Range(footstepPitchMin, footstepPitchMax);
@@ -837,17 +868,17 @@ public class FirstPersonController : MonoBehaviour
             volume *= 1.2f;
         }
 
+        // Usar AudioManager para reproducir el sonido
+        AudioManager.Instance.PlayOneShot(footstepAudioSource, clip, volume);
         footstepAudioSource.pitch = pitch;
-        footstepAudioSource.volume = Mathf.Clamp01(volume);
-        footstepAudioSource.PlayOneShot(clip);
     }
 
     // ============================================
-    // 24. SONIDO DE RESPIRACIÓN
+    // 24. SONIDO DE RESPIRACIÓN - USANDO AUDIOMANAGER
     // ============================================
     void HandleBreathing()
     {
-        if (breathingClip == null) return;
+        if (AudioManager.Instance == null || AudioManager.Instance.breathingClip == null) return;
 
         bool isRunning = isSprinting && isMoving && currentStamina > 0 && !isExhausted && !isCrouching;
         bool isWalking = isMoving && !isRunning;
@@ -887,7 +918,7 @@ public class FirstPersonController : MonoBehaviour
         breathingAudioSource.volume = currentBreathingVolume;
         breathingAudioSource.pitch = currentBreathingPitch;
 
-        if (!breathingAudioSource.isPlaying && breathingClip != null)
+        if (!breathingAudioSource.isPlaying && AudioManager.Instance.breathingClip != null)
         {
             breathingAudioSource.Play();
         }
@@ -925,7 +956,7 @@ public class FirstPersonController : MonoBehaviour
     }
 
     // ============================================
-    // 26. ZOOM VHS - TOGGLE Y EFECTOS
+    // 26. ZOOM VHS - TOGGLE Y EFECTOS (USANDO AUDIOMANAGER)
     // ============================================
     public void ToggleZoom()
     {
@@ -938,18 +969,20 @@ public class FirstPersonController : MonoBehaviour
                 originalFOV = playerCamera.fieldOfView;
             }
 
-            if (zoomInSound != null)
+            // USAR AUDIOMANAGER PARA ZOOM IN
+            if (AudioManager.Instance != null && AudioManager.Instance.zoomInSound != null)
             {
-                zoomAudioSource.PlayOneShot(zoomInSound);
+                AudioManager.Instance.PlayOneShot(zoomAudioSource, AudioManager.Instance.zoomInSound, zoomSoundVolume);
             }
 
             Debug.Log("Zoom IN - Efecto VHS activado");
         }
         else
         {
-            if (zoomOutSound != null)
+            // USAR AUDIOMANAGER PARA ZOOM OUT
+            if (AudioManager.Instance != null && AudioManager.Instance.zoomOutSound != null)
             {
-                zoomAudioSource.PlayOneShot(zoomOutSound);
+                AudioManager.Instance.PlayOneShot(zoomAudioSource, AudioManager.Instance.zoomOutSound, zoomSoundVolume);
             }
 
             Debug.Log("Zoom OUT - Efecto VHS desactivado");
@@ -1092,7 +1125,6 @@ public class FirstPersonController : MonoBehaviour
         if (!enableCrouch) return;
         if (isZoomed) return;
 
-        // Cooldown: Si el timer es mayor que 0, no se puede cambiar de estado
         if (crouchCooldownTimer > 0f) return;
 
         if (isCrouching)
@@ -1109,22 +1141,22 @@ public class FirstPersonController : MonoBehaviour
         isCrouching = !isCrouching;
         isBlockedByCeiling = false;
 
-        // Iniciar cooldown
         crouchCooldownTimer = crouchCooldown;
 
+        // USAR AUDIOMANAGER PARA SONIDOS DE CROUCH
         if (isCrouching)
         {
-            if (crouchSound != null)
+            if (AudioManager.Instance != null && AudioManager.Instance.crouchSound != null)
             {
-                crouchAudioSource.PlayOneShot(crouchSound);
+                AudioManager.Instance.PlayOneShot(crouchAudioSource, AudioManager.Instance.crouchSound, crouchSoundVolume);
             }
             Debug.Log("Agachado");
         }
         else
         {
-            if (standSound != null)
+            if (AudioManager.Instance != null && AudioManager.Instance.standSound != null)
             {
-                crouchAudioSource.PlayOneShot(standSound);
+                AudioManager.Instance.PlayOneShot(crouchAudioSource, AudioManager.Instance.standSound, crouchSoundVolume);
             }
             Debug.Log("De pie");
         }
@@ -1220,60 +1252,44 @@ public class FirstPersonController : MonoBehaviour
     }
 
     // ============================================
-    // ?? NUEVOS MÉTODOS PARA CONTROL DE MUERTE
+    // MÉTODOS PARA CONTROL DE MUERTE
     // ============================================
 
-    /// <summary>
-    /// Marca al jugador como muerto. Detiene todo movimiento y actualización.
-    /// </summary>
     public void MarcarComoMuerto()
     {
         if (estaMuerto) return;
 
         estaMuerto = true;
-        Debug.Log("?? Jugador marcado como muerto");
+        Debug.Log("Jugador marcado como muerto");
 
-        // Desactivar el CharacterController para evitar errores
         if (controller != null && controller.enabled)
         {
             controller.enabled = false;
-            Debug.Log("? CharacterController desactivado");
+            Debug.Log("CharacterController desactivado");
         }
 
-        // Desactivar el movimiento actual
         currentVelocity = Vector3.zero;
         verticalVelocity = 0f;
         isMoving = false;
         moveInput = Vector2.zero;
-
-        // Opcional: ocultar el cursor (dependiendo de tu juego)
-        // Cursor.lockState = CursorLockMode.None;
-        // Cursor.visible = true;
     }
 
-    /// <summary>
-    /// Devuelve true si el jugador está muerto.
-    /// </summary>
     public bool EstaMuerto()
     {
         return estaMuerto;
     }
 
-    /// <summary>
-    /// Reinicia el estado de muerte (para reiniciar el nivel sin recargar la escena).
-    /// </summary>
     public void Revivir()
     {
         estaMuerto = false;
-        Debug.Log("?? Jugador revivido");
+        Debug.Log("Jugador revivido");
 
         if (controller != null)
         {
             controller.enabled = true;
-            Debug.Log("? CharacterController reactivado");
+            Debug.Log("CharacterController reactivado");
         }
 
-        // Restaurar posición y otras variables si es necesario
         currentVelocity = Vector3.zero;
         verticalVelocity = 0f;
         isMoving = false;
@@ -1282,6 +1298,6 @@ public class FirstPersonController : MonoBehaviour
     public void SetMouseSensitivity(float newSensitivity)
     {
         mouseSensitivity = newSensitivity;
-        Debug.Log($"?? Sensibilidad del ratón cambiada a: {newSensitivity}");
+        Debug.Log($"Sensibilidad del ratón cambiada a: {newSensitivity}");
     }
 }

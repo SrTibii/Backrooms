@@ -11,13 +11,8 @@ public class CajaFuerte : MonoBehaviour
     [Header("Referencias UI")]
     public TextMeshProUGUI[] digitosUI; // Array de 4 TextMeshPro (las X)
 
-    [Header("Audio")]
-    public AudioClip sonidoAcierto;
-    public AudioClip sonidoError;
-    public AudioClip sonidoBoton;
+    [Header("Volumen")]
     [Range(0f, 1f)] public float volumenSonidos = 0.7f;
-
-   
 
     [Header("Puerta de la caja")]
     public GameObject puertaCaja; // La puerta de la caja fuerte (animacion)
@@ -29,18 +24,13 @@ public class CajaFuerte : MonoBehaviour
     private string[] digitosIngresados = new string[4];
     private int pasoActual = 0;
     private bool isOpen = false;
-    private AudioSource audioSource;
 
     void Start()
     {
-        // Configurar AudioSource
-        audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.loop = false;
-        audioSource.playOnAwake = false;
-        audioSource.spatialBlend = 0f;
-
         // Reiniciar la UI
         ReiniciarUI();
+
+        Debug.Log("? CajaFuerte inicializada");
     }
 
     private void OnEnable()
@@ -68,7 +58,7 @@ public class CajaFuerte : MonoBehaviour
         GameObject target = GetTargetObject();
         if (target == null) return;
 
-        // ?? Intentar obtener el componente BotonNumero
+        // Intentar obtener el componente BotonNumero
         BotonNumero boton = target.GetComponent<BotonNumero>();
         if (boton != null)
         {
@@ -110,7 +100,23 @@ public class CajaFuerte : MonoBehaviour
             digitosUI[pasoActual].text = numero;
         }
 
-        ReproducirSonido(sonidoBoton);
+        // ============================================
+        // REPRODUCIR SONIDO DE BOTÓN CON AUDIOMANAGER
+        // ============================================
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoCajaBoton != null)
+        {
+            AudioManager.Instance.PlayOneShotAtPosition(
+                AudioManager.Instance.sonidoCajaBoton,
+                transform.position,
+                volumenSonidos,
+                10f
+            );
+        }
+        else
+        {
+            Debug.LogWarning("?? AudioManager o sonidoCajaBoton no disponible");
+        }
+
         pasoActual++;
 
         if (pasoActual >= maxDigitos)
@@ -134,16 +140,31 @@ public class CajaFuerte : MonoBehaviour
 
         if (esCorrecta)
         {
-            //CIERTO - ABRIR CAJA
+            // CIERTO - ABRIR CAJA
             isOpen = true;
-            ReproducirSonido(sonidoAcierto);
-            Debug.Log("¡CAJA FUERTE ABIERTA!");
 
-            
-            //Animación de la puerta
+            // ============================================
+            // REPRODUCIR SONIDO DE ACIERTO CON AUDIOMANAGER
+            // ============================================
+            if (AudioManager.Instance != null && AudioManager.Instance.sonidoCajaAcierto != null)
+            {
+                AudioManager.Instance.PlayOneShotAtPosition(
+                    AudioManager.Instance.sonidoCajaAcierto,
+                    transform.position,
+                    volumenSonidos,
+                    15f
+                );
+            }
+            else
+            {
+                Debug.LogWarning("?? AudioManager o sonidoCajaAcierto no disponible");
+            }
+
+            Debug.Log("?? ¡CAJA FUERTE ABIERTA!");
+
+            // Animación de la puerta
             if (puertaCaja != null)
             {
-                // Aquí puedes activar una animación de apertura
                 Animator anim = puertaCaja.GetComponent<Animator>();
                 if (anim != null)
                     anim.SetTrigger("Abrir");
@@ -158,9 +179,25 @@ public class CajaFuerte : MonoBehaviour
         }
         else
         {
-            //ERROR - Reiniciar
-            ReproducirSonido(sonidoError);
-            Debug.Log("Combinación incorrecta. Reiniciando...");
+            // ERROR - Reiniciar
+            // ============================================
+            // REPRODUCIR SONIDO DE ERROR CON AUDIOMANAGER
+            // ============================================
+            if (AudioManager.Instance != null && AudioManager.Instance.sonidoCajaError != null)
+            {
+                AudioManager.Instance.PlayOneShotAtPosition(
+                    AudioManager.Instance.sonidoCajaError,
+                    transform.position,
+                    volumenSonidos,
+                    10f
+                );
+            }
+            else
+            {
+                Debug.LogWarning("?? AudioManager o sonidoCajaError no disponible");
+            }
+
+            Debug.Log("? Combinación incorrecta. Reiniciando...");
             ReiniciarUI();
         }
     }
@@ -185,13 +222,6 @@ public class CajaFuerte : MonoBehaviour
                 }
             }
         }
-    }
-
-    private void ReproducirSonido(AudioClip clip)
-    {
-        if (clip == null) return;
-        audioSource.volume = volumenSonidos;
-        audioSource.PlayOneShot(clip);
     }
 
     public void ReiniciarCaja()

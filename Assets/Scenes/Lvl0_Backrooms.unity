@@ -14115,8 +14115,6 @@ MonoBehaviour:
   textoNotaUI: {fileID: 261575369}
   tituloNotaUI: {fileID: 0}
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
-  sonidoAbrirNota: {fileID: 8300000, guid: 4d61a1b986a34fc409afc952352c9d66, type: 3}
-  sonidoCerrarNota: {fileID: 8300000, guid: 4d61a1b986a34fc409afc952352c9d66, type: 3}
   volumenSonido: 0.7
   holdPositionObject: {fileID: 8463024190610562278}
   holdPositionLinterna: {fileID: 575484295}
@@ -21518,7 +21516,6 @@ MonoBehaviour:
   luzRenderer: {fileID: 828019516}
   materialApagado: {fileID: 2100000, guid: 7dae7cdae8e52ff48b850efe7b988f44, type: 2}
   materialEncendido: {fileID: 2100000, guid: c497d953ac5aa9841b1d99c4cd37ee9e, type: 2}
-  sonidoActivacion: {fileID: 8300000, guid: 0c5e464e37670044e980441209c00293, type: 3}
   volumenSonido: 0.7
   interactionDistance: 3
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
@@ -25304,8 +25301,6 @@ MonoBehaviour:
   doorTransparentObject: {fileID: 1392681625}
   interactionDistance: 4
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
-  enterSound: {fileID: 8300000, guid: f397117500a20f246a7bd229291ec4b4, type: 3}
-  exitSound: {fileID: 8300000, guid: 18315a6f9fb56964d90b24a49ba1a9b8, type: 3}
   enterSoundVolume: 0.5
   exitSoundVolume: 0.5
   showDebugLogs: 0
@@ -56742,7 +56737,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TablaMadera
   interactionDistance: 5
-  sonidoRomper: {fileID: 8300000, guid: e616d28ccdc297445b3b995e977c65fe, type: 3}
   volumenSonido: 1
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
 --- !u!65 &455436402
@@ -57095,6 +57089,7 @@ MonoBehaviour:
   sliderSensibilidad: {fileID: 558329312}
   sliderBrillo: {fileID: 766002556}
   sliderFOV: {fileID: 1920379}
+  sliderVolumen: {fileID: 140666482}
   toggleFPS: {fileID: 1324113693}
   toggleSombras: {fileID: 731122480}
   togglePantallaCompleta: {fileID: 2025987945}
@@ -74922,14 +74917,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PuertaBloqueada
   interactionDistance: 3
-  sonidosPorTag:
-  - tag: PuertaGenerador
-    sonido: {fileID: 8300000, guid: 8f84fdc67ed75f440a4f1b28d55b467c, type: 3}
-    volumen: 0.7
-  - tag: PuertaColoresTV
-    sonido: {fileID: 8300000, guid: 8f84fdc67ed75f440a4f1b28d55b467c, type: 3}
-    volumen: 0.7
-  sonidoPorDefecto: {fileID: 0}
   volumenPorDefecto: 0.7
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
 --- !u!4 &618313428
@@ -83461,7 +83448,6 @@ MonoBehaviour:
   materialVerde: {fileID: 2100000, guid: c497d953ac5aa9841b1d99c4cd37ee9e, type: 2}
   puerta: {fileID: 685696878}
   triggerAbrir: Abrir
-  sonidoPuertaAbierta: {fileID: 8300000, guid: 697f0f96ef0e8fd4ea7d978c1a6839b1, type: 3}
   volumenSonido: 0.7
 --- !u!95 &685696881
 Animator:
@@ -83596,8 +83582,6 @@ MonoBehaviour:
   uiPausa: {fileID: 594397934}
   uiOpciones: {fileID: 221322801}
   pauseAction: {fileID: -5592002400440831791, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
-  sonidoClick: {fileID: 8300000, guid: f1003f578eed7f54b811046ff54e485e, type: 3}
-  sonidoHover: {fileID: 8300000, guid: 0c5e464e37670044e980441209c00293, type: 3}
   volumenSonidos: 0.4
 --- !u!4 &686546018
 Transform:
@@ -86083,8 +86067,6 @@ MonoBehaviour:
   doorTransparentObject: {fileID: 1582018727}
   interactionDistance: 4
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
-  enterSound: {fileID: 8300000, guid: f397117500a20f246a7bd229291ec4b4, type: 3}
-  exitSound: {fileID: 8300000, guid: 18315a6f9fb56964d90b24a49ba1a9b8, type: 3}
   enterSoundVolume: 0.5
   exitSoundVolume: 0.5
   showDebugLogs: 0
@@ -105743,8 +105725,6 @@ MonoBehaviour:
   doorTransparentObject: {fileID: 1293245158}
   interactionDistance: 4
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
-  enterSound: {fileID: 8300000, guid: f397117500a20f246a7bd229291ec4b4, type: 3}
-  exitSound: {fileID: 8300000, guid: 18315a6f9fb56964d90b24a49ba1a9b8, type: 3}
   enterSoundVolume: 0.5
   exitSoundVolume: 0.5
   showDebugLogs: 0
@@ -120279,7 +120259,6 @@ MonoBehaviour:
   luzRenderer: {fileID: 380639669}
   materialApagado: {fileID: 2100000, guid: 7dae7cdae8e52ff48b850efe7b988f44, type: 2}
   materialEncendido: {fileID: 2100000, guid: c497d953ac5aa9841b1d99c4cd37ee9e, type: 2}
-  sonidoActivacion: {fileID: 8300000, guid: 0c5e464e37670044e980441209c00293, type: 3}
   volumenSonido: 0.7
   interactionDistance: 3
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
@@ -126665,9 +126644,6 @@ MonoBehaviour:
   tagLlaveAzul: LlaveAzul
   tagLlaveVerde: LlaveVerde
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
-  sonidoCandadoAbierto: {fileID: 8300000, guid: 9ecd590b572156e46aa99baa856e9596, type: 3}
-  sonidoLlaveIncorrecta: {fileID: 8300000, guid: 8c6b7084bee814d49b6dfa7183978f65, type: 3}
-  sonidoPuertaAbierta: {fileID: 8300000, guid: 697f0f96ef0e8fd4ea7d978c1a6839b1, type: 3}
   volumenSonidos: 0.7
 --- !u!64 &1080545650
 MeshCollider:
@@ -129205,7 +129181,6 @@ MonoBehaviour:
   luzRenderer: {fileID: 828019516}
   materialApagado: {fileID: 2100000, guid: 7dae7cdae8e52ff48b850efe7b988f44, type: 2}
   materialEncendido: {fileID: 2100000, guid: c497d953ac5aa9841b1d99c4cd37ee9e, type: 2}
-  sonidoActivacion: {fileID: 8300000, guid: 0c5e464e37670044e980441209c00293, type: 3}
   volumenSonido: 0.7
   interactionDistance: 6
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
@@ -158341,7 +158316,6 @@ MonoBehaviour:
   luzRenderer: {fileID: 47561724}
   materialApagado: {fileID: 2100000, guid: 7dae7cdae8e52ff48b850efe7b988f44, type: 2}
   materialEncendido: {fileID: 2100000, guid: c497d953ac5aa9841b1d99c4cd37ee9e, type: 2}
-  sonidoActivacion: {fileID: 8300000, guid: 0c5e464e37670044e980441209c00293, type: 3}
   volumenSonido: 0.7
   interactionDistance: 3
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
@@ -168676,7 +168650,6 @@ MonoBehaviour:
   luzRenderer: {fileID: 380639669}
   materialApagado: {fileID: 2100000, guid: 7dae7cdae8e52ff48b850efe7b988f44, type: 2}
   materialEncendido: {fileID: 2100000, guid: c497d953ac5aa9841b1d99c4cd37ee9e, type: 2}
-  sonidoActivacion: {fileID: 8300000, guid: 0c5e464e37670044e980441209c00293, type: 3}
   volumenSonido: 0.7
   interactionDistance: 6
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
@@ -172261,11 +172234,6 @@ MonoBehaviour:
   walkSpeed: 4
   lostPlayerTime: 5
   hideWaitTime: 3
-  ambientSounds:
-  - {fileID: 8300000, guid: d614f9e878de0cf41815e369e17e6f22, type: 3}
-  chaseSounds:
-  - {fileID: 8300000, guid: c774e7fe4d3f78f499b3b5964a42f3d9, type: 3}
-  - {fileID: 8300000, guid: 2b9cc0f57f5a550439f3f3c077ec9a40, type: 3}
   ambientVolume: 0.3
   chaseVolume: 0.3
   minPauseBetweenAmbient: 2
@@ -172278,7 +172246,6 @@ MonoBehaviour:
   ambientAudioVerticalRange: 7.5
   showAudioGizmo: 1
   jumpscareDistance: 4
-  jumpscareSound: {fileID: 8300000, guid: 3a2dfb1f35bbe5745a2d136b0ac84b67, type: 3}
   jumpscareVolume: 0.5
   jumpscareDuration: 3
   jumpscareCamera: {fileID: 1236680498}
@@ -199770,10 +199737,7 @@ MonoBehaviour:
   - {fileID: 1325897248}
   - {fileID: 1662992192}
   delayAlFallar: 1.5
-  sonidoPulsarBoton: {fileID: 8300000, guid: c2ae10cbb81b3494d864e86fadb2ffc0, type: 3}
-  sonidoCombinacionCorrecta: {fileID: 8300000, guid: 67710b508e8fd9b4994bc44df10e277c, type: 3}
-  sonidoCombinacionIncorrecta: {fileID: 8300000, guid: 5ac0b56526a42614cbe1dfea067181e9, type: 3}
-  volumenSonidos: 0.7
+  volumenSonidos: 1
 --- !u!1 &1715041380
 GameObject:
   m_ObjectHideFlags: 0
@@ -227875,10 +227839,7 @@ MonoBehaviour:
   tagLlaveAzul: LlaveAzul
   tagLlaveVerde: LlaveVerde
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
-  sonidoCandadoAbierto: {fileID: 8300000, guid: 9ecd590b572156e46aa99baa856e9596, type: 3}
-  sonidoLlaveIncorrecta: {fileID: 8300000, guid: 8c6b7084bee814d49b6dfa7183978f65, type: 3}
-  sonidoPuertaAbierta: {fileID: 8300000, guid: 697f0f96ef0e8fd4ea7d978c1a6839b1, type: 3}
-  volumenSonidos: 0.7
+  volumenSonidos: 0.9
 --- !u!65 &1954566764
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -237263,7 +237224,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TablaMadera
   interactionDistance: 5
-  sonidoRomper: {fileID: 8300000, guid: e616d28ccdc297445b3b995e977c65fe, type: 3}
   volumenSonido: 1
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
 --- !u!65 &2032815189
@@ -248622,30 +248582,21 @@ MonoBehaviour:
   zoomTransitionSpeed: 5
   enableZoomVignette: 1
   zoomVignetteIntensity: 0.8
-  zoomInSound: {fileID: 8300000, guid: 2d92561a2146d984eb687957390e5ac2, type: 3}
-  zoomOutSound: {fileID: 8300000, guid: 234b1fba211478747a993ce952d5fd0e, type: 3}
   zoomSoundVolume: 0.5
   enableFocusEffect: 1
   focusTransitionSpeed: 3
   focusBlurAmount: 15
-  footstepSounds:
-  - {fileID: 8300000, guid: de43834cee953b74689395a57f773fdb, type: 3}
   footstepVolume: 0.3
   footstepPitchMin: 0.8
   footstepPitchMax: 1.2
   footstepInterval: 1
   enableFootsteps: 1
-  sprintFootstepSounds:
-  - {fileID: 8300000, guid: de43834cee953b74689395a57f773fdb, type: 3}
   sprintFootstepInterval: 0.5
-  breathingClip: {fileID: 8300000, guid: 0cec3a1758ef0f84e96af3e0bd2e8834, type: 3}
   breathingVolumeWalk: 15
   breathingVolumeSprint: 15.5
   breathingPitchWalk: 0.85
   breathingPitchSprint: 1.2
   breathingTransitionSpeed: 2.5
-  staminaDepletedSound: {fileID: 8300000, guid: c3d6e4cca8fc4bd4191734a6c1fc0d45, type: 3}
-  staminaRecoveredSound: {fileID: 0}
   staminaSoundVolume: 4
   enableCrouch: 1
   crouchHeight: 0.6
@@ -248659,8 +248610,6 @@ MonoBehaviour:
   ceilingLayerMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  crouchSound: {fileID: 8300000, guid: a8132134e614f9f4887250f0e1e32a4b, type: 3}
-  standSound: {fileID: 8300000, guid: f59938ad9c9d72647a35030db13f969d, type: 3}
   crouchSoundVolume: 0.7
   enableSway: 0
   swayAmount: 1.2
@@ -249907,22 +249856,7 @@ MonoBehaviour:
   - LlaveAzul
   - LlaveVerde
   - Moneda
-  - CintaVHS
-  sonidosPorTag:
-  - tag: LlaveRojo
-    sonido: {fileID: 8300000, guid: a18dc60d8363d2e41967a11d6e8f641f, type: 3}
-    volumen: 1
-  - tag: LlaveAzul
-    sonido: {fileID: 8300000, guid: a18dc60d8363d2e41967a11d6e8f641f, type: 3}
-    volumen: 1
-  - tag: LlaveVerde
-    sonido: {fileID: 8300000, guid: a18dc60d8363d2e41967a11d6e8f641f, type: 3}
-    volumen: 1
-  - tag: Moneda
-    sonido: {fileID: 8300000, guid: a18dc60d8363d2e41967a11d6e8f641f, type: 3}
-    volumen: 1
-  sonidoPorDefecto: {fileID: 8300000, guid: 0c80b7cf7294d71459a1e051989f32e3, type: 3}
-  volumenPorDefecto: 0.7
+  volumenPorDefecto: 1
 --- !u!1 &1858127245641710124
 GameObject:
   m_ObjectHideFlags: 0
@@ -251474,9 +251408,6 @@ MonoBehaviour:
   - {fileID: 778441006}
   - {fileID: 643989537}
   - {fileID: 1194828832}
-  sonidoAcierto: {fileID: 8300000, guid: 67710b508e8fd9b4994bc44df10e277c, type: 3}
-  sonidoError: {fileID: 8300000, guid: 5ac0b56526a42614cbe1dfea067181e9, type: 3}
-  sonidoBoton: {fileID: 8300000, guid: c2ae10cbb81b3494d864e86fadb2ffc0, type: 3}
   volumenSonidos: 0.7
   puertaCaja: {fileID: 6003542231179528525}
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
@@ -252025,7 +251956,6 @@ MonoBehaviour:
   glitchIntensityMax: 0.05
   positionGlitchAmount: 0.005
   rotationGlitchAmount: 0.1
-  glitchSound: {fileID: 8300000, guid: ca6513a7427d4564ea8e13844a533c73, type: 3}
   glitchSoundVolume: 0.15
 --- !u!81 &4657648971206769815
 AudioListener:
@@ -254339,9 +254269,7 @@ MonoBehaviour:
   pickupRange: 7
   smoothSpeed: 10
   linternaTag: Linterna
-  sonidoRecogerLinterna: {fileID: 8300000, guid: 98390a7420e6c3c42a092316b0d2df3f, type: 3}
-  sonidoSoltarLinterna: {fileID: 0}
-  volumenSonidos: 0.7
+  volumenSonidos: 1
 --- !u!114 &6528473899433236217
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -254360,9 +254288,7 @@ MonoBehaviour:
   pickupRange: 7
   smoothSpeed: 15
   martilloTag: Martillo
-  sonidoRecogerMartillo: {fileID: 8300000, guid: 0c80b7cf7294d71459a1e051989f32e3, type: 3}
-  sonidoSoltarMartillo: {fileID: 0}
-  volumenSonidos: 0.7
+  volumenSonidos: 1
 --- !u!33 &6557193832427089987
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -254960,8 +254886,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Linterna
   flashLight: {fileID: 572492476}
   flashLightPressed: {fileID: -6268360390814023790, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
-  sonidoEncender: {fileID: 8300000, guid: 0c9a2f31bc1846243907d12d15fda025, type: 3}
-  sonidoApagar: {fileID: 8300000, guid: 0c9a2f31bc1846243907d12d15fda025, type: 3}
   volumenSonidos: 1
 --- !u!54 &7087741503492390217
 Rigidbody:
@@ -257348,7 +257272,6 @@ MonoBehaviour:
   luzRenderer: {fileID: 47561724}
   materialApagado: {fileID: 2100000, guid: 7dae7cdae8e52ff48b850efe7b988f44, type: 2}
   materialEncendido: {fileID: 2100000, guid: c497d953ac5aa9841b1d99c4cd37ee9e, type: 2}
-  sonidoActivacion: {fileID: 8300000, guid: 0c5e464e37670044e980441209c00293, type: 3}
   volumenSonido: 0.7
   interactionDistance: 6
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
@@ -257481,8 +257404,6 @@ MonoBehaviour:
   llaveFalsa: {fileID: 392951443}
   llaveBuena: {fileID: 8315454898275150980}
   colliderInteractuable: {fileID: 1223767154}
-  sonidoInsertarMoneda: {fileID: 8300000, guid: bf62cd15ae565d9488b8d34d90d6e2af, type: 3}
-  sonidoCaerLlave: {fileID: 8300000, guid: 36a43d4c42d87e945bd910a2ed3c56b8, type: 3}
   volumenSonidos: 1
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
 --- !u!33 &8956983772365740038
@@ -257521,7 +257442,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TablaMadera
   interactionDistance: 5
-  sonidoRomper: {fileID: 8300000, guid: e616d28ccdc297445b3b995e977c65fe, type: 3}
   volumenSonido: 1
   interactAction: {fileID: 1794236840604793500, guid: 1a831d61a712bfb47a2c2ca63ac563e6, type: 3}
 --- !u!65 &8996911047909489828
@@ -257860,7 +257780,6 @@ MonoBehaviour:
   materialVerde: {fileID: 2100000, guid: c497d953ac5aa9841b1d99c4cd37ee9e, type: 2}
   puerta: {fileID: 2301541352423180035}
   triggerAbrir: Abrir
-  sonidoPuertaAbierta: {fileID: 8300000, guid: 697f0f96ef0e8fd4ea7d978c1a6839b1, type: 3}
   volumenSonido: 0.7
 --- !u!95 &9119292329488832279
 Animator:

@@ -19,15 +19,11 @@ public class PuertaFinal : MonoBehaviour
     [Header("Input")]
     public InputActionReference interactAction;
 
-    [Header("Audio")]
-    public AudioClip sonidoCandadoAbierto;
-    public AudioClip sonidoLlaveIncorrecta;
-    public AudioClip sonidoPuertaAbierta;
+    [Header("Volumen")]
     [Range(0f, 1f)] public float volumenSonidos = 0.7f;
 
     private int candadosAbiertos = 0;
     private bool puertaAbierta = false;
-    private AudioSource audioSource;
     private InteractionSystem interactionSystem;
 
     [System.Serializable]
@@ -40,19 +36,13 @@ public class PuertaFinal : MonoBehaviour
 
     void Start()
     {
-        audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.loop = false;
-        audioSource.playOnAwake = false;
-        audioSource.spatialBlend = 1f;
-        audioSource.volume = volumenSonidos;
-
         interactionSystem = FindObjectOfType<InteractionSystem>();
         if (interactionSystem == null)
         {
             Debug.LogError("? No se encontró InteractionSystem en la escena");
         }
 
-        Debug.Log("?? Puerta final inicializada");
+        Debug.Log("? Puerta final inicializada");
     }
 
     private void OnEnable()
@@ -180,11 +170,22 @@ public class PuertaFinal : MonoBehaviour
 
         if (TieneLlaveEnMano(tagLlave))
         {
-            if (sonidoCandadoAbierto != null)
+            // ============================================
+            // REPRODUCIR SONIDO DE CANDADO ABIERTO
+            // ============================================
+            if (AudioManager.Instance != null && AudioManager.Instance.sonidoCandadoAbierto != null)
             {
-                audioSource.volume = volumenSonidos;
-                audioSource.PlayOneShot(sonidoCandadoAbierto);
+                AudioManager.Instance.PlayOneShotAtPosition(
+                    AudioManager.Instance.sonidoCandadoAbierto,
+                    candado.candadoGO != null ? candado.candadoGO.transform.position : transform.position,
+                    volumenSonidos,
+                    10f
+                );
                 Debug.Log($"?? Sonido de candado abierto reproducido para {candado.nombre}");
+            }
+            else
+            {
+                Debug.LogWarning("?? AudioManager o sonidoCandadoAbierto no disponible");
             }
 
             candado.isOpen = true;
@@ -197,7 +198,7 @@ public class PuertaFinal : MonoBehaviour
 
             EliminarLlaveDeLaMano();
 
-            Debug.Log($"?? Candado {candado.nombre} abierto! ({candadosAbiertos}/3)");
+            Debug.Log($"?? Candado {candado.nombre} abierto! ({candadosAbiertos}/{candados.Length})");
 
             if (candadosAbiertos >= candados.Length)
             {
@@ -206,11 +207,23 @@ public class PuertaFinal : MonoBehaviour
         }
         else
         {
-            if (sonidoLlaveIncorrecta != null)
+            // ============================================
+            // REPRODUCIR SONIDO DE LLAVE INCORRECTA
+            // ============================================
+            if (AudioManager.Instance != null && AudioManager.Instance.sonidoLlaveIncorrecta != null)
             {
-                audioSource.volume = volumenSonidos;
-                audioSource.PlayOneShot(sonidoLlaveIncorrecta);
+                AudioManager.Instance.PlayOneShotAtPosition(
+                    AudioManager.Instance.sonidoLlaveIncorrecta,
+                    candado.candadoGO != null ? candado.candadoGO.transform.position : transform.position,
+                    volumenSonidos,
+                    8f
+                );
             }
+            else
+            {
+                Debug.LogWarning("?? AudioManager o sonidoLlaveIncorrecta no disponible");
+            }
+
             Debug.Log($"? Necesitas la llave {candado.nombre} para abrir este candado");
         }
     }
@@ -231,14 +244,26 @@ public class PuertaFinal : MonoBehaviour
         {
             puertaAbierta = true;
 
-            // ?? CAMBIAR EL TAG DE LA PUERTA A "Usado"
+            // CAMBIAR EL TAG DE LA PUERTA A "Usado"
             gameObject.tag = "Usado";
             Debug.Log("??? Tag de la puerta final cambiado a 'Usado'");
 
-            if (sonidoPuertaAbierta != null)
+            // ============================================
+            // REPRODUCIR SONIDO DE PUERTA ABIERTA
+            // ============================================
+            if (AudioManager.Instance != null && AudioManager.Instance.sonidoPuertaAbierta != null)
             {
-                audioSource.volume = volumenSonidos;
-                audioSource.PlayOneShot(sonidoPuertaAbierta);
+                AudioManager.Instance.PlayOneShotAtPosition(
+                    AudioManager.Instance.sonidoPuertaAbierta,
+                    transform.position,
+                    volumenSonidos,
+                    20f
+                );
+                Debug.Log("?? Sonido de puerta abierta reproducido");
+            }
+            else
+            {
+                Debug.LogWarning("?? AudioManager o sonidoPuertaAbierta no disponible");
             }
 
             SceneManager.LoadScene("EscenaWin"); // Cambia a la escena final del juego

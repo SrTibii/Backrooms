@@ -24,8 +24,7 @@ public class VHSGlitchManager : MonoBehaviour
     public float positionGlitchAmount = 0.3f;      // Desplazamiento de posición durante glitch
     public float rotationGlitchAmount = 2f;        // Rotación durante glitch
 
-    [Header("Audio")]
-    public AudioClip glitchSound;                  // Sonido de glitch (opcional)
+    [Header("Volumen")]
     public float glitchSoundVolume = 0.3f;
 
     // Variables internas
@@ -33,9 +32,8 @@ public class VHSGlitchManager : MonoBehaviour
     private Quaternion cameraOriginalRotation;
     private float nextGlitchTime = 0f;
     private bool isGlitching = false;
-    private AudioSource glitchAudioSource;
 
-    // ?? NUEVO: Control de pausa para cuando se leen notas
+    // Control de pausa para cuando se leen notas
     private bool isPaused = false;
 
     void Start()
@@ -57,20 +55,13 @@ public class VHSGlitchManager : MonoBehaviour
             cameraOriginalRotation = vhsCamera.transform.localRotation;
         }
 
-        // Crear AudioSource para glitch
-        glitchAudioSource = gameObject.AddComponent<AudioSource>();
-        glitchAudioSource.loop = false;
-        glitchAudioSource.playOnAwake = false;
-        glitchAudioSource.spatialBlend = 0f;
-        glitchAudioSource.volume = glitchSoundVolume;
-
         // Programar el primer glitch
         ScheduleNextGlitch();
     }
 
     void Update()
     {
-        // ?? Si está en pausa, NO ejecutar glitches
+        // Si está en pausa, NO ejecutar glitches
         if (isPaused) return;
 
         if (!enableTrackingGlitch) return;
@@ -100,10 +91,22 @@ public class VHSGlitchManager : MonoBehaviour
         float duration = Random.Range(glitchDurationMin, glitchDurationMax);
         float intensity = Random.Range(glitchIntensityMin, glitchIntensityMax);
 
-        // Reproducir sonido de glitch
-        if (glitchSound != null)
+        // ============================================
+        // REPRODUCIR SONIDO DE GLITCH CON AUDIOMANAGER
+        // ============================================
+        if (AudioManager.Instance != null && AudioManager.Instance.glitchSound != null)
         {
-            glitchAudioSource.PlayOneShot(glitchSound);
+            // Usamos PlayOneShotAtPosition para que suene en la posición del jugador
+            AudioManager.Instance.PlayOneShotAtPosition(
+                AudioManager.Instance.glitchSound,
+                transform.position,
+                glitchSoundVolume,
+                5f // distancia máxima para el sonido 3D
+            );
+        }
+        else
+        {
+            Debug.LogWarning("?? AudioManager o glitchSound no disponible");
         }
 
         // Aplicar glitch en varios frames (para efecto de "tracking perdido")
@@ -175,7 +178,9 @@ public class VHSGlitchManager : MonoBehaviour
         }
     }
 
-    // ?? NUEVO: Pausar los glitches (cuando se abre una nota)
+    /// <summary>
+    /// Pausar los glitches (cuando se abre una nota)
+    /// </summary>
     public void PausarGlitches()
     {
         isPaused = true;
@@ -197,7 +202,9 @@ public class VHSGlitchManager : MonoBehaviour
         Debug.Log("?? Glitches de VHS pausados");
     }
 
-    // ?? NUEVO: Reanudar los glitches (cuando se cierra la nota)
+    /// <summary>
+    /// Reanudar los glitches (cuando se cierra la nota)
+    /// </summary>
     public void ReanudarGlitches()
     {
         isPaused = false;
