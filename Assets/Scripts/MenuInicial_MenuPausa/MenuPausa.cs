@@ -23,6 +23,7 @@ public class MenuPausa : MonoBehaviour
     private List<AudioSource> audioSourcesJuego = new List<AudioSource>();
     private List<bool> estadosAudioSources = new List<bool>();
     private List<bool> estadosLoop = new List<bool>();
+    private List<float> volumenesOriginales = new List<float>();
 
     private AudioSource audioSource;
     private bool isPaused = false;
@@ -39,9 +40,6 @@ public class MenuPausa : MonoBehaviour
         enemyIA = FindObjectOfType<EnemyIA>();
         lockerSystem = FindObjectOfType<LockerHideSystem>();
 
-        // ============================================
-        // CREAR AUDIOSOURCE Y REGISTRAR EN AUDIOMANAGER
-        // ============================================
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.loop = false;
         audioSource.playOnAwake = false;
@@ -63,7 +61,7 @@ public class MenuPausa : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        Debug.Log("?? Menú de Pausa inicializado");
+        Debug.Log("? Menú de Pausa inicializado");
     }
 
     private void OnEnable()
@@ -94,7 +92,7 @@ public class MenuPausa : MonoBehaviour
 
         if (LockerHideSystem.IsPlayerHidingGlobal)
         {
-            Debug.Log("?? No se puede pausar mientras estás escondido en la taquilla (Flag Global)");
+            Debug.Log("?? No se puede pausar mientras estás escondido en la taquilla");
             return;
         }
 
@@ -104,10 +102,6 @@ public class MenuPausa : MonoBehaviour
         }
     }
 
-    // ============================================
-    // MÉTODOS DE PAUSA
-    // ============================================
-
     public void PausarJuego()
     {
         if (isPaused) return;
@@ -116,7 +110,7 @@ public class MenuPausa : MonoBehaviour
 
         if (LockerHideSystem.IsPlayerHidingGlobal)
         {
-            Debug.Log("?? No se puede pausar mientras estás escondido en la taquilla (Flag Global)");
+            Debug.Log("?? No se puede pausar mientras estás escondido en la taquilla");
             return;
         }
 
@@ -126,9 +120,6 @@ public class MenuPausa : MonoBehaviour
         if (uiPausa != null) uiPausa.SetActive(true);
         if (uiOpciones != null) uiOpciones.SetActive(false);
 
-        // ============================================
-        // OCULTAR INDICADORES AL ABRIR PAUSA
-        // ============================================
         BotonConIndicadorPausa.OcultarTodosLosIndicadores();
 
         Time.timeScale = 0f;
@@ -166,9 +157,6 @@ public class MenuPausa : MonoBehaviour
         if (uiPausa != null) uiPausa.SetActive(false);
         if (uiOpciones != null) uiOpciones.SetActive(false);
 
-        // ============================================
-        // OCULTAR INDICADORES AL REANUDAR
-        // ============================================
         BotonConIndicadorPausa.OcultarTodosLosIndicadores();
 
         Time.timeScale = 1f;
@@ -191,22 +179,11 @@ public class MenuPausa : MonoBehaviour
         Debug.Log("?? Juego REANUDADO - Todo descongelado");
     }
 
-    // ============================================
-    // MÉTODOS PARA NAVEGAR ENTRE MENÚS
-    // ============================================
-
     public void AbrirOpciones()
     {
-        // ============================================
-        // REPRODUCIR SONIDO CON AUDIOMANAGER
-        // ============================================
         if (AudioManager.Instance != null && AudioManager.Instance.sonidoClick != null)
         {
             AudioManager.Instance.PlayOneShot(audioSource, AudioManager.Instance.sonidoClick, volumenSonidos);
-        }
-        else if (audioSource != null)
-        {
-            audioSource.PlayOneShot(AudioManager.Instance?.sonidoClick, volumenSonidos);
         }
 
         BotonConIndicadorPausa.OcultarTodosLosIndicadores();
@@ -217,16 +194,9 @@ public class MenuPausa : MonoBehaviour
 
     public void CerrarOpciones()
     {
-        // ============================================
-        // REPRODUCIR SONIDO CON AUDIOMANAGER
-        // ============================================
         if (AudioManager.Instance != null && AudioManager.Instance.sonidoClick != null)
         {
             AudioManager.Instance.PlayOneShot(audioSource, AudioManager.Instance.sonidoClick, volumenSonidos);
-        }
-        else if (audioSource != null)
-        {
-            audioSource.PlayOneShot(AudioManager.Instance?.sonidoClick, volumenSonidos);
         }
 
         BotonConIndicadorPausa.OcultarTodosLosIndicadores();
@@ -235,22 +205,11 @@ public class MenuPausa : MonoBehaviour
         if (uiPausa != null) uiPausa.SetActive(true);
     }
 
-    // ============================================
-    // MÉTODOS PARA BOTONES
-    // ============================================
-
     public void BotonReanudar()
     {
-        // ============================================
-        // REPRODUCIR SONIDO CON AUDIOMANAGER
-        // ============================================
         if (AudioManager.Instance != null && AudioManager.Instance.sonidoClick != null)
         {
             AudioManager.Instance.PlayOneShot(audioSource, AudioManager.Instance.sonidoClick, volumenSonidos);
-        }
-        else if (audioSource != null)
-        {
-            audioSource.PlayOneShot(AudioManager.Instance?.sonidoClick, volumenSonidos);
         }
 
         StartCoroutine(ReanudarConDelay());
@@ -264,16 +223,9 @@ public class MenuPausa : MonoBehaviour
 
     public void BotonSalir()
     {
-        // ============================================
-        // REPRODUCIR SONIDO CON AUDIOMANAGER
-        // ============================================
         if (AudioManager.Instance != null && AudioManager.Instance.sonidoClick != null)
         {
             AudioManager.Instance.PlayOneShot(audioSource, AudioManager.Instance.sonidoClick, volumenSonidos);
-        }
-        else if (audioSource != null)
-        {
-            audioSource.PlayOneShot(AudioManager.Instance?.sonidoClick, volumenSonidos);
         }
 
         Time.timeScale = 1f;
@@ -291,15 +243,15 @@ public class MenuPausa : MonoBehaviour
     }
 
     // ============================================
-    // MÉTODOS PARA CONTROLAR AUDIOSOURCES
+    // ?? MODIFICADO: Guardar volumen original
     // ============================================
-
     private void DesactivarAudioSources()
     {
         AudioSource[] allAudioSources = FindObjectsOfType<AudioSource>();
         audioSourcesJuego.Clear();
         estadosAudioSources.Clear();
         estadosLoop.Clear();
+        volumenesOriginales.Clear();
 
         foreach (var src in allAudioSources)
         {
@@ -308,6 +260,7 @@ public class MenuPausa : MonoBehaviour
                 audioSourcesJuego.Add(src);
                 estadosAudioSources.Add(src.isPlaying);
                 estadosLoop.Add(src.loop);
+                volumenesOriginales.Add(src.volume);
 
                 if (src.isPlaying)
                 {
@@ -320,8 +273,14 @@ public class MenuPausa : MonoBehaviour
         Debug.Log($"?? {audioSourcesJuego.Count} AudioSources desactivados");
     }
 
+    // ============================================
+    // ?? MODIFICADO: Respetar el volumen global al reanudar
+    // ============================================
     private void ReactivarAudioSources()
     {
+        float volumenGlobal = AudioManager.Instance != null ? AudioManager.Instance.GetVolumenGlobal() : 1f;
+        bool volumenCero = volumenGlobal <= 0.001f;
+
         for (int i = 0; i < audioSourcesJuego.Count; i++)
         {
             if (audioSourcesJuego[i] != null)
@@ -329,32 +288,33 @@ public class MenuPausa : MonoBehaviour
                 audioSourcesJuego[i].enabled = true;
                 audioSourcesJuego[i].loop = estadosLoop[i];
 
-                if (estadosAudioSources[i])
+                if (volumenCero)
                 {
-                    audioSourcesJuego[i].Play();
+                    audioSourcesJuego[i].volume = 0f;
+                    if (audioSourcesJuego[i].isPlaying)
+                        audioSourcesJuego[i].Stop();
+                }
+                else if (i < volumenesOriginales.Count)
+                {
+                    float volOriginal = volumenesOriginales[i];
+                    audioSourcesJuego[i].volume = volOriginal * volumenGlobal;
+
+                    if (estadosAudioSources[i] && audioSourcesJuego[i].clip != null)
+                    {
+                        audioSourcesJuego[i].Play();
+                    }
                 }
             }
         }
 
-        Debug.Log($"?? {audioSourcesJuego.Count} AudioSources reactivados");
+        Debug.Log($"?? {audioSourcesJuego.Count} AudioSources reactivados (volumen global: {volumenGlobal})");
     }
-
-    // ============================================
-    // MÉTODOS PARA EVENT TRIGGER (Pointer Enter)
-    // ============================================
 
     public void SonidoHover()
     {
-        // ============================================
-        // REPRODUCIR SONIDO HOVER CON AUDIOMANAGER
-        // ============================================
         if (AudioManager.Instance != null && AudioManager.Instance.sonidoHover != null)
         {
             AudioManager.Instance.PlayOneShot(audioSource, AudioManager.Instance.sonidoHover, volumenSonidos);
-        }
-        else if (audioSource != null)
-        {
-            audioSource.PlayOneShot(AudioManager.Instance?.sonidoHover, volumenSonidos);
         }
     }
 

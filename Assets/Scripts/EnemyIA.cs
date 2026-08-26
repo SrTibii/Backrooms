@@ -1375,7 +1375,11 @@ public class EnemyIA : MonoBehaviour
 
         ambientAudioSource.clip = currentAmbientClip;
         ambientAudioSource.loop = false;
-        ambientAudioSource.volume = ambientVolume;
+
+        // ?? APLICAR VOLUMEN GLOBAL
+        float volumenGlobal = AudioManager.Instance.GetVolumenGlobal();
+        ambientAudioSource.volume = ambientVolume * volumenGlobal;
+
         ambientAudioSource.Play();
         isAmbientPlaying = true;
         isAmbientStopped = false;
@@ -1385,7 +1389,7 @@ public class EnemyIA : MonoBehaviour
         ambientTimer = clipDuration + pauseBetweenSounds;
 
         if (showDebugLogs)
-            Debug.Log($"?? Ambiente: {currentAmbientClip.name} | Duración: {clipDuration:F1}s | Pausa: {pauseBetweenSounds:F1}s | Total: {ambientTimer:F1}s");
+            Debug.Log($"?? Ambiente: {currentAmbientClip.name} | Volumen: {ambientAudioSource.volume}");
     }
 
     void ReactivateAmbientSound()
@@ -1416,9 +1420,7 @@ public class EnemyIA : MonoBehaviour
         }
 
         if (isChasePlaying && chaseAudioSource.isPlaying && chaseAudioSource.volume > 0.5f)
-        {
             return;
-        }
 
         StopAmbientSoundImmediate();
 
@@ -1469,6 +1471,12 @@ public class EnemyIA : MonoBehaviour
 
     IEnumerator FadeChaseVolume(float targetVolume, float duration)
     {
+        if (chaseAudioSource == null) yield break;
+
+        // ?? OBTENER VOLUMEN GLOBAL
+        float volumenGlobal = AudioManager.Instance != null ? AudioManager.Instance.GetVolumenGlobal() : 1f;
+        float targetVolumenFinal = targetVolume * volumenGlobal;
+
         float startVolume = chaseAudioSource.volume;
         float elapsed = 0f;
 
@@ -1476,24 +1484,20 @@ public class EnemyIA : MonoBehaviour
         {
             elapsed += Time.deltaTime;
             float t = elapsed / duration;
-            chaseAudioSource.volume = Mathf.Lerp(startVolume, targetVolume, t);
+            chaseAudioSource.volume = Mathf.Lerp(startVolume, targetVolumenFinal, t);
             yield return null;
         }
 
-        chaseAudioSource.volume = targetVolume;
+        chaseAudioSource.volume = targetVolumenFinal;
 
-        if (targetVolume == 0f)
+        if (targetVolume == 0f || volumenGlobal <= 0.001f)
         {
             if (chaseAudioSource.isPlaying)
-            {
                 chaseAudioSource.Pause();
-            }
             isChasePlaying = false;
 
             if (!isWaitingAfterHide && !isPlayerHiding)
-            {
                 ReactivateAmbientSound();
-            }
         }
         else
         {

@@ -14,24 +14,24 @@ public class AudioManager : MonoBehaviour
     // AUDIOCLIPS DEL JUEGO
     // ============================================
 
-    [Header("UI - Menús")] // MenuPausa.cs, MenuInicial.cs
+    [Header("UI - Menús")]
     public AudioClip sonidoClick;
     public AudioClip sonidoHover;
 
-    [Header("UI - Notas")] // LeerNota.cs
+    [Header("UI - Notas")]
     public AudioClip sonidoAbrirNota;
     public AudioClip sonidoCerrarNota;
 
-    [Header("Enemigo")] // EnemyIA.cs
+    [Header("Enemigo")]
     public AudioClip[] ambientSounds;
     public AudioClip[] chaseSounds;
     public AudioClip jumpscareSound;
 
-    [Header("Interacciones - Puertas")] // PuertaGeneradores.cs, PuertaFinal.cs, PuertaBloqueada.cs
+    [Header("Interacciones - Puertas")]
     public AudioClip sonidoPuertaAbierta;
-    public AudioClip[] sonidosPuertaBloqueada; // Para diferentes tags en PuertaBloqueada
+    public AudioClip[] sonidosPuertaBloqueada;
 
-    [Header("Interacciones - Objetos")] // RecogerObjeto.cs, RecogerLinterna.cs, RecogerMartillo.cs
+    [Header("Interacciones - Objetos")]
     public AudioClip sonidoRecogerObjeto;
     public AudioClip sonidoRecogerLinterna;
     public AudioClip sonidoRecogerMartillo;
@@ -39,25 +39,25 @@ public class AudioManager : MonoBehaviour
     public AudioClip sonidoSoltarLinterna;
     public AudioClip sonidoSoltarMartillo;
 
-    [Header("Interacciones - Puzzles")] // PanelColores.cs, PuertaFinal.cs, CajaFuerte.cs, Generador.cs, MaquinaExpendedora.cs, TablaMadera.cs
-    public AudioClip sonidoPulsarBoton;              // PanelColores.cs
-    public AudioClip sonidoCombinacionCorrecta;       // PanelColores.cs
-    public AudioClip sonidoCombinacionIncorrecta;     // PanelColores.cs
-    public AudioClip sonidoCandadoAbierto;            // PuertaFinal.cs
-    public AudioClip sonidoLlaveIncorrecta;           // PuertaFinal.cs
-    public AudioClip sonidoCajaAcierto;               // CajaFuerte.cs
-    public AudioClip sonidoCajaError;                 // CajaFuerte.cs
-    public AudioClip sonidoCajaBoton;                 // CajaFuerte.cs
-    public AudioClip sonidoActivacionGenerador;       // Generador.cs
-    public AudioClip sonidoInsertarMoneda;            // MaquinaExpendedora.cs
-    public AudioClip sonidoCaerLlave;                 // MaquinaExpendedora.cs
-    public AudioClip sonidoRomperTabla;               // TablaMadera.cs
+    [Header("Interacciones - Puzzles")]
+    public AudioClip sonidoPulsarBoton;
+    public AudioClip sonidoCombinacionCorrecta;
+    public AudioClip sonidoCombinacionIncorrecta;
+    public AudioClip sonidoCandadoAbierto;
+    public AudioClip sonidoLlaveIncorrecta;
+    public AudioClip sonidoCajaAcierto;
+    public AudioClip sonidoCajaError;
+    public AudioClip sonidoCajaBoton;
+    public AudioClip sonidoActivacionGenerador;
+    public AudioClip sonidoInsertarMoneda;
+    public AudioClip sonidoCaerLlave;
+    public AudioClip sonidoRomperTabla;
 
-    [Header("Interacciones - Taquillas")] // LockerHideSystem.cs
+    [Header("Interacciones - Taquillas")]
     public AudioClip sonidoEnterLocker;
     public AudioClip sonidoExitLocker;
 
-    [Header("Jugador - Movimiento")] // FirstPersonController.cs
+    [Header("Jugador - Movimiento")]
     public AudioClip[] footstepSounds;
     public AudioClip[] sprintFootstepSounds;
     public AudioClip breathingClip;
@@ -66,15 +66,15 @@ public class AudioManager : MonoBehaviour
     public AudioClip crouchSound;
     public AudioClip standSound;
 
-    [Header("Jugador - Zoom")] // FirstPersonController.cs
+    [Header("Jugador - Zoom")]
     public AudioClip zoomInSound;
     public AudioClip zoomOutSound;
 
-    [Header("Jugador - Linterna")] // Linterna.cs
+    [Header("Jugador - Linterna")]
     public AudioClip sonidoEncenderLinterna;
     public AudioClip sonidoApagarLinterna;
 
-    [Header("Efectos")] // VHSGlitchManager.cs
+    [Header("Efectos")]
     public AudioClip glitchSound;
 
     // ============================================
@@ -106,10 +106,6 @@ public class AudioManager : MonoBehaviour
         StartCoroutine(BuscarAudioSourcesPeriodicamente());
     }
 
-    // ============================================
-    // BUSCAR AUDIOSOURCES PERIÓDICAMENTE
-    // ============================================
-
     IEnumerator BuscarAudioSourcesPeriodicamente()
     {
         while (true)
@@ -131,10 +127,6 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    // ============================================
-    // REGISTRAR UN AUDIOSOURCE
-    // ============================================
-
     public void RegistrarAudioSource(AudioSource source)
     {
         if (source == null) return;
@@ -149,7 +141,7 @@ public class AudioManager : MonoBehaviour
 
         AplicarVolumenASource(source, audioSourcesControlados.Count - 1);
 
-        Debug.Log($"?? AudioSource registrado: {source.gameObject.name}");
+        Debug.Log($"?? AudioSource registrado: {source.gameObject.name} (clip: {source.clip?.name ?? "NULL"})");
     }
 
     public void DesregistrarAudioSource(AudioSource source)
@@ -164,10 +156,6 @@ public class AudioManager : MonoBehaviour
             estabaSonando.RemoveAt(index);
         }
     }
-
-    // ============================================
-    // APLICAR VOLUMEN
-    // ============================================
 
     private void AplicarVolumenASource(AudioSource source, int index)
     {
@@ -211,14 +199,68 @@ public class AudioManager : MonoBehaviour
     }
 
     // ============================================
-    // CAMBIAR VOLUMEN GLOBAL
+    // ?? FORZAR MUTEO POR NOMBRE DE CLIP
     // ============================================
+    public void ForzarMuteoPorNombreClip(bool mute)
+    {
+        Debug.Log($"?? FORZANDO MUTEO POR NOMBRE DE CLIP: {mute}");
+
+        AudioSource[] allSources = FindObjectsOfType<AudioSource>(true);
+        int contador = 0;
+
+        // Nombres de los clips problemáticos
+        string[] nombresProblematicos = { "Breath", "BacteriaIdleWalk", "BacteriaChase1", "BacteriaChase2" };
+
+        foreach (var src in allSources)
+        {
+            if (src == null || src == GetComponent<AudioSource>()) continue;
+
+            if (src.clip != null)
+            {
+                string clipName = src.clip.name;
+                bool esProblematico = false;
+
+                foreach (string nombre in nombresProblematicos)
+                {
+                    if (clipName.Contains(nombre))
+                    {
+                        esProblematico = true;
+                        break;
+                    }
+                }
+
+                if (esProblematico)
+                {
+                    if (mute)
+                    {
+                        src.volume = 0f;
+                        if (src.isPlaying) src.Stop();
+                        contador++;
+                        Debug.Log($"?? MUTEADO: {src.gameObject.name} | Clip: {src.clip.name}");
+                    }
+                    else
+                    {
+                        src.volume = 0.8f;
+                        if (!src.isPlaying && src.clip != null) src.Play();
+                        contador++;
+                        Debug.Log($"?? REACTIVADO: {src.gameObject.name} | Clip: {src.clip.name}");
+                    }
+                }
+            }
+        }
+
+        Debug.Log($"?? {contador} AudioSources procesados por nombre de clip");
+    }
 
     public void SetVolumenGlobal(float value)
     {
         volumenGlobal = Mathf.Clamp01(value);
         PlayerPrefs.SetFloat(VOLUMEN_GLOBAL_KEY, volumenGlobal);
         PlayerPrefs.Save();
+
+        // ?? FORZAR MUTEO POR NOMBRE DE CLIP
+        ForzarMuteoPorNombreClip(volumenGlobal <= 0.001f);
+
         AplicarVolumenATodos();
         Debug.Log($"?? Volumen Global cambiado a: {volumenGlobal}");
     }
@@ -278,10 +320,6 @@ public class AudioManager : MonoBehaviour
         Destroy(tempGO, clip.length + 0.2f);
     }
 
-    // ============================================
-    // MÉTODOS DE AYUDA PARA REPRODUCIR SONIDOS COMUNES
-    // ============================================
-
     public void PlayClick(AudioSource source, float volume = 1f)
     {
         PlayOneShot(source, sonidoClick, volume);
@@ -296,10 +334,6 @@ public class AudioManager : MonoBehaviour
     {
         PlayOneShotAtPosition(clip, position, volume);
     }
-
-    // ============================================
-    // RESETEAR Y SILENCIAR
-    // ============================================
 
     public void ResetearAudioSources()
     {

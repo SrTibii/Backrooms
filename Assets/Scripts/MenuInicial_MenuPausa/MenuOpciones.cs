@@ -8,7 +8,7 @@ public class MenuOpciones : MonoBehaviour
     public Slider sliderSensibilidad;
     public Slider sliderBrillo;
     public Slider sliderFOV;
-    public Slider sliderVolumen; // ?? NUEVO
+    public Slider sliderVolumen;
 
     [Header("Toggles")]
     public Toggle toggleFPS;
@@ -39,53 +39,14 @@ public class MenuOpciones : MonoBehaviour
 
     void Start()
     {
-        // ============================================
-        // OBTENER REFERENCIAS
-        // ============================================
-
-        if (playerController == null)
-        {
-            playerController = FindObjectOfType<FirstPersonController>();
-        }
-
-        if (controlBrillo == null)
-        {
-            controlBrillo = FindObjectOfType<ControlBrillo>();
-        }
-
-        if (mostrarFPS == null)
-        {
-            mostrarFPS = FindObjectOfType<MostrarFPS>();
-        }
-
-        if (controlSombras == null)
-        {
-            controlSombras = FindObjectOfType<ControlSombras>();
-        }
-
-        if (controlFOV == null)
-        {
-            controlFOV = FindObjectOfType<ControlFOV>();
-        }
-
-        if (controlPantalla == null)
-        {
-            controlPantalla = FindObjectOfType<ControlPantalla>();
-        }
-
-        if (controlMotionBlur == null)
-        {
-            controlMotionBlur = FindObjectOfType<ControlMotionBlur>();
-        }
-
-        if (controlGlitchEffect == null)
-        {
-            controlGlitchEffect = FindObjectOfType<ControlGlitchEffect>();
-        }
-
-        // ============================================
-        // CONFIGURAR SLIDER DE SENSIBILIDAD
-        // ============================================
+        if (playerController == null) playerController = FindObjectOfType<FirstPersonController>();
+        if (controlBrillo == null) controlBrillo = FindObjectOfType<ControlBrillo>();
+        if (mostrarFPS == null) mostrarFPS = FindObjectOfType<MostrarFPS>();
+        if (controlSombras == null) controlSombras = FindObjectOfType<ControlSombras>();
+        if (controlFOV == null) controlFOV = FindObjectOfType<ControlFOV>();
+        if (controlPantalla == null) controlPantalla = FindObjectOfType<ControlPantalla>();
+        if (controlMotionBlur == null) controlMotionBlur = FindObjectOfType<ControlMotionBlur>();
+        if (controlGlitchEffect == null) controlGlitchEffect = FindObjectOfType<ControlGlitchEffect>();
 
         if (sliderSensibilidad != null)
         {
@@ -95,10 +56,6 @@ public class MenuOpciones : MonoBehaviour
             AplicarSensibilidad(sensibilidadGuardada);
         }
 
-        // ============================================
-        // CONFIGURAR SLIDER DE BRILLO
-        // ============================================
-
         if (sliderBrillo != null && controlBrillo != null)
         {
             float brilloGuardado = PlayerPrefs.GetFloat("Brillo", brilloPorDefecto);
@@ -106,10 +63,6 @@ public class MenuOpciones : MonoBehaviour
             sliderBrillo.onValueChanged.AddListener(OnBrilloChanged);
             controlBrillo.SetBrillo(brilloGuardado);
         }
-
-        // ============================================
-        // CONFIGURAR SLIDER DE FOV
-        // ============================================
 
         if (sliderFOV != null && controlFOV != null)
         {
@@ -119,20 +72,12 @@ public class MenuOpciones : MonoBehaviour
             controlFOV.SetFOV(fovGuardado);
         }
 
-        // ============================================
-        // CONFIGURAR SLIDER DE VOLUMEN
-        // ============================================
-
         if (sliderVolumen != null && AudioManager.Instance != null)
         {
             float volumenGuardado = AudioManager.Instance.GetVolumenGlobal();
             sliderVolumen.value = volumenGuardado;
             sliderVolumen.onValueChanged.AddListener(OnVolumenChanged);
         }
-
-        // ============================================
-        // CONFIGURAR TOGGLE DE FPS
-        // ============================================
 
         if (toggleFPS != null && mostrarFPS != null)
         {
@@ -142,10 +87,6 @@ public class MenuOpciones : MonoBehaviour
             mostrarFPS.ToggleMostrarFPS(fpsActivo);
         }
 
-        // ============================================
-        // CONFIGURAR TOGGLE DE SOMBRAS
-        // ============================================
-
         if (toggleSombras != null && controlSombras != null)
         {
             bool sombrasActivas = PlayerPrefs.GetInt("SombrasActivadas", 1) == 1;
@@ -153,10 +94,6 @@ public class MenuOpciones : MonoBehaviour
             toggleSombras.onValueChanged.AddListener(OnSombrasChanged);
             controlSombras.SetSombras(sombrasActivas);
         }
-
-        // ============================================
-        // CONFIGURAR TOGGLE DE PANTALLA COMPLETA
-        // ============================================
 
         if (togglePantallaCompleta != null && controlPantalla != null)
         {
@@ -166,10 +103,6 @@ public class MenuOpciones : MonoBehaviour
             controlPantalla.SetPantallaCompleta(pantallaCompleta);
         }
 
-        // ============================================
-        // CONFIGURAR TOGGLE DE MOTION BLUR
-        // ============================================
-
         if (toggleMotionBlur != null && controlMotionBlur != null)
         {
             bool motionBlurActivo = PlayerPrefs.GetInt("MotionBlur", 1) == 1;
@@ -177,10 +110,6 @@ public class MenuOpciones : MonoBehaviour
             toggleMotionBlur.onValueChanged.AddListener(OnMotionBlurChanged);
             controlMotionBlur.SetMotionBlur(motionBlurActivo);
         }
-
-        // ============================================
-        // CONFIGURAR TOGGLE DE GLITCH EFFECT
-        // ============================================
 
         if (toggleGlitchEffect != null && controlGlitchEffect != null)
         {
@@ -190,10 +119,6 @@ public class MenuOpciones : MonoBehaviour
             controlGlitchEffect.SetGlitchEffect(glitchActivo);
         }
 
-        // ============================================
-        // CONFIGURAR DROPDOWN DE VSYNC
-        // ============================================
-
         if (dropdownVSync != null && controlPantalla != null)
         {
             controlPantalla.dropdownVSync = dropdownVSync;
@@ -201,12 +126,8 @@ public class MenuOpciones : MonoBehaviour
             dropdownVSync.value = vsyncIndex;
         }
 
-        Debug.Log("?? MenuOpciones inicializado correctamente");
+        Debug.Log("? MenuOpciones inicializado correctamente");
     }
-
-    // ============================================
-    // MÉTODO PARA SENSIBILIDAD
-    // ============================================
 
     public void OnSensibilidadChanged(float value)
     {
@@ -224,172 +145,98 @@ public class MenuOpciones : MonoBehaviour
         }
     }
 
-    // ============================================
-    // MÉTODO PARA BRILLO
-    // ============================================
-
     public void OnBrilloChanged(float value)
     {
         if (controlBrillo != null)
-        {
             controlBrillo.SetBrillo(value);
-        }
     }
-
-    // ============================================
-    // MÉTODO PARA FOV
-    // ============================================
 
     public void OnFOVChanged(float value)
     {
         if (controlFOV != null)
-        {
             controlFOV.SetFOV(value);
-        }
     }
-
-    // ============================================
-    // MÉTODO PARA VOLUMEN
-    // ============================================
 
     public void OnVolumenChanged(float value)
     {
         if (AudioManager.Instance != null)
-        {
             AudioManager.Instance.SetVolumenGlobal(value);
-        }
         Debug.Log($"?? Volumen cambiado a: {value}");
     }
-
-    // ============================================
-    // MÉTODO PARA FPS
-    // ============================================
 
     public void OnFPSChanged(bool value)
     {
         if (mostrarFPS != null)
-        {
             mostrarFPS.ToggleMostrarFPS(value);
-        }
     }
-
-    // ============================================
-    // MÉTODO PARA SOMBRAS
-    // ============================================
 
     public void OnSombrasChanged(bool value)
     {
         if (controlSombras != null)
-        {
             controlSombras.SetSombras(value);
-        }
     }
-
-    // ============================================
-    // MÉTODO PARA PANTALLA COMPLETA
-    // ============================================
 
     public void OnPantallaCompletaChanged(bool value)
     {
         if (controlPantalla != null)
-        {
             controlPantalla.SetPantallaCompleta(value);
-        }
     }
-
-    // ============================================
-    // MÉTODO PARA MOTION BLUR
-    // ============================================
 
     public void OnMotionBlurChanged(bool value)
     {
         if (controlMotionBlur != null)
-        {
             controlMotionBlur.SetMotionBlur(value);
-        }
     }
-
-    // ============================================
-    // MÉTODO PARA GLITCH EFFECT
-    // ============================================
 
     public void OnGlitchEffectChanged(bool value)
     {
         if (controlGlitchEffect != null)
-        {
             controlGlitchEffect.SetGlitchEffect(value);
-        }
     }
-
-    // ============================================
-    // RESTAURAR VALORES POR DEFECTO
-    // ============================================
 
     public void RestaurarValoresPorDefecto()
     {
-        // Restaurar Sensibilidad
-        if (sliderSensibilidad != null)
-        {
-            sliderSensibilidad.value = sensibilidadPorDefecto;
-        }
-
-        // Restaurar Brillo
+        if (sliderSensibilidad != null) sliderSensibilidad.value = sensibilidadPorDefecto;
         if (sliderBrillo != null && controlBrillo != null)
         {
             sliderBrillo.value = brilloPorDefecto;
             controlBrillo.SetBrillo(brilloPorDefecto);
         }
-
-        // Restaurar FOV
         if (sliderFOV != null && controlFOV != null)
         {
             sliderFOV.value = fovPorDefecto;
             controlFOV.SetFOV(fovPorDefecto);
         }
-
-        // Restaurar Volumen
         if (sliderVolumen != null && AudioManager.Instance != null)
         {
             sliderVolumen.value = 0.8f;
             AudioManager.Instance.SetVolumenGlobal(0.8f);
         }
-
-        // Restaurar FPS
         if (toggleFPS != null && mostrarFPS != null)
         {
             toggleFPS.isOn = true;
             mostrarFPS.ToggleMostrarFPS(true);
         }
-
-        // Restaurar Sombras
         if (toggleSombras != null && controlSombras != null)
         {
             toggleSombras.isOn = true;
             controlSombras.SetSombras(true);
         }
-
-        // Restaurar Pantalla Completa
         if (togglePantallaCompleta != null && controlPantalla != null)
         {
             togglePantallaCompleta.isOn = true;
             controlPantalla.SetPantallaCompleta(true);
         }
-
-        // Restaurar Motion Blur
         if (toggleMotionBlur != null && controlMotionBlur != null)
         {
             toggleMotionBlur.isOn = true;
             controlMotionBlur.SetMotionBlur(true);
         }
-
-        // Restaurar Glitch Effect
         if (toggleGlitchEffect != null && controlGlitchEffect != null)
         {
             toggleGlitchEffect.isOn = true;
             controlGlitchEffect.SetGlitchEffect(true);
         }
-
-        // Restaurar VSync
         if (dropdownVSync != null && controlPantalla != null)
         {
             dropdownVSync.value = 0;
