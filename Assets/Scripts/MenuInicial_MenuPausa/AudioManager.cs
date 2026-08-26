@@ -357,4 +357,19 @@ public class AudioManager : MonoBehaviour
         volumenesOriginales.Clear();
         estabaSonando.Clear();
     }
+
+    // ============================================
+    // ?? MÉTODO PARA REPRODUCIR SONIDO DE GLITCH CON VOLUMEN PERSONALIZADO
+    // ============================================
+    public void PlayGlitchSound(Vector3 position, float volume = 0.8f)
+    {
+        if (glitchSound == null)
+        {
+            Debug.LogWarning("?? glitchSound no asignado en AudioManager");
+            return;
+        }
+        if (volumenGlobal <= 0.001f) return;
+
+        PlayOneShotAtPosition(glitchSound, position, volume * volumenGlobal, 8f);
+    }
 }

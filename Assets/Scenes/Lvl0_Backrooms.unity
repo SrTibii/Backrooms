@@ -251956,7 +251956,7 @@ MonoBehaviour:
   glitchIntensityMax: 0.05
   positionGlitchAmount: 0.005
   rotationGlitchAmount: 0.1
-  glitchSoundVolume: 0.15
+  glitchSoundVolume: 0.7
 --- !u!81 &4657648971206769815
 AudioListener:
   m_ObjectHideFlags: 0
