@@ -406,6 +406,21 @@ public class FirstPersonController : MonoBehaviour
         Cursor.visible = false;
 
         // ============================================
+        // INICIALIZAR STAMINA
+        // ============================================
+        currentStamina = maxStamina;
+        isExhausted = false;
+        staminaRegenTimer = 0f;
+        isSprinting = false;
+        isSprintPressed = false;
+        isPlayingStaminaBreath = false;
+
+        if (staminaAudioSource != null)
+            staminaAudioSource.Stop();
+
+        Debug.Log($"? Stamina inicializada a {currentStamina}/{maxStamina}");
+
+        // ============================================
         // CREAR AUDIOSOURCES
         // ============================================
 
