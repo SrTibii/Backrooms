@@ -18,9 +18,7 @@ public class Linterna : MonoBehaviour
 
     void Start()
     {
-        // Buscar el sistema de recogida
         recogerLinterna = FindObjectOfType<RecogerLinterna>();
-
         Debug.Log("? Linterna inicializada");
     }
 
@@ -44,15 +42,11 @@ public class Linterna : MonoBehaviour
 
     private void OnFlashLightPressed(InputAction.CallbackContext context)
     {
-        // Solo se puede encender/apagar si está en la mano
         if (isInHand)
         {
             bool nuevoEstado = !flashLight.enabled;
             flashLight.enabled = nuevoEstado;
 
-            // ============================================
-            // REPRODUCIR SONIDO CON AUDIOMANAGER
-            // ============================================
             if (nuevoEstado)
             {
                 ReproducirSonidoEncender();
@@ -71,7 +65,7 @@ public class Linterna : MonoBehaviour
     }
 
     // ============================================
-    // REPRODUCIR SONIDO DE ENCENDER CON AUDIOMANAGER
+    // ?? REPRODUCIR SONIDO DE ENCENDER - USA CLIP ESPECÍFICO
     // ============================================
     private void ReproducirSonidoEncender()
     {
@@ -81,28 +75,29 @@ public class Linterna : MonoBehaviour
             return;
         }
 
-        // Usar el sonido de zoomInSound como sonido de encender (o crear uno específico)
-        // Si no hay un sonido específico para encender, usamos zoomInSound como placeholder
-        AudioClip clip = AudioManager.Instance.zoomInSound;
+        // ?? USA EL CLIP ESPECÍFICO DE LA LINTERNA
+        AudioClip clip = AudioManager.Instance.sonidoEncenderLinterna;
 
         if (clip != null)
         {
+            // Aplicar volumen global
+            float volumenFinal = volumenSonidos * AudioManager.Instance.GetVolumenGlobal();
             AudioManager.Instance.PlayOneShotAtPosition(
                 clip,
                 transform.position,
-                volumenSonidos,
+                volumenFinal,
                 5f
             );
-            Debug.Log($"?? Sonido de encender reproducido");
+            Debug.Log($"?? Sonido de encender linterna reproducido");
         }
         else
         {
-            Debug.LogWarning("?? No hay sonido de encender disponible en AudioManager");
+            Debug.LogWarning("?? No hay sonido de encender linterna en AudioManager");
         }
     }
 
     // ============================================
-    // REPRODUCIR SONIDO DE APAGAR CON AUDIOMANAGER
+    // ?? REPRODUCIR SONIDO DE APAGAR - USA CLIP ESPECÍFICO
     // ============================================
     private void ReproducirSonidoApagar()
     {
@@ -112,26 +107,26 @@ public class Linterna : MonoBehaviour
             return;
         }
 
-        // Usar el sonido de zoomOutSound como sonido de apagar (o crear uno específico)
-        AudioClip clip = AudioManager.Instance.zoomOutSound;
+        // ?? USA EL CLIP ESPECÍFICO DE LA LINTERNA
+        AudioClip clip = AudioManager.Instance.sonidoApagarLinterna;
 
         if (clip != null)
         {
+            float volumenFinal = volumenSonidos * AudioManager.Instance.GetVolumenGlobal();
             AudioManager.Instance.PlayOneShotAtPosition(
                 clip,
                 transform.position,
-                volumenSonidos,
+                volumenFinal,
                 5f
             );
-            Debug.Log($"?? Sonido de apagar reproducido");
+            Debug.Log($"?? Sonido de apagar linterna reproducido");
         }
         else
         {
-            Debug.LogWarning("?? No hay sonido de apagar disponible en AudioManager");
+            Debug.LogWarning("?? No hay sonido de apagar linterna en AudioManager");
         }
     }
 
-    // Métodos para controlar el estado desde el sistema de recogida
     public void SetInHand(bool inHand)
     {
         isInHand = inHand;
@@ -143,7 +138,6 @@ public class Linterna : MonoBehaviour
         return isInHand;
     }
 
-    // Método para cambiar el volumen desde fuera
     public void SetVolume(float newVolume)
     {
         volumenSonidos = Mathf.Clamp01(newVolume);
