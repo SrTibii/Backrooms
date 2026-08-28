@@ -11,6 +11,10 @@ public class MenuInicial : MonoBehaviour
     [Tooltip("Tiempo de espera antes de cargar la escena después del click")]
     public float delayAntesDeCargar = 0.3f;
 
+    [Header("Paneles")]
+    public GameObject panelInicio;
+    public GameObject panelCreditos;
+
     private AudioSource audioSource;
     private bool isLoading = false;
 
@@ -29,6 +33,10 @@ public class MenuInicial : MonoBehaviour
         {
             AudioManager.Instance.RegistrarAudioSource(audioSource);
         }
+
+        // Asegurar que el panel de inicio está visible y el de créditos no
+        if (panelInicio != null) panelInicio.SetActive(true);
+        if (panelCreditos != null) panelCreditos.SetActive(false);
     }
 
     // ============================================
@@ -39,18 +47,77 @@ public class MenuInicial : MonoBehaviour
     {
         if (audioSource == null || isLoading) return;
 
-        // ============================================
-        // REPRODUCIR SONIDO HOVER CON AUDIOMANAGER
-        // ============================================
         if (AudioManager.Instance != null && AudioManager.Instance.sonidoHover != null)
         {
             AudioManager.Instance.PlayOneShot(audioSource, AudioManager.Instance.sonidoHover, volumenSonidos);
         }
         else if (audioSource != null)
         {
-            // Fallback por si no hay AudioManager
             audioSource.PlayOneShot(AudioManager.Instance?.sonidoHover, volumenSonidos);
         }
+    }
+
+    // ============================================
+    // MÉTODOS PARA NAVEGAR ENTRE PANELES
+    // ============================================
+
+    public void AbrirCreditos()
+    {
+        if (isLoading) return;
+
+        // ?? OCULTAR TODOS LOS INDICADORES ANTES DE CAMBIAR DE PANEL
+        OcultarTodosLosIndicadores();
+
+        if (panelInicio != null) panelInicio.SetActive(false);
+        if (panelCreditos != null) panelCreditos.SetActive(true);
+
+        // Reproducir sonido de click
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoClick != null)
+        {
+            AudioManager.Instance.PlayOneShot(audioSource, AudioManager.Instance.sonidoClick, volumenSonidos);
+        }
+
+        Debug.Log("?? Abriendo panel de créditos");
+    }
+
+    public void CerrarCreditos()
+    {
+        if (isLoading) return;
+
+        // ?? OCULTAR TODOS LOS INDICADORES ANTES DE CAMBIAR DE PANEL
+        OcultarTodosLosIndicadores();
+
+        if (panelCreditos != null) panelCreditos.SetActive(false);
+        if (panelInicio != null) panelInicio.SetActive(true);
+
+        // Reproducir sonido de click
+        if (AudioManager.Instance != null && AudioManager.Instance.sonidoClick != null)
+        {
+            AudioManager.Instance.PlayOneShot(audioSource, AudioManager.Instance.sonidoClick, volumenSonidos);
+        }
+
+        Debug.Log("?? Volviendo al panel de inicio");
+    }
+
+    // ============================================
+    // ?? MÉTODO PARA OCULTAR TODOS LOS INDICADORES
+    // ============================================
+
+    private void OcultarTodosLosIndicadores()
+    {
+        // Buscar todos los BotonConIndicador en la escena
+        BotonConIndicador[] botones = FindObjectsOfType<BotonConIndicador>(true);
+
+        foreach (var boton in botones)
+        {
+            if (boton != null)
+            {
+                // Forzar la ocultación del indicador
+                boton.ForzarOcultar();
+            }
+        }
+
+        Debug.Log($"?? {botones.Length} indicadores ocultados");
     }
 
     // ============================================
@@ -83,9 +150,6 @@ public class MenuInicial : MonoBehaviour
     {
         isLoading = true;
 
-        // ============================================
-        // REPRODUCIR SONIDO CLICK CON AUDIOMANAGER
-        // ============================================
         if (AudioManager.Instance != null && AudioManager.Instance.sonidoClick != null)
         {
             AudioManager.Instance.PlayOneShot(audioSource, AudioManager.Instance.sonidoClick, volumenSonidos);
@@ -95,10 +159,7 @@ public class MenuInicial : MonoBehaviour
             audioSource.PlayOneShot(AudioManager.Instance?.sonidoClick, volumenSonidos);
         }
 
-        // Esperar el delay para que se escuche el sonido
         yield return new WaitForSeconds(delayAntesDeCargar);
-
-        // Cargar la escena
         SceneManager.LoadScene(nombreEscena);
     }
 
@@ -106,9 +167,6 @@ public class MenuInicial : MonoBehaviour
     {
         isLoading = true;
 
-        // ============================================
-        // REPRODUCIR SONIDO CLICK CON AUDIOMANAGER
-        // ============================================
         if (AudioManager.Instance != null && AudioManager.Instance.sonidoClick != null)
         {
             AudioManager.Instance.PlayOneShot(audioSource, AudioManager.Instance.sonidoClick, volumenSonidos);
@@ -118,14 +176,11 @@ public class MenuInicial : MonoBehaviour
             audioSource.PlayOneShot(AudioManager.Instance?.sonidoClick, volumenSonidos);
         }
 
-        // Esperar el delay para que se escuche el sonido
         yield return new WaitForSeconds(delayAntesDeCargar);
 
-        // Salir del juego
         Debug.Log("Saliendo del juego...");
         Application.Quit();
 
-        // En el editor, detener la reproducción
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #endif
