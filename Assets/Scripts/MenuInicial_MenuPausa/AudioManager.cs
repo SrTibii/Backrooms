@@ -372,4 +372,27 @@ public class AudioManager : MonoBehaviour
 
         PlayOneShotAtPosition(glitchSound, position, volume * volumenGlobal, 8f);
     }
+
+    // ============================================
+    // ?? FORZAR REGISTRO DE TODOS LOS AUDIOSOURCES EN LA ESCENA
+    // ============================================
+    public void ForzarRegistroDeTodos()
+    {
+        AudioSource[] allSources = FindObjectsOfType<AudioSource>(true);
+        int contador = 0;
+
+        foreach (var src in allSources)
+        {
+            if (src != null && src != GetComponent<AudioSource>())
+            {
+                if (!audioSourcesControlados.Contains(src))
+                {
+                    RegistrarAudioSource(src);
+                    contador++;
+                }
+            }
+        }
+
+        Debug.Log($"?? Forzado registro de {contador} AudioSources");
+    }
 }

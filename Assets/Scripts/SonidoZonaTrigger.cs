@@ -19,52 +19,125 @@ public class SonidoZonaTrigger : MonoBehaviour
 
         if (audioSource != null)
         {
-            audioSource.loop = true; // O false si quieres que suene una vez
+            audioSource.loop = true;
             audioSource.playOnAwake = false;
             audioSource.volume = volumen;
+
+            // ?? FORZAR REGISTRO DE TODOS
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.ForzarRegistroDeTodos();
+            }
+        }
+    }
+
+    void OnEnable()
+    {
+        // ============================================
+        // ?? CADA VEZ QUE SE ACTIVA EL GAMEOBJECT, REGISTRAR
+        // ============================================
+        RegistrarEnAudioManager();
+    }
+
+    void OnDisable()
+    {
+        // ============================================
+        // ?? DESREGISTRAR AL DESACTIVAR
+        // ============================================
+        if (audioSource != null && AudioManager.Instance != null)
+        {
+            AudioManager.Instance.DesregistrarAudioSource(audioSource);
+        }
+    }
+
+    void OnDestroy()
+    {
+        // ============================================
+        // ?? DESREGISTRAR AL DESTRUIR
+        // ============================================
+        if (audioSource != null && AudioManager.Instance != null)
+        {
+            AudioManager.Instance.DesregistrarAudioSource(audioSource);
+        }
+    }
+
+    // ============================================
+    // ?? REGISTRAR EN AUDIOMANAGER CON LOGS
+    // ============================================
+    private void RegistrarEnAudioManager()
+    {
+        if (audioSource == null) return;
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.RegistrarAudioSource(audioSource);
+            Debug.Log($"?? AudioSource registrado: {gameObject.name} - Clip: {audioSource.clip?.name ?? "NULL"}");
+        }
+        else
+        {
+            Debug.LogWarning($"?? AudioManager no disponible en {gameObject.name} - Intentando registrar más tarde...");
+            // Intentar registrar después de 0.5 segundos si el AudioManager no está listo
+            Invoke("RegistrarEnAudioManager", 0.5f);
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
-        {
-            if (reproducirUnaVez && yaReproducido) return;
+        if (!other.CompareTag("Player")) return;
+        if (reproducirUnaVez && yaReproducido) return;
+        if (audioSource == null) return;
 
-            if (audioSource != null && !audioSource.isPlaying)
-            {
-                audioSource.Play();
-                yaReproducido = true;
-                Debug.Log($"?? Sonido activado en {gameObject.name}");
-            }
+        // ============================================
+        // ?? FORZAR REGISTRO ANTES DE REPRODUCIR
+        // ============================================
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.RegistrarAudioSource(audioSource);
+        }
+
+        // ============================================
+        // ?? APLICAR VOLUMEN GLOBAL
+        // ============================================
+        if (AudioManager.Instance != null)
+        {
+            float volumenGlobal = AudioManager.Instance.GetVolumenGlobal();
+            audioSource.volume = volumen * volumenGlobal;
+            Debug.Log($"?? Volumen aplicado: {audioSource.volume} (original: {volumen} * global: {volumenGlobal})");
+        }
+        else
+        {
+            audioSource.volume = volumen;
+        }
+
+        if (!audioSource.isPlaying)
+        {
+            audioSource.Play();
+            yaReproducido = true;
+            Debug.Log($"?? Sonido ACTIVADO en {gameObject.name} - Clip: {audioSource.clip?.name ?? "NULL"}");
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (!other.CompareTag("Player")) return;
+        if (audioSource == null) return;
+
+        if (audioSource.isPlaying)
         {
-            if (audioSource != null && audioSource.isPlaying)
-            {
-                // ?? En lugar de FadeOut, solo baja el volumen o detén
-                audioSource.Stop();
-            }
+            audioSource.Stop();
+            Debug.Log($"?? Sonido DETENIDO en {gameObject.name}");
         }
     }
 
-    System.Collections.IEnumerator FadeOut(AudioSource source, float duration)
+    // ============================================
+    // ?? MÉTODO PARA ACTUALIZAR EL VOLUMEN (OPCIONAL)
+    // ============================================
+    public void ActualizarVolumen()
     {
-        float startVolume = source.volume;
-        float elapsed = 0f;
-
-        while (elapsed < duration)
+        if (audioSource != null && AudioManager.Instance != null)
         {
-            elapsed += Time.deltaTime;
-            source.volume = Mathf.Lerp(startVolume, 0f, elapsed / duration);
-            yield return null;
+            float volumenGlobal = AudioManager.Instance.GetVolumenGlobal();
+            audioSource.volume = volumen * volumenGlobal;
         }
-
-        source.Stop();
-        source.volume = startVolume;
     }
 }
