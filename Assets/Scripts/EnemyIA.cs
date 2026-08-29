@@ -162,6 +162,10 @@ public class EnemyIA : MonoBehaviour
     private int playerLayerMask = -1;
     private int enemyLayer = -1;
 
+    // ?? TIMER PARA DETECCIÓN DE PROXIMIDAD
+    private float tiempoUltimaDeteccionProximidad = 0f;
+    private float intervaloDeteccionProximidad = 0.3f; // Cada 0.3 segundos
+
     void Start()
     {
         Debug.Log($"?? Inicializando {gameObject.name}...");
@@ -240,7 +244,7 @@ public class EnemyIA : MonoBehaviour
             if (globalVolume.profile.TryGet<UnityEngine.Rendering.Universal.ColorAdjustments>(out globalColorAdjustments))
             {
                 originalHueShift = globalColorAdjustments.hueShift.value;
-                Debug.Log($"? ColorAdjustments global encontrado. HueShift original: {originalHueShift}");
+                Debug.Log($"?? ColorAdjustments global encontrado. HueShift original: {originalHueShift}");
             }
         }
 
@@ -360,6 +364,7 @@ public class EnemyIA : MonoBehaviour
 
         if (isJumpscareActive) return;
 
+        // ?? DETECCIÓN SIEMPRE ACTIVA
         DetectPlayer();
         CheckPlayerIdle();
         CheckJumpscare();
@@ -411,9 +416,7 @@ public class EnemyIA : MonoBehaviour
             isPlayerHiding = lockerSystem.IsHiding();
 
             if (showDebugLogs && wasHiding != isPlayerHiding)
-            {
                 Debug.Log($"?? Estado de escondido cambiado: {wasHiding} -> {isPlayerHiding}");
-            }
         }
     }
 
@@ -430,9 +433,7 @@ public class EnemyIA : MonoBehaviour
         if (distanceToPlayer <= jumpscareDistance && !isPlayerHiding)
         {
             if (HasLineOfSightToPlayer())
-            {
                 StartJumpscare();
-            }
         }
     }
 
@@ -441,9 +442,8 @@ public class EnemyIA : MonoBehaviour
         if (isJumpscareActive) return;
         isJumpscareActive = true;
 
-        // Detener ambiente y chase
-        if (ambientAudioSource.isPlaying) ambientAudioSource.Stop();
-        if (chaseAudioSource.isPlaying) chaseAudioSource.Stop();
+        if (ambientAudioSource != null && ambientAudioSource.isPlaying) ambientAudioSource.Stop();
+        if (chaseAudioSource != null && chaseAudioSource.isPlaying) chaseAudioSource.Stop();
         isChasePlaying = false;
         isAmbientPlaying = false;
         isAmbientStopped = true;
@@ -466,24 +466,12 @@ public class EnemyIA : MonoBehaviour
         }
 
         StopAgentImmediately();
-
         StopAllCoroutines();
 
-        // ============================================
-        // REPRODUCIR SONIDO DE JUMPSCARE CON AUDIOMANAGER
-        // ============================================
-        if (AudioManager.Instance != null && AudioManager.Instance.jumpscareSound != null)
+        if (AudioManager.Instance != null && AudioManager.Instance.jumpscareSound != null && jumpscareAudioSource != null)
         {
-            AudioManager.Instance.PlayOneShot(
-                jumpscareAudioSource,
-                AudioManager.Instance.jumpscareSound,
-                jumpscareVolume
-            );
+            AudioManager.Instance.PlayOneShot(jumpscareAudioSource, AudioManager.Instance.jumpscareSound, jumpscareVolume);
             Debug.Log($"?? Sonido de jumpscare reproducido");
-        }
-        else
-        {
-            Debug.LogWarning("?? AudioManager o jumpscareSound no disponible");
         }
 
         ActivateJumpscareCamera();
@@ -495,7 +483,7 @@ public class EnemyIA : MonoBehaviour
     {
         if (jumpscareCamera == null)
         {
-            Debug.LogWarning("?? No se ha asignado JumpscareCamera. Usando posición de la cámara principal.");
+            Debug.LogWarning("?? No se ha asignado JumpscareCamera");
 
             if (playerCamera != null)
             {
@@ -504,16 +492,8 @@ public class EnemyIA : MonoBehaviour
 
                 Vector3 directionToEnemy = (transform.position - playerCamera.transform.position).normalized;
                 if (directionToEnemy.magnitude > 0.1f)
-                {
                     playerCamera.transform.rotation = Quaternion.LookRotation(directionToEnemy);
-                }
             }
-            return;
-        }
-
-        if (jumpscareCamera == null)
-        {
-            Debug.LogWarning("?? jumpscareCamera ha sido destruido");
             return;
         }
 
@@ -533,9 +513,7 @@ public class EnemyIA : MonoBehaviour
             {
                 var existingVolume = jumpscareCamera.GetComponent<UnityEngine.Rendering.Volume>();
                 if (existingVolume != null)
-                {
                     existingVolume.profile = jumpscareVolumeOverride.profile;
-                }
                 else
                 {
                     var newVolume = jumpscareCamera.gameObject.AddComponent<UnityEngine.Rendering.Volume>();
@@ -544,9 +522,7 @@ public class EnemyIA : MonoBehaviour
 
                 var volumeComponent = jumpscareCamera.GetComponent<UnityEngine.Rendering.Volume>();
                 if (volumeComponent != null)
-                {
                     volumeComponent.enabled = true;
-                }
 
                 if (jumpscareVolumeOverride != null)
                 {
@@ -562,21 +538,15 @@ public class EnemyIA : MonoBehaviour
 
         AudioListener jumpscareListener = jumpscareCamera.GetComponent<AudioListener>();
         if (jumpscareListener == null)
-        {
             jumpscareListener = jumpscareCamera.gameObject.AddComponent<AudioListener>();
-        }
         if (jumpscareListener != null)
-        {
             jumpscareListener.enabled = true;
-        }
 
         if (playerCamera != null)
         {
             AudioListener playerListener = playerCamera.GetComponent<AudioListener>();
             if (playerListener != null)
-            {
                 playerListener.enabled = false;
-            }
         }
 
         Debug.Log($"?? Cámara de Jumpscare ACTIVADA: {jumpscareCamera.name}");
@@ -587,9 +557,7 @@ public class EnemyIA : MonoBehaviour
         if (jumpscareCamera == null)
         {
             if (playerCamera != null)
-            {
                 playerCamera.gameObject.SetActive(true);
-            }
             return;
         }
 
@@ -612,9 +580,7 @@ public class EnemyIA : MonoBehaviour
             {
                 var volume = jumpscareCamera.GetComponent<UnityEngine.Rendering.Volume>();
                 if (volume != null)
-                {
                     volume.enabled = false;
-                }
                 Debug.Log("?? Volume de jumpscare limpiado");
             }
             catch (System.Exception e)
@@ -632,9 +598,7 @@ public class EnemyIA : MonoBehaviour
         {
             AudioListener jumpscareListener = jumpscareCamera.GetComponent<AudioListener>();
             if (jumpscareListener != null)
-            {
                 jumpscareListener.enabled = false;
-            }
         }
 
         if (playerCamera != null)
@@ -643,11 +607,9 @@ public class EnemyIA : MonoBehaviour
 
             AudioListener playerListener = playerCamera.GetComponent<AudioListener>();
             if (playerListener != null)
-            {
                 playerListener.enabled = true;
-            }
 
-            Debug.Log("? Cámara del player REACTIVADA");
+            Debug.Log("?? Cámara del player REACTIVADA");
         }
 
         Debug.Log($"?? Cámara de Jumpscare DESACTIVADA");
@@ -700,9 +662,7 @@ public class EnemyIA : MonoBehaviour
     IEnumerator JumpscareSequence()
     {
         yield return new WaitForSeconds(jumpscareDuration);
-
         Debug.Log($"?? Reiniciando escena después de {jumpscareDuration} segundos...");
-
         SceneManager.LoadScene("EndVHS");
     }
 
@@ -729,12 +689,78 @@ public class EnemyIA : MonoBehaviour
         isPlayerInRange = distanceToPlayer <= detectionRadius;
         isPlayerVisible = false;
 
+        // ============================================
+        // ?? PROXIMIDAD CON RAYCAST (VERSIÓN DEFINITIVA)
+        // ============================================
         if (distanceToPlayer < proximityDetectionRange)
         {
-            isPlayerVisible = true;
-            lastKnownPlayerPosition = player.position;
-            lastDirection = (player.position - transform.position).normalized;
-            Debug.Log($"?? DETECTADO por PROXIMIDAD: {distanceToPlayer:F1}m");
+            if (Time.time - tiempoUltimaDeteccionProximidad < intervaloDeteccionProximidad)
+            {
+                if (!isPlayerVisible) return;
+            }
+
+            tiempoUltimaDeteccionProximidad = Time.time;
+
+            Vector3 directionToPlayerEnemy = (player.position - transform.position).normalized;
+
+            float[] alturas = { 0.5f, 1.0f, 1.5f, 2.0f, 2.5f };
+            bool hayLineaVista = false;
+
+            // ?? SOLO DETECTAR LA CAPA DEFAULT (paredes y obstáculos)
+            int layerMaskFinal = 1 << LayerMask.NameToLayer("Default");
+
+            foreach (float altura in alturas)
+            {
+                Vector3 start = transform.position + Vector3.up * altura + transform.forward * raycastForwardOffset;
+                Vector3 end = player.position + Vector3.up * 0.5f;
+
+                Vector3 direction = (end - start).normalized;
+                float distance = Vector3.Distance(start, end);
+
+                Debug.DrawRay(start, direction * distance, Color.magenta, 1f);
+
+                RaycastHit hit;
+                if (Physics.Raycast(start, direction, out hit, distance, layerMaskFinal))
+                {
+                    // Como solo detecta Default, cualquier hit es un obstáculo (pared)
+                    Debug.Log($"?? OBSTÁCULO en altura {altura}m: {hit.collider.gameObject.name}");
+                    continue;
+                }
+                else
+                {
+                    Debug.Log($"?? SIN OBSTÁCULO en altura {altura}m");
+                    hayLineaVista = true;
+                    break;
+                }
+            }
+
+            if (hayLineaVista)
+            {
+                isPlayerVisible = true;
+                isPlayerInRange = true;
+                lastKnownPlayerPosition = player.position;
+                lastDirection = directionToPlayerEnemy;
+                playerLostTimer = 0f;
+                Debug.Log($"?? DETECTADO por PROXIMIDAD: {distanceToPlayer:F1}m");
+
+                if (currentState == EnemyState.Idle || currentState == EnemyState.Walking)
+                {
+                    ChangeState(EnemyState.Running);
+                }
+            }
+            else
+            {
+                if (isPlayerVisible)
+                {
+                    isPlayerVisible = false;
+                    Debug.Log($"?? Jugador perdió línea de visión");
+                }
+                else
+                {
+                    Debug.Log($"?? Jugador cerca ({distanceToPlayer:F1}m) pero hay obstáculo");
+                }
+            }
+
             return;
         }
 
@@ -746,7 +772,7 @@ public class EnemyIA : MonoBehaviour
         if (angle > visionAngle * 0.5f)
         {
             if (showDebugLogs && Time.frameCount % 30 == 0)
-                Debug.Log($"? Jugador fuera del ángulo: {angle:F1}°");
+                Debug.Log($"?? Jugador fuera del ángulo: {angle:F1}°");
             return;
         }
 
@@ -785,7 +811,7 @@ public class EnemyIA : MonoBehaviour
                     lastKnownPlayerPosition = player.position;
                     lastDirection = directionToPlayer;
                     foundPlayer = true;
-                    Debug.Log($"? JUGADOR DETECTADO desde altura {height}m");
+                    Debug.Log($"?? JUGADOR DETECTADO desde altura {height}m");
                     break;
                 }
             }
@@ -793,7 +819,7 @@ public class EnemyIA : MonoBehaviour
 
         if (!foundPlayer && showDebugLogs && Time.frameCount % 30 == 0)
         {
-            Debug.Log("? No se detectó al jugador");
+            Debug.Log("?? No se detectó al jugador");
         }
     }
 
@@ -858,9 +884,7 @@ public class EnemyIA : MonoBehaviour
                 ReactivateAmbientSound();
 
                 if (lockerSystem != null && !detectionDisabled)
-                {
                     isPlayerHiding = lockerSystem.IsHiding();
-                }
 
                 if (isPlayerHiding || detectionDisabled)
                 {
@@ -871,9 +895,7 @@ public class EnemyIA : MonoBehaviour
                 }
 
                 if (isPlayerVisible && !isPlayerHiding && !detectionDisabled)
-                {
                     ChangeState(EnemyState.Running);
-                }
                 else
                 {
                     SelectNewWaypoint();
@@ -932,6 +954,12 @@ public class EnemyIA : MonoBehaviour
 
     void UpdateRunning()
     {
+        // ?? SI EL JUGADOR ES VISIBLE POR PROXIMIDAD, RESETEAR EL TIMER
+        if (isPlayerVisible)
+        {
+            playerLostTimer = 0f;
+        }
+
         if (isPlayerInvisible)
         {
             if (showDebugLogs) Debug.Log($"?? Jugador invisible - Perdiendo persecución");
@@ -945,9 +973,7 @@ public class EnemyIA : MonoBehaviour
         }
 
         if (lockerSystem != null && !detectionDisabled)
-        {
             isPlayerHiding = lockerSystem.IsHiding();
-        }
 
         if (detectionDisabled || isPlayerHiding)
         {
@@ -995,9 +1021,7 @@ public class EnemyIA : MonoBehaviour
         if (playerLostTimer < lostPlayerTime)
         {
             if (showDebugLogs && Time.frameCount % 30 == 0)
-            {
                 Debug.Log($"?? Buscando... {playerLostTimer:F1}s/{lostPlayerTime}s");
-            }
 
             if (agent != null && agent.isOnNavMesh)
             {
@@ -1073,9 +1097,7 @@ public class EnemyIA : MonoBehaviour
             }
 
             if (agent.remainingDistance > 1f && agent.velocity.magnitude < 0.5f)
-            {
                 agent.velocity = directionToPlayer * runSpeed * 0.5f;
-            }
 
             Vector3 desiredDirection = (player.position - transform.position).normalized;
             desiredDirection.y = 0;
@@ -1141,9 +1163,7 @@ public class EnemyIA : MonoBehaviour
         if (agent.CalculatePath(destination, path))
         {
             if (path.status == NavMeshPathStatus.PathComplete)
-            {
                 return true;
-            }
         }
         return false;
     }
@@ -1152,9 +1172,7 @@ public class EnemyIA : MonoBehaviour
     {
         NavMeshHit hit;
         if (NavMesh.SamplePosition(position, out hit, 10f, agent.areaMask))
-        {
             return hit.position;
-        }
         return Vector3.zero;
     }
 
@@ -1207,9 +1225,7 @@ public class EnemyIA : MonoBehaviour
         playerLostTimer = 0f;
 
         if (player != null)
-        {
             lastKnownHidingPosition = player.position;
-        }
 
         isWaitingAfterHide = true;
         hideWaitTimer = hideWaitTime;
@@ -1239,16 +1255,13 @@ public class EnemyIA : MonoBehaviour
         {
             case EnemyState.Idle:
                 if (!isWaitingAfterHide)
-                {
                     idleTimer = Random.Range(idleTimeMin, idleTimeMax);
-                }
                 if (agent != null)
                 {
                     agent.isStopped = true;
                     agent.ResetPath();
                 }
                 if (showDebugLogs) Debug.Log($"?? IDLE por {(isWaitingAfterHide ? hideWaitTimer : idleTimer):F1}s");
-
                 StopChaseSound();
                 break;
 
@@ -1258,12 +1271,9 @@ public class EnemyIA : MonoBehaviour
                     agent.speed = walkSpeed;
                     agent.isStopped = false;
                     if (currentWaypoint != null && agent.isOnNavMesh)
-                    {
                         agent.SetDestination(currentWaypoint.position);
-                    }
                 }
                 if (showDebugLogs) Debug.Log($"?? WALKING a {currentWaypoint?.name}");
-
                 StopChaseSound();
                 break;
 
@@ -1291,7 +1301,6 @@ public class EnemyIA : MonoBehaviour
                     }
                 }
                 if (showDebugLogs) Debug.Log($"?? RUNNING al jugador");
-
                 StartChaseSound();
                 break;
 
@@ -1327,18 +1336,12 @@ public class EnemyIA : MonoBehaviour
         float normalizedSpeed = 0f;
 
         if (currentState == EnemyState.Running)
-        {
             normalizedSpeed = Mathf.Clamp01(speed / runSpeed);
-        }
         else if (currentState == EnemyState.Walking)
-        {
             normalizedSpeed = Mathf.Clamp01(speed / walkSpeed);
-        }
 
         if (currentState == EnemyState.Idle || currentState == EnemyState.Jumpscare)
-        {
             normalizedSpeed = 0f;
-        }
 
         animator.SetFloat("Speed", normalizedSpeed);
         animator.SetBool("IsRunning", currentState == EnemyState.Running);
@@ -1363,6 +1366,12 @@ public class EnemyIA : MonoBehaviour
             return;
         }
 
+        if (ambientAudioSource == null)
+        {
+            if (showDebugLogs) Debug.LogWarning("?? ambientAudioSource no asignado en el Inspector");
+            return;
+        }
+
         AudioClip newClip = AudioManager.Instance.ambientSounds[Random.Range(0, AudioManager.Instance.ambientSounds.Length)];
         int attempts = 0;
         while (newClip == currentAmbientClip && AudioManager.Instance.ambientSounds.Length > 1 && attempts < 20)
@@ -1376,7 +1385,6 @@ public class EnemyIA : MonoBehaviour
         ambientAudioSource.clip = currentAmbientClip;
         ambientAudioSource.loop = false;
 
-        // ?? APLICAR VOLUMEN GLOBAL
         float volumenGlobal = AudioManager.Instance.GetVolumenGlobal();
         ambientAudioSource.volume = ambientVolume * volumenGlobal;
 
@@ -1396,7 +1404,7 @@ public class EnemyIA : MonoBehaviour
     {
         if (showDebugLogs) Debug.Log($"?? Reactivando sonidos ambientales...");
 
-        if (isAmbientStopped || !ambientAudioSource.isPlaying)
+        if (isAmbientStopped || (ambientAudioSource != null && !ambientAudioSource.isPlaying))
         {
             isAmbientStopped = false;
             isAmbientPlaying = false;
@@ -1416,6 +1424,12 @@ public class EnemyIA : MonoBehaviour
         if (AudioManager.Instance.chaseSounds == null || AudioManager.Instance.chaseSounds.Length == 0)
         {
             if (showDebugLogs) Debug.LogWarning("?? No hay sonidos de persecución en AudioManager");
+            return;
+        }
+
+        if (chaseAudioSource == null)
+        {
+            if (showDebugLogs) Debug.LogWarning("?? chaseAudioSource no asignado en el Inspector");
             return;
         }
 
@@ -1460,10 +1474,8 @@ public class EnemyIA : MonoBehaviour
 
     void StopAmbientSoundImmediate()
     {
-        if (ambientAudioSource.isPlaying)
-        {
+        if (ambientAudioSource != null && ambientAudioSource.isPlaying)
             ambientAudioSource.Stop();
-        }
         isAmbientPlaying = false;
         isAmbientStopped = true;
         if (showDebugLogs) Debug.Log($"?? Ambiente detenido inmediatamente");
@@ -1473,7 +1485,6 @@ public class EnemyIA : MonoBehaviour
     {
         if (chaseAudioSource == null) yield break;
 
-        // ?? OBTENER VOLUMEN GLOBAL
         float volumenGlobal = AudioManager.Instance != null ? AudioManager.Instance.GetVolumenGlobal() : 1f;
         float targetVolumenFinal = targetVolume * volumenGlobal;
 
@@ -1516,8 +1527,8 @@ public class EnemyIA : MonoBehaviour
     {
         if (currentState == EnemyState.Jumpscare)
         {
-            if (ambientAudioSource.isPlaying) ambientAudioSource.Stop();
-            if (chaseAudioSource.isPlaying) chaseAudioSource.Stop();
+            if (ambientAudioSource != null && ambientAudioSource.isPlaying) ambientAudioSource.Stop();
+            if (chaseAudioSource != null && chaseAudioSource.isPlaying) chaseAudioSource.Stop();
             return;
         }
 
@@ -1538,7 +1549,7 @@ public class EnemyIA : MonoBehaviour
         {
             if (!playerInAudioRange)
             {
-                if (ambientAudioSource.isPlaying)
+                if (ambientAudioSource != null && ambientAudioSource.isPlaying)
                 {
                     ambientAudioSource.Stop();
                     isAmbientPlaying = false;
@@ -1547,29 +1558,23 @@ public class EnemyIA : MonoBehaviour
                 return;
             }
 
-            if (!ambientAudioSource.isPlaying && isAmbientPlaying)
-            {
+            if (ambientAudioSource != null && !ambientAudioSource.isPlaying && isAmbientPlaying)
                 isAmbientPlaying = false;
-            }
 
             if (!isAmbientPlaying && !isAmbientStopped)
             {
                 ambientTimer -= Time.deltaTime;
 
                 if (ambientTimer <= 0f)
-                {
                     PlayRandomAmbientSound();
-                }
             }
 
             if (isAmbientStopped && currentState != EnemyState.Running)
-            {
                 ReactivateAmbientSound();
-            }
         }
         else
         {
-            if (ambientAudioSource.isPlaying)
+            if (ambientAudioSource != null && ambientAudioSource.isPlaying)
             {
                 ambientAudioSource.Stop();
                 isAmbientPlaying = false;
@@ -1579,10 +1584,8 @@ public class EnemyIA : MonoBehaviour
 
         if (currentState == EnemyState.Running)
         {
-            if (!isChasePlaying || !chaseAudioSource.isPlaying)
-            {
+            if (!isChasePlaying || (chaseAudioSource != null && !chaseAudioSource.isPlaying))
                 StartChaseSound();
-            }
         }
     }
 
@@ -1601,19 +1604,13 @@ public class EnemyIA : MonoBehaviour
         Debug.DrawRay(transform.position + Vector3.up * 0.5f, right * visionRange, Color.green);
 
         if (isPlayerVisible && player != null)
-        {
             Debug.DrawLine(transform.position + Vector3.up * 0.5f, player.position, Color.red);
-        }
 
         if (currentWaypoint != null)
-        {
             Debug.DrawLine(transform.position, currentWaypoint.position, Color.cyan);
-        }
 
         if (currentState == EnemyState.Running && !isPlayerVisible && playerLostTimer < lostPlayerTime)
-        {
             Debug.DrawRay(transform.position + Vector3.up * 0.5f, lastDirection * 5f, Color.magenta);
-        }
     }
 
     void DrawWireCircle(Vector3 center, float radius, Color color)
@@ -1637,15 +1634,25 @@ public class EnemyIA : MonoBehaviour
     // ============================================
     void OnDrawGizmosSelected()
     {
+        // Detection Radius
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, detectionRadius);
 
+        // Vision Range
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.position, visionRange);
 
+        // Jumpscare Distance
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, jumpscareDistance);
 
+        // ============================================
+        // ?? PROXIMITY DETECTION RANGE 
+        // ============================================
+        Gizmos.color = new Color(1f, 0.5f, 0f, 0.3f);
+        Gizmos.DrawWireSphere(transform.position, proximityDetectionRange);
+
+        // Waypoints
         Gizmos.color = Color.cyan;
         foreach (var wp in waypoints)
         {
@@ -1659,6 +1666,7 @@ public class EnemyIA : MonoBehaviour
             Gizmos.DrawWireSphere(currentWaypoint.position, 0.5f);
         }
 
+        // Ángulo de visión
         Gizmos.color = Color.green;
         Vector3 forward = transform.forward;
         Vector3 left = Quaternion.Euler(0, -visionAngle * 0.5f, 0) * forward;
@@ -1669,6 +1677,7 @@ public class EnemyIA : MonoBehaviour
         Gizmos.DrawLine(transform.position + Vector3.up * 0.5f,
                         transform.position + Vector3.up * 0.5f + right * visionRange);
 
+        // Jumpscare Camera
         if (jumpscareCamera != null)
         {
             Gizmos.color = Color.magenta;
@@ -1685,6 +1694,7 @@ public class EnemyIA : MonoBehaviour
             );
         }
 
+        // Audio Gizmo
         if (showAudioGizmo)
         {
             Vector3 center = transform.position + Vector3.up * (ambientAudioVerticalRange / 2f);
@@ -1782,7 +1792,6 @@ public class EnemyIA : MonoBehaviour
         jumpscareCamera = null;
         playerCamera = null;
 
-        // Desregistrar AudioSources al destruir
         if (AudioManager.Instance != null)
         {
             if (ambientAudioSource != null)
@@ -1817,7 +1826,7 @@ public class EnemyIA : MonoBehaviour
         Collider collider = GetComponent<Collider>();
         if (collider != null)
         {
-            Debug.Log($"? Collider: {collider.GetType().Name} | Enabled: {collider.enabled} | IsTrigger: {collider.isTrigger}");
+            Debug.Log($"?? Collider: {collider.GetType().Name} | Enabled: {collider.enabled} | IsTrigger: {collider.isTrigger}");
         }
         else
         {
@@ -1826,7 +1835,7 @@ public class EnemyIA : MonoBehaviour
 
         if (agent != null)
         {
-            Debug.Log($"? NavMeshAgent: {agent.GetType().Name} | Enabled: {agent.enabled} | OnNavMesh: {agent.isOnNavMesh}");
+            Debug.Log($"?? NavMeshAgent: {agent.GetType().Name} | Enabled: {agent.enabled} | OnNavMesh: {agent.isOnNavMesh}");
         }
 
         if (player != null)
@@ -1834,7 +1843,7 @@ public class EnemyIA : MonoBehaviour
             Collider playerCol = player.GetComponent<Collider>();
             if (playerCol != null)
             {
-                Debug.Log($"? Player Collider: {playerCol.GetType().Name} | Enabled: {playerCol.enabled} | IsTrigger: {playerCol.isTrigger}");
+                Debug.Log($"?? Player Collider: {playerCol.GetType().Name} | Enabled: {playerCol.enabled} | IsTrigger: {playerCol.isTrigger}");
             }
             else
             {
