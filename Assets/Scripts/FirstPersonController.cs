@@ -239,6 +239,7 @@ public class FirstPersonController : MonoBehaviour
     // ============================================
     // 14. ONENABLE / ONDISABLE
     // ============================================
+    /*
     private void OnEnable()
     {
         if (moveAction != null)
@@ -312,28 +313,29 @@ public class FirstPersonController : MonoBehaviour
             crouchAction.action.Disable();
         }
     }
+    */
 
     // ============================================
     // 15. CALLBACKS DE INPUT SYSTEM
     // ============================================
     private void OnMovePerformed(InputAction.CallbackContext context)
     {
-        moveInput = context.ReadValue<Vector2>();
+        //moveInput = context.ReadValue<Vector2>();
     }
 
     private void OnMoveCanceled(InputAction.CallbackContext context)
     {
-        moveInput = Vector2.zero;
+        //moveInput = Vector2.zero;
     }
 
     private void OnLookPerformed(InputAction.CallbackContext context)
     {
-        lookInput = context.ReadValue<Vector2>();
+        //lookInput = context.ReadValue<Vector2>();
     }
 
     private void OnLookCanceled(InputAction.CallbackContext context)
     {
-        lookInput = Vector2.zero;
+        //lookInput = Vector2.zero;
     }
 
     private void OnSprintPerformed(InputAction.CallbackContext context)
@@ -509,6 +511,13 @@ public class FirstPersonController : MonoBehaviour
     {
         if (estaMuerto) return;
 
+        // NUEVO: ARDUINO
+        if (ArduinoManager.Instance != null)
+        {
+            moveInput = ArduinoManager.Instance.moveInput;
+            lookInput = ArduinoManager.Instance.lookInput;
+        }
+
         if (crouchCooldownTimer > 0f)
             crouchCooldownTimer -= Time.deltaTime;
 
@@ -643,7 +652,11 @@ public class FirstPersonController : MonoBehaviour
         float horizontal = moveInput.x;
         float vertical = moveInput.y;
 
-        Vector3 inputDirection = (transform.right * horizontal + transform.forward * vertical).normalized;
+        // ANTES: Vector3 inputDirection = (transform.right * horizontal + transform.forward * vertical).normalized;
+        // AHORA:
+        Vector3 inputDirection = (transform.right * horizontal + transform.forward * vertical);
+        if (inputDirection.magnitude > 1f) inputDirection.Normalize();
+
 
         if (!controller.isGrounded)
             inputDirection *= 0.3f;
@@ -695,8 +708,8 @@ public class FirstPersonController : MonoBehaviour
     // ============================================
     void HandleMouseLook()
     {
-        float mouseX = lookInput.x * mouseSensitivity;
-        float mouseY = lookInput.y * mouseSensitivity;
+        float mouseX = lookInput.x * mouseSensitivity * 10f;
+        float mouseY = lookInput.y * mouseSensitivity * 10f;
 
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, minYAngle, maxYAngle);
