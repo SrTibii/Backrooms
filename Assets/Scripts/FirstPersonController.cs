@@ -653,26 +653,46 @@ public class FirstPersonController : MonoBehaviour
     // ============================================
     void HandleMovement()
     {
+
         float horizontal = moveInput.x;
         float vertical = moveInput.y;
 
-        // ANTES: Vector3 inputDirection = (transform.right * horizontal + transform.forward * vertical).normalized;
-        // AHORA:
         Vector3 inputDirection = (transform.right * horizontal + transform.forward * vertical);
         if (inputDirection.magnitude > 1f) inputDirection.Normalize();
-
 
         if (!controller.isGrounded)
             inputDirection *= 0.3f;
 
         float currentSpeed = walkSpeed;
 
+        // Si estamos agachados, velocidad de agachado
         if (isCrouching)
+        {
             currentSpeed = crouchSpeed;
+        }
+        // Si estamos sprintando (y el joystick está a tope), velocidad de sprint
         else if (isSprinting && isMoving && currentStamina > 0 && !isExhausted && controller.isGrounded)
+        {
             currentSpeed = sprintSpeed;
+        }
 
-        float speed = inputDirection.magnitude > 0 ? currentSpeed : 0f;
+        // IMPORTANTE: Si NO estamos sprintando, forzamos a que la velocidad sea constante
+        // (así evitamos que al mover un poco el joystick, el personaje vaya a trompicones)
+        float speed = currentSpeed;
+
+        // Si hay input, aplicamos la velocidad. Si no, velocidad 0.
+        if (inputDirection.magnitude == 0)
+        {
+            speed = 0f;
+        }
+        else if (!isSprinting)
+        {
+            // Si no estamos sprintando, la velocidad es la de caminar (independientemente de 
+            // lo poco que empujes el joystick, el personaje siempre irá a walkSpeed).
+            // Para que se sienta natural, normalizamos la dirección.
+            inputDirection = inputDirection.normalized;
+        }
+
         Vector3 targetVelocity = inputDirection * speed;
 
         if (enableInertia)
