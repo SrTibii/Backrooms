@@ -12,6 +12,10 @@ public class ArduinoManager : MonoBehaviour
     [Header("Configuración Joysticks")]
     public float deadzone = 0.15f;
 
+    [Tooltip("A partir de qué valor (0 a 1) el joystick hace sprint. 0.5 es la mitad del recorrido.")]
+    [Range(0f, 1f)]
+    public float umbralSprint = 0.65f; // Lo bajamos a 0.65 por defecto
+
     public enum EjeJoystick { X, Y, InvertirX, InvertirY }
 
     [Header("Mapeo de Movimiento")]
@@ -108,7 +112,7 @@ public class ArduinoManager : MonoBehaviour
                             // NUEVO: Calcular si estamos haciendo sprint
                             // Si la longitud del vector de movimiento es mayor a 0.85, corremos.
                             // (Puedes ajustar el 0.85 si quieres que corra antes o después).
-                            isSprinting = moveInput.magnitude > 0.85f;
+                            isSprinting = moveInput.magnitude > umbralSprint;
                         }
                     }
                 }
