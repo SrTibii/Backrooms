@@ -118,7 +118,7 @@ public class DrawerInteraction : MonoBehaviour
         transform.localPosition = Vector3.Lerp(transform.localPosition, targetPosition, Time.deltaTime * speed);
     }
 
-    void HandleInteraction()
+    public void HandleInteraction()
     {
         if (interactionSystem == null) return;
 

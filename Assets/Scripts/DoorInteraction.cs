@@ -26,6 +26,8 @@ public class DoorInteraction : MonoBehaviour
     private bool isAnimating = false;
     private AudioSource audioSource;
 
+    private bool clickDerechoAnterior = false;
+
     void Start()
     {
         // Buscar referencias
@@ -55,6 +57,18 @@ public class DoorInteraction : MonoBehaviour
         }
     }
 
+    void Update() // Si no tienes Update, créalo
+    {
+        if (ArduinoManager.Instance != null)
+        {
+            if (ArduinoManager.Instance.clickDerecho && !clickDerechoAnterior)
+            {
+                HandleInteraction();
+            }
+            clickDerechoAnterior = ArduinoManager.Instance.clickDerecho;
+        }
+    }
+
     private void OnEnable()
     {
         if (interactAction != null)
@@ -78,7 +92,7 @@ public class DoorInteraction : MonoBehaviour
         HandleInteraction();
     }
 
-    void HandleInteraction()
+    public void HandleInteraction()
     {
         if (interactionSystem == null) return;
 

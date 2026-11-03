@@ -36,6 +36,8 @@ public class LeerNota : MonoBehaviour
     private bool notaAbierta = false;
     private GameObject notaActual = null;
 
+    private bool clickDerechoAnterior = false;
+
     void Start()
     {
         playerController = FindObjectOfType<FirstPersonController>();
@@ -56,6 +58,21 @@ public class LeerNota : MonoBehaviour
         }
 
         Debug.Log("? Sistema de lectura de notas inicializado");
+    }
+
+    void Update()
+    {
+        if (ArduinoManager.Instance != null)
+        {
+            if (ArduinoManager.Instance.clickDerecho && !clickDerechoAnterior)
+            {
+                // Si ya está abierta, la cierra. Si no, intenta abrirla.
+                if (notaAbierta) CerrarNota();
+                else AbrirNota();
+            }
+            clickDerechoAnterior = ArduinoManager.Instance.clickDerecho;
+        }
+
     }
 
     private void OnEnable()

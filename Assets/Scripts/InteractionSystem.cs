@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem; // IMPORTANTE: Necesario para el Input System
 
 public class InteractionSystem : MonoBehaviour
 {
@@ -17,11 +18,8 @@ public class InteractionSystem : MonoBehaviour
     public Color normalColor = Color.white;
     public Color highlightColor = Color.green;
 
-    // ============================================
-    // REFERENCIA A LA CÁMARA DE JUEGO
-    // ============================================
     [Header("Cámara de Juego")]
-    public Camera gameCamera; // Arrastra la cámara que renderiza la escena
+    public Camera gameCamera;
 
     // Variables internas
     private float currentSize;
@@ -29,12 +27,13 @@ public class InteractionSystem : MonoBehaviour
     private bool isLookingAtObject = false;
     private GameObject currentTarget;
 
+    // Puente entre el Arduino y el sistema de interacción
+    private bool botonInteraccionAnterior = false;
+
     void Start()
     {
-        // Buscar la cámara de juego si no está asignada
         if (gameCamera == null)
         {
-            // Buscar la cámara que NO es la de UI (layer 5 = UI)
             Camera[] allCameras = FindObjectsOfType<Camera>();
             foreach (Camera cam in allCameras)
             {
@@ -44,96 +43,49 @@ public class InteractionSystem : MonoBehaviour
                     break;
                 }
             }
-
-            // Si no se encontró, usar Camera.main
-            if (gameCamera == null)
-            {
-                gameCamera = Camera.main;
-                Debug.LogWarning("InteractionSystem: Usando Camera.main como fallback");
-            }
-        }
-
-        if (gameCamera == null)
-        {
-            Debug.LogError("InteractionSystem: No se encontró una cámara de juego");
-        }
-        else
-        {
-            Debug.Log($"?? InteractionSystem: Cámara de juego asignada - {gameCamera.name}");
+            if (gameCamera == null) gameCamera = Camera.main;
         }
 
         if (crosshair != null)
         {
-            if (!crosshair.gameObject.activeSelf)
-            {
-                crosshair.gameObject.SetActive(true);
-                Debug.Log("?? Crosshair forzado a activo en Start()");
-            }
-
+            if (!crosshair.gameObject.activeSelf) crosshair.gameObject.SetActive(true);
             crosshair.anchorMin = new Vector2(0.5f, 0.5f);
             crosshair.anchorMax = new Vector2(0.5f, 0.5f);
             crosshair.pivot = new Vector2(0.5f, 0.5f);
-
             currentSize = normalSize;
             crosshair.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, currentSize);
             crosshair.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, currentSize);
-
             Image crosshairImage = crosshair.GetComponent<Image>();
             if (crosshairImage != null)
             {
-                Color color = crosshairImage.color;
-                if (color.a < 0.1f)
-                {
-                    color.a = 1f;
-                    crosshairImage.color = color;
-                    Debug.Log("?? Crosshair alpha corregido a 1");
-                }
-
                 crosshairImage.color = normalColor;
                 currentColor = normalColor;
             }
-            else
-            {
-                Debug.LogWarning("?? El crosshair no tiene componente Image");
-            }
-
-            Debug.Log($"?? Crosshair inicializado: active={crosshair.gameObject.activeSelf}, size={currentSize}");
-        }
-        else
-        {
-            Debug.LogError("?? Crosshair NO ASIGNADO en InteractionSystem");
         }
     }
 
     void Update()
     {
-        if (crosshair != null && !crosshair.gameObject.activeSelf)
+        // NUEVO: Leer el clic derecho del Arduino
+        if (ArduinoManager.Instance != null)
         {
-            crosshair.gameObject.SetActive(true);
-            Debug.Log("?? Crosshair reactivado en Update()");
+            if (ArduinoManager.Instance.clickDerecho && !botonInteraccionAnterior)
+            {
+                InteractuarConObjetoActual();
+            }
+            botonInteraccionAnterior = ArduinoManager.Instance.clickDerecho;
         }
 
         PerformRaycast();
         UpdateCrosshair();
     }
 
-    // ============================================
-    // RAYCAST - Usando la cámara de juego
-    // ============================================
-
     void PerformRaycast()
     {
         if (gameCamera == null) return;
 
-        // ============================================
-        // USAR EL CENTRO DE LA CÁMARA DE JUEGO
-        // ViewportPointToRay(0.5, 0.5) = centro exacto de la cámara
-        // Esto funciona tanto con pantalla normal como con Render Texture
-        // ============================================
         Vector3 centerPoint = new Vector3(0.5f, 0.5f, 0f);
         Ray ray = gameCamera.ViewportPointToRay(centerPoint);
-
-        Debug.DrawRay(ray.origin, ray.direction * interactionRange, Color.yellow);
 
         RaycastHit hit;
 
@@ -172,8 +124,7 @@ public class InteractionSystem : MonoBehaviour
 
     void UpdateCrosshair()
     {
-        if (crosshair == null) return;
-        if (!crosshair.gameObject.activeInHierarchy) return;
+        if (crosshair == null || !crosshair.gameObject.activeInHierarchy) return;
 
         float targetSize = isLookingAtObject ? expandedSize : normalSize;
         currentSize = Mathf.Lerp(currentSize, targetSize, Time.deltaTime * sizeTransitionSpeed);
@@ -188,15 +139,63 @@ public class InteractionSystem : MonoBehaviour
         }
     }
 
-    // ============================================
-    // MÉTODOS PÚBLICOS
-    // ============================================
-
-    public bool IsLookingAtInteractable()
+    public void InteractuarConObjetoActual()
     {
-        if (crosshair != null && !crosshair.gameObject.activeInHierarchy) return false;
-        return isLookingAtObject;
+        if (currentTarget == null) return;
+
+        Debug.Log($"?? Clic derecho del Arduino en: {currentTarget.name}");
+
+        // 1. Puerta normal
+        DoorInteraction puerta = currentTarget.GetComponent<DoorInteraction>();
+        if (puerta != null)
+        {
+            puerta.HandleInteraction();
+            return;
+        }
+
+        // 2. Taquilla
+        LockerHideSystem taquilla = currentTarget.GetComponent<LockerHideSystem>();
+        if (taquilla != null)
+        {
+            if (taquilla.IsHiding()) taquilla.ExitLocker();
+            else taquilla.EnterLocker();
+            return;
+        }
+
+        // 3. Cajón
+        DrawerInteraction cajon = currentTarget.GetComponent<DrawerInteraction>();
+        if (cajon != null)
+        {
+            cajon.HandleInteraction();
+            return;
+        }
+
+        // 4. Generador (Usa SendMessage porque su método es privado)
+        Generador generador = currentTarget.GetComponent<Generador>();
+        if (generador != null)
+        {
+            generador.SendMessage("OnInteractPerformed", new UnityEngine.InputSystem.InputAction.CallbackContext(), SendMessageOptions.DontRequireReceiver);
+            return;
+        }
+
+        // 5. Caja Fuerte
+        CajaFuerte caja = currentTarget.GetComponent<CajaFuerte>();
+        if (caja != null)
+        {
+            caja.SendMessage("OnInteractPerformed", new UnityEngine.InputSystem.InputAction.CallbackContext(), SendMessageOptions.DontRequireReceiver);
+            return;
+        }
+
+        // 6. Notas (LeerNota)
+        LeerNota nota = currentTarget.GetComponent<LeerNota>();
+        if (nota != null)
+        {
+            nota.SendMessage("OnInteractPerformed", new UnityEngine.InputSystem.InputAction.CallbackContext(), SendMessageOptions.DontRequireReceiver);
+            return;
+        }
     }
+
+    public bool IsLookingAtInteractable() { return isLookingAtObject; }
 
     public GameObject GetTargetObject()
     {
@@ -211,13 +210,9 @@ public class InteractionSystem : MonoBehaviour
         {
             foreach (string tag in targetTags)
             {
-                if (hit.collider.CompareTag(tag))
-                {
-                    return hit.collider.gameObject;
-                }
+                if (hit.collider.CompareTag(tag)) return hit.collider.gameObject;
             }
         }
-
         return null;
     }
 
@@ -234,13 +229,9 @@ public class InteractionSystem : MonoBehaviour
         {
             foreach (string tag in targetTags)
             {
-                if (hit.collider.CompareTag(tag))
-                {
-                    return hit.distance;
-                }
+                if (hit.collider.CompareTag(tag)) return hit.distance;
             }
         }
-
         return -1f;
     }
 }

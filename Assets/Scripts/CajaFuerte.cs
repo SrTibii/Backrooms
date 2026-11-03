@@ -25,12 +25,27 @@ public class CajaFuerte : MonoBehaviour
     private int pasoActual = 0;
     private bool isOpen = false;
 
+    private bool clickDerechoAnterior = false;
+
     void Start()
     {
         // Reiniciar la UI
         ReiniciarUI();
 
         Debug.Log("? CajaFuerte inicializada");
+    }
+
+    void Update()
+    {
+        if (ArduinoManager.Instance != null)
+        {
+            if (ArduinoManager.Instance.clickDerecho && !clickDerechoAnterior)
+            {
+                // Llamamos al método de interacción pasándole un contexto falso
+                OnInteractPerformed(new UnityEngine.InputSystem.InputAction.CallbackContext());
+            }
+            clickDerechoAnterior = ArduinoManager.Instance.clickDerecho;
+        }
     }
 
     private void OnEnable()

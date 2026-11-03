@@ -50,6 +50,9 @@ public class LockerHideSystem : MonoBehaviour
     private bool wasLockerAudioListenerActive;
     private AudioListener lockerAudioListener; // <--- AÑADIDA ESTA VARIABLE
 
+    private bool clickDerechoAnterior = false;
+
+
     public bool IsPlayerHiding() => isHiding;
 
     public bool IsHidingOrTransitioning()
@@ -175,6 +178,18 @@ public class LockerHideSystem : MonoBehaviour
     void Update()
     {
         CheckDoorDetection();
+
+        // Si ya tienes un Update con CheckDoorDetection, ponlo DEBAJO de esto.
+
+        if (ArduinoManager.Instance != null)
+        {
+            if (ArduinoManager.Instance.clickDerecho && !clickDerechoAnterior)
+            {
+                HandleInteraction();
+            }
+            clickDerechoAnterior = ArduinoManager.Instance.clickDerecho;
+        }
+
     }
 
     void CheckDoorDetection()
@@ -214,7 +229,7 @@ public class LockerHideSystem : MonoBehaviour
         }
     }
 
-    void EnterLocker()
+    public void EnterLocker()
     {
         if (isHiding) return;
         if (lockerCamera == null)
@@ -318,7 +333,7 @@ public class LockerHideSystem : MonoBehaviour
         Debug.Log($"? {gameObject.name}: Entrando a la taquilla - Flag Global = {IsPlayerHidingGlobal}");
     }
 
-    void ExitLocker()
+    public void ExitLocker()
     {
         if (!isHiding) return;
 

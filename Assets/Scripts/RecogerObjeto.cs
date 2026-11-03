@@ -29,6 +29,7 @@ public class RecogerObjeto : MonoBehaviour
     private ManosManager manosManager;
     private Material alwaysOnTopMat;
 
+    private bool botonPulsado = false;
     void Start()
     {
         if (interactionSystem == null)
@@ -57,6 +58,7 @@ public class RecogerObjeto : MonoBehaviour
         }
     }
 
+    /*
     private void OnEnable()
     {
         if (interactAction != null)
@@ -74,6 +76,7 @@ public class RecogerObjeto : MonoBehaviour
             interactAction.action.Disable();
         }
     }
+    */
 
     private void OnInteractPerformed(InputAction.CallbackContext context)
     {
@@ -95,6 +98,26 @@ public class RecogerObjeto : MonoBehaviour
                 holdPosition.rotation,
                 Time.deltaTime * smoothSpeed
             );
+        }
+
+        // NUEVO: Leer el clic del Arduino
+        if (ArduinoManager.Instance != null)
+        {
+            // Si el Arduino detecta el clic izquierdo...
+            if (ArduinoManager.Instance.clickIzquierdo)
+            {
+                // Para que no se active 60 veces por segundo mientras mantienes pulsado, 
+                // usamos un "bool" para que solo se active una vez al presionar.
+                if (!botonPulsado)
+                {
+                    HandleInteraction(); // Esta es tu función de recoger/soltar
+                    botonPulsado = true;
+                }
+            }
+            else
+            {
+                botonPulsado = false;
+            }
         }
     }
 

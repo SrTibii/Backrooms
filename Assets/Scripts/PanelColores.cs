@@ -39,6 +39,8 @@ public class PanelColores : MonoBehaviour
     private Dictionary<string, Color> coloresMap = new Dictionary<string, Color>();
     private Color[] coloresOriginalesCubos;
 
+    private bool clickDerechoAnterior = false;
+
     void Start()
     {
         InicializarDiccionarioColores();
@@ -65,6 +67,18 @@ public class PanelColores : MonoBehaviour
         GuardarColoresOriginales();
 
         Debug.Log("? Panel de colores inicializado");
+    }
+
+    void Update()
+    {
+        if (ArduinoManager.Instance != null)
+        {
+            if (ArduinoManager.Instance.clickDerecho && !clickDerechoAnterior)
+            {
+                OnInteractPerformed(new UnityEngine.InputSystem.InputAction.CallbackContext());
+            }
+            clickDerechoAnterior = ArduinoManager.Instance.clickDerecho;
+        }
     }
 
     private void GuardarColoresOriginales()

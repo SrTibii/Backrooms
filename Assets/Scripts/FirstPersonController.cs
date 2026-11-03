@@ -516,6 +516,10 @@ public class FirstPersonController : MonoBehaviour
         {
             moveInput = ArduinoManager.Instance.moveInput;
             lookInput = ArduinoManager.Instance.lookInput;
+
+            // NUEVO: Conectar el sprint del joystick con el script del jugador
+            // Si el joystick está a tope, simulamos que mantenemos pulsado el botón de sprint
+            isSprintPressed = ArduinoManager.Instance.isSprinting;
         }
 
         if (crouchCooldownTimer > 0f)
