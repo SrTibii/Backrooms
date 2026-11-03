@@ -26,6 +26,8 @@ public class PuertaFinal : MonoBehaviour
     private bool puertaAbierta = false;
     private InteractionSystem interactionSystem;
 
+    private bool clickDerechoAnterior = false;
+
     [System.Serializable]
     public class Candado
     {
@@ -43,6 +45,61 @@ public class PuertaFinal : MonoBehaviour
         }
 
         Debug.Log("? Puerta final inicializada");
+    }
+
+    void Update()
+    {
+        // Si el Arduino dice que ya no estamos pulsando, reseteamos el estado
+        // para poder volver a pulsar más adelante.
+        if (ArduinoManager.Instance != null && !ArduinoManager.Instance.clickDerecho)
+        {
+            clickDerechoAnterior = false;
+        }
+    }
+
+    // ============================================
+    // NUEVO MÉTODO PÚBLICO PARA EL ARDUINO
+    // ============================================
+    public void RecibirClicDerecho()
+    {
+        // Comprobamos que no lo hayamos procesado ya en este "clic"
+        if (!clickDerechoAnterior)
+        {
+            clickDerechoAnterior = true;
+            IntentarInteractuar();
+        }
+    }
+
+    private void IntentarInteractuar()
+    {
+        if (puertaAbierta) return;
+
+        // USAMOS EL INTERACTIONSYSTEM EN LUGAR DE UN RAYCAST PROPIO
+        if (interactionSystem == null)
+        {
+            interactionSystem = FindObjectOfType<InteractionSystem>();
+            if (interactionSystem == null) return;
+        }
+
+        GameObject target = interactionSystem.GetTargetObject();
+        if (target == null) return;
+
+        // Comprobar si estamos mirando un candado
+        if (target.CompareTag("CandadoRojo") || target.CompareTag("CandadoAzul") || target.CompareTag("CandadoVerde"))
+        {
+            Candado candado = ObtenerCandadoPorGameObject(target);
+            if (candado != null)
+            {
+                IntentarAbrirCandado(candado);
+            }
+            return;
+        }
+
+        // Comprobar si estamos mirando la puerta
+        if (target == gameObject)
+        {
+            IntentarAbrirPuerta();
+        }
     }
 
     private void OnEnable()
@@ -65,12 +122,12 @@ public class PuertaFinal : MonoBehaviour
 
     private void OnInteractPerformed(InputAction.CallbackContext context)
     {
+        // Misma lógica que IntentarInteractuar para el teclado
         if (puertaAbierta) return;
 
         GameObject target = GetTargetObject();
         if (target == null) return;
 
-        // Verificar si es un candado
         if (target.CompareTag("CandadoRojo") || target.CompareTag("CandadoAzul") || target.CompareTag("CandadoVerde"))
         {
             float distance = Vector3.Distance(Camera.main.transform.position, target.transform.position);
@@ -155,11 +212,16 @@ public class PuertaFinal : MonoBehaviour
         GameObject llave = recoger.GetHeldObject();
         if (llave != null)
         {
+            // Destruimos el objeto de la escena
             Destroy(llave);
+
+            // Le decimos al script que la mano está libre
             recoger.ForceDrop();
-            Debug.Log("??? Llave consumida");
+
+            Debug.Log("?? Llave consumida y retirada de la mano");
         }
     }
+
 
     private void IntentarAbrirCandado(Candado candado)
     {

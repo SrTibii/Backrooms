@@ -123,12 +123,53 @@ public class RecogerObjeto : MonoBehaviour
 
     void HandleInteraction()
     {
+        GameObject target = interactionSystem.GetTargetObject();
+
+        // 1. ¿Tenemos algo en la mano? (Da igual si es linterna, martillo u objeto)
+        RecogerLinterna scriptLinterna = FindObjectOfType<RecogerLinterna>();
+        RecogerMartillo scriptMartillo = FindObjectOfType<RecogerMartillo>();
+
+        // Si el jugador tiene la linterna, y pulsa el botón, la suelta
+        if (scriptLinterna != null && scriptLinterna.IsHolding())
+        {
+            scriptLinterna.DropObject();
+            return;
+        }
+
+        // Si el jugador tiene el martillo, y pulsa el botón, lo suelta
+        if (scriptMartillo != null && scriptMartillo.IsHolding())
+        {
+            scriptMartillo.DropObject();
+            return;
+        }
+
+        // Si el jugador tiene un objeto normal, y pulsa el botón, lo suelta
         if (isHolding)
         {
             DropObject();
             return;
         }
 
+        // ==========================================
+        // SI NO TIENE NADA, INTENTAMOS COGER
+        // ==========================================
+        if (target == null) return;
+
+        // ¿Es una linterna?
+        if (target.CompareTag("Linterna") && scriptLinterna != null)
+        {
+            scriptLinterna.TryPickUp();
+            return;
+        }
+
+        // ¿Es un martillo?
+        if (target.CompareTag("Martillo") && scriptMartillo != null)
+        {
+            scriptMartillo.TryPickUp();
+            return;
+        }
+
+        // ¿Es un objeto normal?
         TryPickUp();
     }
 

@@ -33,6 +33,8 @@ public class VHSIntroScene : MonoBehaviour
     private bool videoTerminado = false;
     private bool puedeSaltar = false;
 
+    private bool skipAnterior = false;
+
     void Start()
     {
         // ============================================
@@ -74,6 +76,23 @@ public class VHSIntroScene : MonoBehaviour
         if (mostrarLogs)
         {
             Debug.Log($"?? Intro VHS iniciada. Duración: {duracionIntro}s. Escena destino: {nombreEscenaJuego}");
+        }
+    }
+
+    void Update()
+    {
+        // Si el Arduino está conectado y se pulsa SKIP
+        if (ArduinoManager.Instance != null)
+        {
+            if (ArduinoManager.Instance.btnSkip && !skipAnterior)
+            {
+                // Llamamos a la función que salta la intro (la que ya tienes creada)
+                if (puedeSaltar && !introTerminada)
+                {
+                    SaltarIntro();
+                }
+            }
+            skipAnterior = ArduinoManager.Instance.btnSkip;
         }
     }
 

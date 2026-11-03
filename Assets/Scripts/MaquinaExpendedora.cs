@@ -29,6 +29,8 @@ public class MaquinaExpendedora : MonoBehaviour
     private bool llaveEntregada = false;
     private InteractionSystem interactionSystem;
 
+    private bool clickDerechoAnterior = false;
+
     void Start()
     {
         // Buscar referencias
@@ -63,6 +65,19 @@ public class MaquinaExpendedora : MonoBehaviour
         if (llaveBuena != null) llaveBuena.SetActive(false);
 
         Debug.Log("? Máquina expendedora inicializada correctamente");
+    }
+
+    void Update()
+    {
+        // Si no hay conexión con el Arduino, no hacemos nada
+        if (ArduinoManager.Instance == null) return;
+
+        // Detectar cuando se pulsa el clic derecho
+        if (ArduinoManager.Instance.clickDerecho && !clickDerechoAnterior)
+        {
+            IntentarInteractuar();
+        }
+        clickDerechoAnterior = ArduinoManager.Instance.clickDerecho;
     }
 
     private void OnEnable()
@@ -162,32 +177,20 @@ public class MaquinaExpendedora : MonoBehaviour
 
     private bool TieneMonedaEnMano()
     {
-        // Buscar el script de recogida de objetos
+        // Buscamos el script de recoger objeto que controla la mano
         RecogerObjeto recoger = FindObjectOfType<RecogerObjeto>();
-        if (recoger == null)
-        {
-            Debug.LogWarning("?? No se encontró RecogerObjeto en la escena");
-            return false;
-        }
+        if (recoger == null) return false;
 
-        // Verificar si tiene un objeto en la mano
+        // Le pedimos el objeto que tiene en la mano
         GameObject objetoEnMano = recoger.GetHeldObject();
-        if (objetoEnMano == null)
-        {
-            Debug.Log("? No hay objeto en la mano");
-            return false;
-        }
+        if (objetoEnMano == null) return false;
 
-        Debug.Log($"? Objeto en mano: {objetoEnMano.name} (tag: {objetoEnMano.tag})");
-
-        // Verificar si el objeto tiene el tag "Moneda"
+        // Comprobamos si el tag es "Moneda"
         if (objetoEnMano.CompareTag(monedaTag))
         {
-            Debug.Log("?? ¡Es una moneda!");
             return true;
         }
 
-        Debug.Log($"? El objeto en mano NO es una moneda (tag: {objetoEnMano.tag})");
         return false;
     }
 
@@ -289,5 +292,20 @@ public class MaquinaExpendedora : MonoBehaviour
         llaveEntregada = true;
         monedaInsertada = false;
         Debug.Log("? Proceso completado. Llave entregada. Máquina desactivada.");
+    }
+
+    private void IntentarInteractuar()
+    {
+        // Si ya se usó la máquina, no hacemos nada
+        if (monedaInsertada || llaveEntregada) return;
+
+        // Verificar si estamos mirando la máquina
+        if (!IsLookingAtMachine()) return;
+
+        // Verificar si tenemos una moneda en la mano
+        if (!TieneMonedaEnMano()) return;
+
+        // Si todo está bien, insertar la moneda
+        StartCoroutine(InsertarMoneda());
     }
 }

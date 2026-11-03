@@ -109,7 +109,7 @@ public class RecogerMartillo : MonoBehaviour
         TryPickUp();
     }
 
-    void TryPickUp()
+    public void TryPickUp()
     {
         if (interactionSystem == null) return;
         if (manosManager == null) return;
@@ -222,7 +222,7 @@ public class RecogerMartillo : MonoBehaviour
         Debug.Log($"? Martillo recogido: {target.name}");
     }
 
-    void DropObject()
+    public void DropObject()
     {
         if (currentObject == null)
         {

@@ -17,6 +17,8 @@ public class MenuPausa : MonoBehaviour
     [Header("Audio")]
     [Range(0f, 1f)] public float volumenSonidos = 0.8f;
 
+    private bool pauseAnterior = false;
+
     // ============================================
     // LISTA PARA GUARDAR AUDIOSOURCES DEL JUEGO
     // ============================================
@@ -62,6 +64,20 @@ public class MenuPausa : MonoBehaviour
         Cursor.visible = false;
 
         Debug.Log("? Menú de Pausa inicializado");
+    }
+
+    void Update()
+    {
+        if (ArduinoManager.Instance != null)
+        {
+            if (ArduinoManager.Instance.btnPause && !pauseAnterior)
+            {
+                // Reutilizamos la lógica que ya tienes para pausar
+                if (!isPaused) PausarJuego();
+                else BotonReanudar();
+            }
+            pauseAnterior = ArduinoManager.Instance.btnPause;
+        }
     }
 
     private void OnEnable()

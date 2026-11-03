@@ -110,7 +110,7 @@ public class RecogerLinterna : MonoBehaviour
         TryPickUp();
     }
 
-    void TryPickUp()
+    public void TryPickUp()
     {
         if (interactionSystem == null) return;
         if (manosManager == null) return;
@@ -223,7 +223,7 @@ public class RecogerLinterna : MonoBehaviour
         Debug.Log($"? Linterna recogida: {target.name}");
     }
 
-    void DropObject()
+    public void DropObject()
     {
         if (currentObject == null)
         {

@@ -14,6 +14,8 @@ public class TablaMadera : MonoBehaviour
 
     private bool isBroken = false;
 
+    private bool clickDerechoAnterior = false;
+
     void Start()
     {
         gameObject.tag = "Tabla";
@@ -37,6 +39,42 @@ public class TablaMadera : MonoBehaviour
             interactAction.action.performed -= OnInteractPerformed;
             Debug.Log($"?? Tabla {gameObject.name} desuscrita del Input Action");
         }
+    }
+
+    void Update()
+    {
+        // Si Unity no tiene conexión con el Arduino, no hace nada
+        if (ArduinoManager.Instance == null) return;
+
+        // Detecta el flanco de subida (cuando pulsas el botón, no mientras lo mantienes)
+        if (ArduinoManager.Instance.clickDerecho && !clickDerechoAnterior)
+        {
+            // Si estamos mirando la tabla, intentamos romperla
+            Camera cam = Camera.main;
+            if (cam != null)
+            {
+                Ray ray = cam.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+                RaycastHit hit;
+
+                if (Physics.Raycast(ray, out hit, interactionDistance))
+                {
+                    if (hit.collider.gameObject == gameObject)
+                    {
+                        // ¡Estamos mirando la tabla! Comprobamos si tenemos el martillo
+                        if (TieneMartilloEnMano())
+                        {
+                            RomperTabla();
+                        }
+                        else
+                        {
+                            Debug.Log("Necesitas un martillo para romper la tabla");
+                        }
+                    }
+                }
+            }
+        }
+
+        clickDerechoAnterior = ArduinoManager.Instance.clickDerecho;
     }
 
     private void OnInteractPerformed(InputAction.CallbackContext context)
@@ -93,28 +131,16 @@ public class TablaMadera : MonoBehaviour
 
     private bool TieneMartilloEnMano()
     {
-        ManosManager manosManager = FindObjectOfType<ManosManager>();
-        if (manosManager == null)
+        // Buscamos directamente el script del martillo en la escena
+        RecogerMartillo scriptMartillo = FindObjectOfType<RecogerMartillo>();
+
+        // Si el script existe y dice que está sosteniendo algo, es que tenemos el martillo
+        if (scriptMartillo != null && scriptMartillo.IsHolding())
         {
-            Debug.Log("? No hay ManosManager");
-            return false;
+            return true;
         }
 
-        GameObject objetoEnMano = manosManager.objetoEnManoIzquierda;
-        if (objetoEnMano == null)
-        {
-            objetoEnMano = manosManager.objetoEnManoDerecha;
-        }
-
-        if (objetoEnMano == null)
-        {
-            Debug.Log("? No hay objeto en la mano");
-            return false;
-        }
-
-        bool tieneMartillo = objetoEnMano.CompareTag("Martillo");
-        Debug.Log($"?? ¿Tiene martillo? {tieneMartillo} (objeto: {objetoEnMano.name})");
-        return tieneMartillo;
+        return false;
     }
 
     private void RomperTabla()

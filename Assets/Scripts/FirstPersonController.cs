@@ -236,6 +236,10 @@ public class FirstPersonController : MonoBehaviour
     private float crouchCooldown = 0.3f;
     private bool estaMuerto = false;
 
+    // Variables para evitar que los botones se activen 60 veces por segundo
+    private bool zoomAnterior = false;
+    private bool agacharseAnterior = false;
+
     // ============================================
     // 14. ONENABLE / ONDISABLE
     // ============================================
@@ -520,6 +524,20 @@ public class FirstPersonController : MonoBehaviour
             // NUEVO: Conectar el sprint del joystick con el script del jugador
             // Si el joystick está a tope, simulamos que mantenemos pulsado el botón de sprint
             isSprintPressed = ArduinoManager.Instance.isSprinting;
+
+            // ZOOM
+            if (ArduinoManager.Instance.btnZoom && !zoomAnterior)
+            {
+                ToggleZoom();
+            }
+            zoomAnterior = ArduinoManager.Instance.btnZoom;
+
+            // AGACHARSE
+            if (ArduinoManager.Instance.btnAgacharse && !agacharseAnterior)
+            {
+                ToggleCrouch();
+            }
+            agacharseAnterior = ArduinoManager.Instance.btnAgacharse;
         }
 
         if (crouchCooldownTimer > 0f)

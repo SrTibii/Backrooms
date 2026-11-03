@@ -16,10 +16,32 @@ public class Linterna : MonoBehaviour
     private RecogerLinterna recogerLinterna;
     private bool isInHand = false;
 
+    private bool flashAnterior = false;
+
     void Start()
     {
         recogerLinterna = FindObjectOfType<RecogerLinterna>();
         Debug.Log("? Linterna inicializada");
+    }
+
+    void Update()
+    {
+        if (ArduinoManager.Instance != null)
+        {
+            if (ArduinoManager.Instance.btnFlash && !flashAnterior)
+            {
+                // Lógica para encender/apagar la linterna
+                // (Usa la misma lógica que tenías en OnFlashLightPressed)
+                if (isInHand)
+                {
+                    bool nuevoEstado = !flashLight.enabled;
+                    flashLight.enabled = nuevoEstado;
+                    if (nuevoEstado) ReproducirSonidoEncender();
+                    else ReproducirSonidoApagar();
+                }
+            }
+            flashAnterior = ArduinoManager.Instance.btnFlash;
+        }
     }
 
     private void OnEnable()

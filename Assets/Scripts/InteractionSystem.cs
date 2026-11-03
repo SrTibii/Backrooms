@@ -143,7 +143,14 @@ public class InteractionSystem : MonoBehaviour
     {
         if (currentTarget == null) return;
 
-        Debug.Log($"?? Clic derecho del Arduino en: {currentTarget.name}");
+        // NUEVO: Si estamos mirando un candado, ignoramos el clic aquí.
+        // Dejamos que el script PuertaFinal se encargue de él.
+        if (currentTarget.CompareTag("CandadoRojo") || currentTarget.CompareTag("CandadoAzul") || currentTarget.CompareTag("CandadoVerde"))
+        {
+            return;
+        }
+
+        Debug.Log($"?? Clic derecho en: {currentTarget.name}");
 
         // 1. Puerta normal
         DoorInteraction puerta = currentTarget.GetComponent<DoorInteraction>();

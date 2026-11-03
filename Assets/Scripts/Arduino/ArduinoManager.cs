@@ -6,15 +6,12 @@ public class ArduinoManager : MonoBehaviour
     public static ArduinoManager Instance;
 
     [Header("Configuración Serial")]
-    public string puertoCOM = "COM3"; // Asegúrate de que es tu puerto
+    public string puertoCOM = "COM3";
     public int baudrate = 115200;
 
     [Header("Configuración Joysticks")]
     public float deadzone = 0.15f;
-
-    [Tooltip("A partir de qué valor (0 a 1) el joystick hace sprint. 0.5 es la mitad del recorrido.")]
-    [Range(0f, 1f)]
-    public float umbralSprint = 0.65f; // Lo bajamos a 0.65 por defecto
+    [Range(0f, 1f)] public float umbralSprint = 0.85f;
 
     public enum EjeJoystick { X, Y, InvertirX, InvertirY }
 
@@ -26,19 +23,25 @@ public class ArduinoManager : MonoBehaviour
     public EjeJoystick camaraHorizontal = EjeJoystick.X;
     public EjeJoystick camaraVertical = EjeJoystick.Y;
 
-    // Variables de salida
     public Vector2 moveInput;
     public Vector2 lookInput;
+    public bool isSprinting;
 
-    // NUEVAS VARIABLES: Clics de los joysticks
     public bool clickIzquierdo;
     public bool clickDerecho;
 
-    // NUEVA VARIABLE PARA EL SPRINT
-    public bool isSprinting;
+    // Variables de los Botones
+    public bool btnFlash;
+    public bool btnZoom;
+    public bool btnPause;
+    public bool btnSkip;
+    public bool btnAgacharse;
 
     private SerialPort serialPort;
     private bool puertoAbierto = false;
+
+    // Esto avisará a los demás scripts de que se ha pulsado
+    public bool clickDerechoPulsadoEsteFrame = false;
 
     void Awake()
     {
@@ -75,15 +78,25 @@ public class ArduinoManager : MonoBehaviour
                     string cleanData = data.Substring(1);
                     string[] valores = cleanData.Split(',');
 
-                    // AHORA ESPERAMOS 6 VALORES
-                    if (valores.Length == 6)
+                    if (valores.Length == 12) // 4 ejes + 2 clics + 5 botones + 1 extra? No, son 11 datos. Arreglado a 11.
+                    {
+                        // CORRECCIÓN: Son 11 datos reales
+                    }
+
+                    // Como el Arduino manda 11 datos separados por coma:
+                    if (valores.Length == 11)
                     {
                         if (int.TryParse(valores[0], out int xIzq) &&
                             int.TryParse(valores[1], out int yIzq) &&
                             int.TryParse(valores[2], out int xDer) &&
                             int.TryParse(valores[3], out int yDer) &&
                             int.TryParse(valores[4], out int cIzq) &&
-                            int.TryParse(valores[5], out int cDer))
+                            int.TryParse(valores[5], out int cDer) &&
+                            int.TryParse(valores[6], out int bFlash) &&
+                            int.TryParse(valores[7], out int bZoom) &&
+                            int.TryParse(valores[8], out int bPause) &&
+                            int.TryParse(valores[9], out int bSkip) &&
+                            int.TryParse(valores[10], out int bAgacharse))
                         {
                             float nX = (xIzq - 512) / 512f;
                             float nY = (yIzq - 512) / 512f;
@@ -105,14 +118,26 @@ public class ArduinoManager : MonoBehaviour
                                 ObtenerValor(camaraVertical, nZ, nW)
                             );
 
-                            // Asignamos los clics (1 es true, 0 es false)
+                            isSprinting = moveInput.magnitude > umbralSprint;
+
                             clickIzquierdo = (cIzq == 1);
                             clickDerecho = (cDer == 1);
 
-                            // NUEVO: Calcular si estamos haciendo sprint
-                            // Si la longitud del vector de movimiento es mayor a 0.85, corremos.
-                            // (Puedes ajustar el 0.85 si quieres que corra antes o después).
-                            isSprinting = moveInput.magnitude > umbralSprint;
+                            // NUEVO: Avisar a la puerta final directamente si estamos pulsando
+                            if (clickDerecho)
+                            {
+                                PuertaFinal puerta = FindObjectOfType<PuertaFinal>();
+                                if (puerta != null)
+                                {
+                                    puerta.RecibirClicDerecho();
+                                }
+                            }
+
+                            btnFlash = (bFlash == 1);
+                            btnZoom = (bZoom == 1);
+                            btnPause = (bPause == 1);
+                            btnSkip = (bSkip == 1);
+                            btnAgacharse = (bAgacharse == 1);
                         }
                     }
                 }
@@ -123,6 +148,9 @@ public class ArduinoManager : MonoBehaviour
                 Debug.LogWarning("Error leyendo datos: " + e.Message);
             }
         }
+
+        // Al final del Update de ArduinoManager
+        clickDerechoPulsadoEsteFrame = false;
     }
 
     private float ObtenerValor(EjeJoystick eje, float valX, float valY)
@@ -142,7 +170,6 @@ public class ArduinoManager : MonoBehaviour
         if (serialPort != null && serialPort.IsOpen)
         {
             serialPort.Close();
-            Debug.Log("Puerto cerrado.");
         }
     }
 }
