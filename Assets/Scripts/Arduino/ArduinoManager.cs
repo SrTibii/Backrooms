@@ -29,8 +29,8 @@ public class ArduinoManager : MonoBehaviour
 
     public bool clickIzquierdo;
     public bool clickDerecho;
+    public bool clickDerechoPulsadoEsteFrame = false;
 
-    // Variables de los Botones
     public bool btnFlash;
     public bool btnZoom;
     public bool btnPause;
@@ -39,9 +39,6 @@ public class ArduinoManager : MonoBehaviour
 
     private SerialPort serialPort;
     private bool puertoAbierto = false;
-
-    // Esto avisará a los demás scripts de que se ha pulsado
-    public bool clickDerechoPulsadoEsteFrame = false;
 
     void Awake()
     {
@@ -78,12 +75,6 @@ public class ArduinoManager : MonoBehaviour
                     string cleanData = data.Substring(1);
                     string[] valores = cleanData.Split(',');
 
-                    if (valores.Length == 12) // 4 ejes + 2 clics + 5 botones + 1 extra? No, son 11 datos. Arreglado a 11.
-                    {
-                        // CORRECCIÓN: Son 11 datos reales
-                    }
-
-                    // Como el Arduino manda 11 datos separados por coma:
                     if (valores.Length == 11)
                     {
                         if (int.TryParse(valores[0], out int xIzq) &&
@@ -123,7 +114,7 @@ public class ArduinoManager : MonoBehaviour
                             clickIzquierdo = (cIzq == 1);
                             clickDerecho = (cDer == 1);
 
-                            // NUEVO: Avisar a la puerta final directamente si estamos pulsando
+                            // Avisar a la puerta final si estamos pulsando
                             if (clickDerecho)
                             {
                                 PuertaFinal puerta = FindObjectOfType<PuertaFinal>();
@@ -149,8 +140,26 @@ public class ArduinoManager : MonoBehaviour
             }
         }
 
-        // Al final del Update de ArduinoManager
         clickDerechoPulsadoEsteFrame = false;
+    }
+
+    // ============================================
+    // ENVIAR NIVEL DE PELIGRO AL ARDUINO
+    // ============================================
+    public void EnviarPeligro(int nivel)
+    {
+        if (!puertoAbierto || serialPort == null || !serialPort.IsOpen) return;
+
+        nivel = Mathf.Clamp(nivel, 0, 4);
+
+        try
+        {
+            serialPort.WriteLine("P," + nivel);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning("Error enviando peligro al Arduino: " + e.Message);
+        }
     }
 
     private float ObtenerValor(EjeJoystick eje, float valX, float valY)
@@ -170,6 +179,26 @@ public class ArduinoManager : MonoBehaviour
         if (serialPort != null && serialPort.IsOpen)
         {
             serialPort.Close();
+        }
+    }
+
+    // ============================================
+    // SEGURIDAD: Apagar buzzer al cerrar o cambiar de escena
+    // ============================================
+    void OnApplicationQuit()
+    {
+        if (puertoAbierto && serialPort != null && serialPort.IsOpen)
+        {
+            try { serialPort.WriteLine("P,0"); } catch { }
+            serialPort.Close();
+        }
+    }
+
+    void OnDisable()
+    {
+        if (puertoAbierto && serialPort != null && serialPort.IsOpen)
+        {
+            try { serialPort.WriteLine("P,0"); } catch { }
         }
     }
 }

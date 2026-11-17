@@ -166,6 +166,11 @@ public class EnemyIA : MonoBehaviour
     private float tiempoUltimaDeteccionProximidad = 0f;
     private float intervaloDeteccionProximidad = 0.3f; // Cada 0.3 segundos
 
+    // ============================================
+    // VARIABLE PARA EL ARDUINO
+    // ============================================
+    private int nivelPeligroAnterior = -1;
+
     void Start()
     {
         Debug.Log($"?? Inicializando {gameObject.name}...");
@@ -369,6 +374,11 @@ public class EnemyIA : MonoBehaviour
         CheckPlayerIdle();
         CheckJumpscare();
 
+        // ============================================
+        // CALCULAR Y ENVIAR PELIGRO AL ARDUINO
+        // ============================================
+        ActualizarPeligroArduino();
+
         switch (currentState)
         {
             case EnemyState.Idle:
@@ -387,6 +397,54 @@ public class EnemyIA : MonoBehaviour
         UpdateAnimations();
         UpdateAudio();
         DebugDraw();
+    }
+
+    // ============================================
+    // LÓGICA DEL NIVEL DE PELIGRO PARA EL ARDUINO
+    // ============================================
+    void ActualizarPeligroArduino()
+    {
+        if (ArduinoManager.Instance == null) return;
+        if (player == null) return;
+
+        // Si el jugador está escondido, invisible o la detección está desactivada, peligro 0 (silencio)
+        if (isPlayerHiding || isPlayerInvisible || detectionDisabled)
+        {
+            if (nivelPeligroAnterior != 0)
+            {
+                nivelPeligroAnterior = 0;
+                ArduinoManager.Instance.EnviarPeligro(0);
+            }
+            return;
+        }
+
+        int nivel = 0;
+
+        // ¡NUEVO! Si el enemigo te está persiguiendo, pitido máximo (4) sin importar la distancia
+        if (currentState == EnemyState.Running)
+        {
+            nivel = 4;
+        }
+        else
+        {
+            // Si no te persigue, pero estás cerca, usamos los niveles 1, 2 y 3
+            float distancia = Vector3.Distance(transform.position, player.position);
+
+            if (distancia <= proximityDetectionRange)
+            {
+                float t = (distancia - jumpscareDistance) / (proximityDetectionRange - jumpscareDistance);
+                if (t > 0.75f) nivel = 1;
+                else if (t > 0.5f) nivel = 2;
+                else nivel = 3;
+            }
+        }
+
+        // Solo enviar si el nivel ha cambiado para no saturar el puerto serie
+        if (nivel != nivelPeligroAnterior)
+        {
+            nivelPeligroAnterior = nivel;
+            ArduinoManager.Instance.EnviarPeligro(nivel);
+        }
     }
 
     // ============================================
@@ -447,6 +505,12 @@ public class EnemyIA : MonoBehaviour
         isChasePlaying = false;
         isAmbientPlaying = false;
         isAmbientStopped = true;
+
+        // 1. APAGAR EL PITIDO DEL ARDUINO (Antes de cualquier otra cosa)
+        if (ArduinoManager.Instance != null)
+        {
+            ArduinoManager.Instance.EnviarPeligro(0);
+        }
 
         LeerNota leerNota = FindObjectOfType<LeerNota>();
         if (leerNota != null)

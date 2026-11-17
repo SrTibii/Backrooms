@@ -39880,12 +39880,12 @@ MonoBehaviour:
   isSprinting: 0
   clickIzquierdo: 0
   clickDerecho: 0
+  clickDerechoPulsadoEsteFrame: 0
   btnFlash: 0
   btnZoom: 0
   btnPause: 0
   btnSkip: 0
   btnAgacharse: 0
-  clickDerechoPulsadoEsteFrame: 0
 --- !u!4 &356972756
 Transform:
   m_ObjectHideFlags: 0
@@ -94883,7 +94883,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &776855600
 Transform:
   m_ObjectHideFlags: 0
@@ -255053,7 +255053,7 @@ Transform:
   m_GameObject: {fileID: 5346311453154236445}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 953.28, y: 125.02, z: 1188.33}
+  m_LocalPosition: {x: 949.95, y: 125.02, z: 1190.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
