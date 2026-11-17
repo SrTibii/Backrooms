@@ -10466,14 +10466,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6e705d8c563048b898ce13a6b9685f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: space.chikalin.textdecal::space.chikalin.textdecal.TextDecal
-  settings:
-    projectionDepth: 0
-    startAngleFade: 180
-    endAngleFade: 180
-    useDefaultUV: 1
-    vertexData: 0
-    UVData: 0
-    extraData: 0
 --- !u!114 &84336284
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12447,14 +12439,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6e705d8c563048b898ce13a6b9685f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: space.chikalin.textdecal::space.chikalin.textdecal.TextDecal
-  settings:
-    projectionDepth: 0
-    startAngleFade: 180
-    endAngleFade: 180
-    useDefaultUV: 1
-    vertexData: 0
-    UVData: 0
-    extraData: 0
 --- !u!114 &104115530
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -37565,14 +37549,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6e705d8c563048b898ce13a6b9685f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: space.chikalin.textdecal::space.chikalin.textdecal.TextDecal
-  settings:
-    projectionDepth: 0
-    startAngleFade: 180
-    endAngleFade: 180
-    useDefaultUV: 1
-    vertexData: 0
-    UVData: 0
-    extraData: 0
 --- !u!114 &335426281
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -44889,14 +44865,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6e705d8c563048b898ce13a6b9685f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: space.chikalin.textdecal::space.chikalin.textdecal.TextDecal
-  settings:
-    projectionDepth: 0
-    startAngleFade: 180
-    endAngleFade: 180
-    useDefaultUV: 1
-    vertexData: 0
-    UVData: 0
-    extraData: 0
 --- !u!114 &384796561
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -52063,14 +52031,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6e705d8c563048b898ce13a6b9685f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: space.chikalin.textdecal::space.chikalin.textdecal.TextDecal
-  settings:
-    projectionDepth: 0
-    startAngleFade: 180
-    endAngleFade: 180
-    useDefaultUV: 1
-    vertexData: 0
-    UVData: 0
-    extraData: 0
 --- !u!114 &417713408
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -122767,12 +122727,12 @@ Transform:
   m_GameObject: {fileID: 1036392190}
   serializedVersion: 2
   m_LocalRotation: {x: -0.07347551, y: -0.06355475, z: 0.7034629, w: 0.70406115}
-  m_LocalPosition: {x: 957.42, y: 127.11, z: 1195.44}
-  m_LocalScale: {x: 300, y: 299.99994, z: 300.00003}
+  m_LocalPosition: {x: -3.4990845, y: 1.7674637, z: 12.28064}
+  m_LocalScale: {x: 300, y: 299.9999, z: 300.00003}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 390699425}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1243298161}
   m_LocalEulerAnglesHint: {x: -0.805, y: -11.121, z: 90.03}
 --- !u!1 &1038050604
 GameObject:
@@ -143018,11 +142978,11 @@ Transform:
   m_GameObject: {fileID: 1216963173}
   serializedVersion: 2
   m_LocalRotation: {x: -0.15146573, y: 0.6906941, z: -0.69069386, w: -0.15146552}
-  m_LocalPosition: {x: 863.31, y: 124.93, z: 1095.77}
+  m_LocalPosition: {x: -97.60907, y: -0.41253662, z: -87.38928}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1243298161}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -204.738}
 --- !u!1 &1219513997
 GameObject:
@@ -145495,6 +145455,43 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
+--- !u!1 &1243298160
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1243298161}
+  m_Layer: 0
+  m_Name: ObjetosDuplicadosParaPruebas
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1243298161
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1243298160}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 960.91907, y: 125.34254, z: 1183.1593}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1036392195}
+  - {fileID: 1909565370}
+  - {fileID: 1689801840}
+  - {fileID: 1216963178}
+  - {fileID: 1383429208}
+  - {fileID: 1284127780}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1247866590
 GameObject:
   m_ObjectHideFlags: 0
@@ -149249,11 +149246,11 @@ Transform:
   m_GameObject: {fileID: 1284127775}
   serializedVersion: 2
   m_LocalRotation: {x: -0.5, y: 0.5, z: -0.5, w: -0.5}
-  m_LocalPosition: {x: 862.44, y: 124.53613, z: 1097.6}
+  m_LocalPosition: {x: -98.479065, y: -0.8064041, z: -85.559326}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1243298161}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -180}
 --- !u!1 &1284229997
 GameObject:
@@ -161214,11 +161211,11 @@ Transform:
   m_GameObject: {fileID: 1383429203}
   serializedVersion: 2
   m_LocalRotation: {x: 0.6492283, y: -0.28018326, z: 0.28018326, w: 0.6492283}
-  m_LocalPosition: {x: 861.78, y: 125.1, z: 1094.79}
+  m_LocalPosition: {x: -99.13904, y: -0.24253845, z: -88.36926}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1243298161}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &1383716779
 Mesh:
@@ -170201,14 +170198,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6e705d8c563048b898ce13a6b9685f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: space.chikalin.textdecal::space.chikalin.textdecal.TextDecal
-  settings:
-    projectionDepth: 0
-    startAngleFade: 180
-    endAngleFade: 180
-    useDefaultUV: 1
-    vertexData: 0
-    UVData: 0
-    extraData: 0
 --- !u!114 &1469314459
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -176671,14 +176660,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6e705d8c563048b898ce13a6b9685f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: space.chikalin.textdecal::space.chikalin.textdecal.TextDecal
-  settings:
-    projectionDepth: 0
-    startAngleFade: 180
-    endAngleFade: 180
-    useDefaultUV: 1
-    vertexData: 0
-    UVData: 0
-    extraData: 0
 --- !u!114 &1515297466
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -196913,14 +196894,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6e705d8c563048b898ce13a6b9685f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: space.chikalin.textdecal::space.chikalin.textdecal.TextDecal
-  settings:
-    projectionDepth: 0
-    startAngleFade: 180
-    endAngleFade: 180
-    useDefaultUV: 1
-    vertexData: 0
-    UVData: 0
-    extraData: 0
 --- !u!114 &1675048855
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -198740,11 +198713,11 @@ Transform:
   m_GameObject: {fileID: 1689801835}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.80074036, z: -0, w: -0.5990116}
-  m_LocalPosition: {x: 957.79, y: 126.53, z: 1197.84}
+  m_LocalPosition: {x: -3.1290894, y: 1.1874619, z: 14.680664}
   m_LocalScale: {x: 0.8911507, y: 0.8096385, z: 0.8911507}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1243298161}
   m_LocalEulerAnglesHint: {x: 0, y: 163.598, z: 0}
 --- !u!1 &1690530917
 GameObject:
@@ -226006,12 +225979,12 @@ Transform:
   m_GameObject: {fileID: 1909565364}
   serializedVersion: 2
   m_LocalRotation: {x: 0.34022352, y: 0.6198774, z: 0.6198774, w: -0.34022346}
-  m_LocalPosition: {x: 958.16, y: 126.24, z: 1187.33}
+  m_LocalPosition: {x: -2.7590942, y: 0.89746094, z: 4.1706543}
   m_LocalScale: {x: 3, y: 3, z: 3}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1401735280}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1243298161}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 185.117}
 --- !u!43 &1914134504
 Mesh:
@@ -234564,14 +234537,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6e705d8c563048b898ce13a6b9685f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: space.chikalin.textdecal::space.chikalin.textdecal.TextDecal
-  settings:
-    projectionDepth: 0
-    startAngleFade: 180
-    endAngleFade: 180
-    useDefaultUV: 1
-    vertexData: 0
-    UVData: 0
-    extraData: 0
 --- !u!114 &1991673830
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -260416,9 +260381,4 @@ SceneRoots:
   - {fileID: 1108003837}
   - {fileID: 84336286}
   - {fileID: 356972756}
-  - {fileID: 1036392195}
-  - {fileID: 1909565370}
-  - {fileID: 1689801840}
-  - {fileID: 1216963178}
-  - {fileID: 1383429208}
-  - {fileID: 1284127780}
+  - {fileID: 1243298161}
