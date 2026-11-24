@@ -100,6 +100,10 @@ public class EnemyIA : MonoBehaviour
     private bool isAmbientPlaying = false;
     private bool isAmbientStopped = false;
 
+    [Header("Arduino - Diferencia de Altura (Pisos)")]
+    [Tooltip("Diferencia máxima en Y para considerar que están en el mismo piso para el nivel de proximidad")]
+    public float maxVerticalDangerDistance = 3.0f;
+
     [Header("Debug")]
     public bool showDebugLogs = true;
 
@@ -420,26 +424,30 @@ public class EnemyIA : MonoBehaviour
 
         int nivel = 0;
 
-        // ¡NUEVO! Si el enemigo te está persiguiendo, pitido máximo (4) sin importar la distancia
+        // Si el enemigo te está persiguiendo, pitido/alerta máxima (4)
         if (currentState == EnemyState.Running)
         {
             nivel = 4;
         }
         else
         {
-            // Si no te persigue, pero estás cerca, usamos los niveles 1, 2 y 3
-            float distancia = Vector3.Distance(transform.position, player.position);
+            float deltaY = Mathf.Abs(transform.position.y - player.position.y);
 
-            if (distancia <= proximityDetectionRange)
+            // Solo calcular proximidad si están en el mismo nivel/piso en Y
+            if (deltaY <= maxVerticalDangerDistance)
             {
-                float t = (distancia - jumpscareDistance) / (proximityDetectionRange - jumpscareDistance);
-                if (t > 0.75f) nivel = 1;
-                else if (t > 0.5f) nivel = 2;
-                else nivel = 3;
+                float distancia = Vector3.Distance(transform.position, player.position);
+
+                if (distancia <= proximityDetectionRange)
+                {
+                    float t = (distancia - jumpscareDistance) / (proximityDetectionRange - jumpscareDistance);
+                    if (t > 0.75f) nivel = 1;
+                    else if (t > 0.5f) nivel = 2;
+                    else nivel = 3;
+                }
             }
         }
 
-        // Solo enviar si el nivel ha cambiado para no saturar el puerto serie
         if (nivel != nivelPeligroAnterior)
         {
             nivelPeligroAnterior = nivel;

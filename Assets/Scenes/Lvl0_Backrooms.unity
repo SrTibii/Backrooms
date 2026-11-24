@@ -173738,6 +173738,7 @@ MonoBehaviour:
   jumpscareCamera: {fileID: 1236680498}
   globalVolume: {fileID: 1570190007}
   jumpscareVolumeOverride: {fileID: 1654677601}
+  maxVerticalDangerDistance: 1.5
   showDebugLogs: 0
 --- !u!195 &1489431147
 NavMeshAgent:
