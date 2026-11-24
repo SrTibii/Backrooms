@@ -9,6 +9,9 @@ public class ArduinoManager : MonoBehaviour
     public string puertoCOM = "COM3";
     public int baudrate = 115200;
 
+    [Header("Configuración Cámara")]
+    public float sensibilidadCamara = 1.5f;
+
     [Header("Configuración Joysticks")]
     public float deadzone = 0.15f;
     [Range(0f, 1f)] public float umbralSprint = 0.85f;
@@ -107,7 +110,7 @@ public class ArduinoManager : MonoBehaviour
                             lookInput = new Vector2(
                                 ObtenerValor(camaraHorizontal, nZ, nW),
                                 ObtenerValor(camaraVertical, nZ, nW)
-                            );
+                            ) * sensibilidadCamara;
 
                             isSprinting = moveInput.magnitude > umbralSprint;
 

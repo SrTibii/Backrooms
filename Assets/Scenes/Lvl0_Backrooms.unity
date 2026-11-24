@@ -39845,6 +39845,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ArduinoManager
   puertoCOM: COM3
   baudrate: 115200
+  sensibilidadCamara: 2
   deadzone: 0.1
   umbralSprint: 0.4
   movimientoHorizontal: 3
